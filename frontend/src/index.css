@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  background-color: #080C18;
+  color: #F8FAFC;
+  min-height: 100vh;
+}
+
+/* React Flow dark theme overrides */
+.react-flow__background {
+  background-color: #0F1629 !important;
+}
+
+.react-flow__controls {
+  background-color: #1A2235;
+  border: 1px solid #1E2D4A;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.react-flow__controls-button {
+  background-color: #1A2235;
+  border-bottom: 1px solid #1E2D4A;
+  color: #94A3B8;
+  fill: #94A3B8;
+}
+
+.react-flow__controls-button:hover {
+  background-color: #253050;
+}
+
+.react-flow__minimap {
+  background-color: #111827;
+  border: 1px solid #1E2D4A;
+  border-radius: 8px;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2;
+}
+
+.react-flow__handle {
+  width: 8px !important;
+  height: 8px !important;
+  border: 2px solid #475569 !important;
+  background: #1A2235 !important;
+}
+
+.react-flow__node {
+  cursor: grab;
+}
+
+.react-flow__node:active {
+  cursor: grabbing;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0F1629;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E2D4A;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2A3F60;
+}
+
+/* Range input styling */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #1E2D4A;
+  outline: none;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #6366F1;
+  cursor: pointer;
+  border: 2px solid #818CF8;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #6366F1;
+  cursor: pointer;
+  border: 2px solid #818CF8;
+}

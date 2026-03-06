@@ -1,0 +1,218 @@
+timestamp,user_id,tool,action,task_category,duration_seconds,context,is_primary_window
+2025-03-03 08:31:05,SDR_001,Salesforce,view_dashboard,crm_data_entry,187,"Dashboard: Today's Activities",1
+2025-03-03 08:34:12,SDR_001,Salesforce,view_pipeline,crm_data_entry,246,"Pipeline: March Open Deals",1
+2025-03-03 08:38:18,SDR_001,Salesforce,update_contact,crm_data_entry,128,"Contact: Jennifer Walsh - VP Sales TechFlow",1
+2025-03-03 08:40:26,SDR_001,Salesforce,add_activity_log,crm_data_entry,95,"Activity: Friday follow-up call logged",1
+2025-03-03 08:42:01,SDR_001,Salesforce,create_task,scheduling_discovery,76,"Task: Schedule demo - TechFlow Inc",1
+2025-03-03 08:43:17,SDR_001,LinkedIn,search_people,prospecting_lead_gen,213,"Search: VP Sales fintech Series B 50-200 employees",1
+2025-03-03 08:46:50,SDR_001,LinkedIn,view_profile,prospecting_lead_gen,189,"Profile: Marcus Chen - CRO Finova Technologies",1
+2025-03-03 08:50:00,SDR_001,LinkedIn,view_profile,prospecting_lead_gen,145,"Profile: Rachel Torres - Director Sales CloudBase",1
+2025-03-03 08:52:25,SDR_001,ZoomInfo,company_search,account_research,231,"Company: Finova Technologies",1
+2025-03-03 08:56:16,SDR_001,ZoomInfo,view_intent_data,account_research,178,"Intent signals: Finova - CRM Software, Sales Enablement",1
+2025-03-03 08:59:14,SDR_001,ZoomInfo,contact_search,account_research,142,"Contacts: Finova decision makers filter",1
+2025-03-03 09:01:36,SDR_001,ZoomInfo,export_contacts,account_research,34,"Export: 3 contacts to Salesforce",1
+2025-03-03 09:02:10,SDR_001,Salesforce,add_contact,crm_data_entry,163,"New Contact: Marcus Chen - Finova",1
+2025-03-03 09:04:53,SDR_001,LinkedIn,send_connection,linkedin_outreach_social,88,"Connection request: Marcus Chen",1
+2025-03-03 09:06:21,SDR_001,LinkedIn,write_message,cold_emailing_outreach,267,"InMail draft: Marcus Chen - personalized CRO message",1
+2025-03-03 09:10:48,SDR_001,LinkedIn,view_profile,prospecting_lead_gen,134,"Profile: David Kim - VP RevOps Payrise",1
+2025-03-03 09:13:02,SDR_001,LinkedIn,send_connection,linkedin_outreach_social,67,"Connection request: David Kim",1
+2025-03-03 09:14:09,SDR_001,Salesforce,log_call,cold_calling,312,"Call: TechFlow Inc - John Peterson - no answer",1
+2025-03-03 09:19:21,SDR_001,Salesforce,log_call,cold_calling,428,"Call: DataSync Corp - Maria Lopez - voicemail left",1
+2025-03-03 09:26:29,SDR_001,Salesforce,log_call,cold_calling,267,"Call: InnovateCo - Derek Smith - 4min conversation",1
+2025-03-03 09:31:00,SDR_001,Salesforce,update_opportunity,crm_data_entry,145,"Opportunity: InnovateCo - Stage 2 Interested",1
+2025-03-03 09:33:25,SDR_001,LinkedIn,view_feed,linkedin_outreach_social,189,"Feed: Engage with prospect content",1
+2025-03-03 09:36:34,SDR_001,LinkedIn,comment_post,linkedin_outreach_social,134,"Comment: Derek Smith post about sales ops",1
+2025-03-03 09:38:48,SDR_001,Zapier,view_zap,crm_data_entry,98,"Zap: LinkedIn lead → Salesforce contact",1
+2025-03-03 09:40:26,SDR_001,Zapier,edit_zap,crm_data_entry,234,"Edit: LinkedIn form fill to Salesforce automation",1
+2025-03-03 09:44:20,SDR_001,Zapier,run_zap,crm_data_entry,45,"Test: Zap execution successful",1
+2025-03-03 09:45:05,SDR_001,Linear,view_board,prospecting_lead_gen,112,"Board: SDR Tasks - March Sprint",1
+2025-03-03 09:46:57,SDR_001,Linear,create_issue,prospecting_lead_gen,167,"Issue: Research fintech accounts batch 3",1
+2025-03-03 09:49:44,SDR_001,Linear,update_issue,followup_cadence,89,"Update: TechFlow outreach → In Progress",1
+2025-03-03 09:51:13,SDR_001,ZoomInfo,technology_filter,account_research,198,"Filter: Uses HubSpot NOT Salesforce 50-200 emp",1
+2025-03-03 09:54:31,SDR_001,ZoomInfo,company_search,account_research,243,"Results: 47 companies matching ICP criteria",1
+2025-03-03 09:59:30,SDR_001,ZoomInfo,export_contacts,account_research,56,"Export: 12 contacts batch to Salesforce",1
+2025-03-03 10:01:26,SDR_001,Salesforce,view_reports,crm_data_entry,176,"Report: Morning call activity summary",1
+2025-03-03 10:04:22,SDR_001,Salesforce,log_call,cold_calling,521,"Call: AlphaTech - Susan Park - discovery intent confirmed",1
+2025-03-03 10:13:03,SDR_001,Salesforce,update_opportunity,crm_data_entry,134,"Opportunity: AlphaTech - Stage 3 Meeting Scheduled",1
+2025-03-03 10:15:17,SDR_001,Salesforce,create_task,scheduling_discovery,98,"Task: Send calendar invite AlphaTech 15-Mar",1
+2025-03-03 10:16:55,SDR_001,Salesforce,log_call,cold_calling,198,"Call: NexGen Systems - Ben Carter - not interested",1
+2025-03-03 10:20:13,SDR_001,LinkedIn,search_companies,prospecting_lead_gen,221,"Search: B2B SaaS 100-500 employees Chicago",1
+2025-03-03 10:23:54,SDR_001,LinkedIn,view_company,account_research,156,"Company: Pulse Analytics HQ",1
+2025-03-03 10:26:30,SDR_001,Salesforce,log_call,cold_calling,389,"Call: Pulse Analytics - Tom Reeves - callback requested",1
+2025-03-03 10:33:00,SDR_001,Salesforce,add_activity_log,crm_data_entry,102,"Activity: Callback scheduled Pulse Analytics Fri 2pm",1
+2025-03-03 13:01:44,SDR_001,Salesforce,view_dashboard,crm_data_entry,134,"Dashboard: Afternoon pipeline check",1
+2025-03-03 13:03:58,SDR_001,LinkedIn,search_people,prospecting_lead_gen,198,"Search: Head of Operations logistics SaaS",1
+2025-03-03 13:07:16,SDR_001,LinkedIn,write_message,cold_emailing_outreach,312,"InMail: Rachel Torres - CloudBase outreach",1
+2025-03-03 13:12:28,SDR_001,ZoomInfo,company_search,account_research,201,"Company: Scale Commerce deep dive",1
+2025-03-03 13:15:49,SDR_001,ZoomInfo,view_intent_data,account_research,167,"Intent: Scale Commerce - ecommerce platform migration",1
+2025-03-03 13:18:36,SDR_001,Salesforce,log_call,cold_calling,478,"Call: Scale Commerce - Amy Nguyen - interested book meeting",1
+2025-03-03 13:26:54,SDR_001,Salesforce,update_opportunity,crm_data_entry,189,"Opportunity: Scale Commerce - NEW Stage 2",1
+2025-03-03 13:30:03,SDR_001,Salesforce,log_call,cold_calling,234,"Call: Vertex AI Co - Chris Brown - gatekeeper no transfer",1
+2025-03-03 13:34:17,SDR_001,Zapier,view_history,crm_data_entry,88,"Zap run history: check failures",1
+2025-03-03 13:35:45,SDR_001,Linear,view_board,crm_data_entry,143,"Board: End of day review sprint tasks",1
+2025-03-03 13:38:08,SDR_001,Linear,update_issue,followup_cadence,76,"Update: InnovateCo Derek - meeting booked",1
+2025-03-03 13:39:24,SDR_001,Jira,view_ticket,objection_handling,134,"Ticket: PROD-2341 feature request from prospect DataSync",1
+2025-03-03 13:41:38,SDR_001,Jira,add_comment,objection_handling,178,"Comment: Added sales context DataSync needs API export",1
+2025-03-03 13:44:56,SDR_001,Salesforce,update_contact,crm_data_entry,112,"Contacts batch update: 8 new ZoomInfo exports",1
+2025-03-03 13:46:48,SDR_001,Salesforce,view_reports,crm_data_entry,201,"Report: Day 1 activity - 6 calls 3 InMails",1
+2025-03-03 13:50:09,SDR_001,LinkedIn,view_feed,linkedin_outreach_social,167,"Feed: 10 min prospect engagement session",1
+2025-03-03 13:52:56,SDR_001,LinkedIn,comment_post,linkedin_outreach_social,98,"Comment: Marcus Chen repost on sales automation",1
+2025-03-04 08:29:33,SDR_001,Salesforce,view_dashboard,crm_data_entry,201,"Dashboard: Tuesday plan - 8 follow-ups queued",1
+2025-03-04 08:32:54,SDR_001,LinkedIn,view_notifications,linkedin_outreach_social,145,"Notifications: 2 connection accepts Marcus Chen David Kim",1
+2025-03-04 08:34:39,SDR_001,LinkedIn,write_message,cold_emailing_outreach,298,"Message: Marcus Chen follow-up value prop",1
+2025-03-04 08:39:37,SDR_001,LinkedIn,write_message,cold_emailing_outreach,267,"Message: David Kim intro message",1
+2025-03-04 08:44:24,SDR_001,Salesforce,log_call,cold_calling,412,"Call: TechFlow - Jennifer Walsh - voicemail",1
+2025-03-04 08:51:16,SDR_001,Salesforce,log_call,cold_calling,623,"Call: InnovateCo - Derek Smith - 10min full discovery",1
+2025-03-04 09:01:39,SDR_001,Salesforce,update_opportunity,crm_data_entry,234,"Opportunity: InnovateCo - MEDDIC fields updated",1
+2025-03-04 09:05:53,SDR_001,Salesforce,create_task,scheduling_discovery,112,"Task: Send InnovateCo proposal - due Thursday",1
+2025-03-04 09:07:45,SDR_001,ZoomInfo,company_search,account_research,189,"Company: Meridian Financial deep research",1
+2025-03-04 09:10:54,SDR_001,ZoomInfo,contact_search,account_research,201,"Contacts: Meridian Financial VP Finance CFO",1
+2025-03-04 09:14:15,SDR_001,ZoomInfo,technology_filter,account_research,156,"Tech stack: Meridian - QuickBooks legacy ERP",1
+2025-03-04 09:16:51,SDR_001,ZoomInfo,export_contacts,account_research,42,"Export: 2 Meridian contacts to Salesforce",1
+2025-03-04 09:17:33,SDR_001,Salesforce,add_contact,crm_data_entry,178,"Contact: Linda Foster CFO Meridian Financial",1
+2025-03-04 09:20:11,SDR_001,LinkedIn,view_profile,account_research,134,"Profile: Linda Foster - CFO Meridian Financial",1
+2025-03-04 09:22:25,SDR_001,LinkedIn,send_connection,linkedin_outreach_social,56,"Connection request: Linda Foster",1
+2025-03-04 09:23:21,SDR_001,Salesforce,log_call,cold_calling,345,"Call: Meridian Financial - Linda Foster - spoke briefly interested",1
+2025-03-04 09:29:06,SDR_001,Salesforce,update_opportunity,crm_data_entry,189,"Opportunity: Meridian Financial - NEW Stage 2",1
+2025-03-04 09:32:35,SDR_001,Salesforce,log_call,cold_calling,267,"Call: Pulse Analytics - Tom Reeves - confirmed callback",1
+2025-03-04 09:37:02,SDR_001,Salesforce,log_call,cold_calling,521,"Call: DataSync Corp - Maria Lopez - 8min conversation qualifying",1
+2025-03-04 09:45:43,SDR_001,Salesforce,update_contact,crm_data_entry,145,"Contact: Maria Lopez - qualification notes added",1
+2025-03-04 09:47:48,SDR_001,Zapier,create_zap,followup_cadence,389,"New Zap: Salesforce stage change → Slack notify manager",1
+2025-03-04 09:54:17,SDR_001,Zapier,run_zap,followup_cadence,67,"Test: Stage change Zap - successful",1
+2025-03-04 09:55:24,SDR_001,Linear,create_issue,followup_cadence,156,"Issue: Follow-up sequence TechFlow Jennifer - 3 touch",1
+2025-03-04 09:57:56,SDR_001,Linear,view_board,crm_data_entry,112,"Board: Tuesday sprint check",1
+2025-03-04 10:00:43,SDR_001,Jira,view_board,crm_data_entry,98,"Board: Product roadmap check for sales objections",1
+2025-03-04 10:02:21,SDR_001,Jira,view_ticket,objection_handling,167,"Ticket: PROD-2198 bulk export feature - Q2 roadmap",1
+2025-03-04 10:04:28,SDR_001,Salesforce,log_call,cold_calling,198,"Call: CloudBase - Rachel Torres - not available",1
+2025-03-04 10:07:46,SDR_001,Salesforce,log_call,cold_calling,445,"Call: Scale Commerce - Amy Nguyen - confirm meeting Thursday",1
+2025-03-04 10:15:31,SDR_001,Salesforce,log_call,cold_calling,312,"Call: AlphaTech - cold contact James Wu - voicemail",1
+2025-03-04 10:20:43,SDR_001,LinkedIn,search_people,prospecting_lead_gen,234,"Search: Director Revenue Operations B2B SaaS NYC",1
+2025-03-04 10:24:57,SDR_001,LinkedIn,view_profile,prospecting_lead_gen,189,"Profile: Emma Sato - RevOps Director StreamlineHQ",1
+2025-03-04 10:28:06,SDR_001,LinkedIn,view_profile,prospecting_lead_gen,156,"Profile: Kevin Park - Head of Sales EnableCo",1
+2025-03-04 10:30:42,SDR_001,ZoomInfo,company_search,account_research,211,"Company: StreamlineHQ overview",1
+2025-03-04 10:34:13,SDR_001,ZoomInfo,view_intent_data,account_research,145,"Intent: StreamlineHQ - workflow automation tools",1
+2025-03-04 13:02:17,SDR_001,Salesforce,view_dashboard,crm_data_entry,167,"Dashboard: Afternoon pipeline review",1
+2025-03-04 13:04:44,SDR_001,LinkedIn,view_notifications,linkedin_outreach_social,112,"Notifications: Linda Foster accepted connection",1
+2025-03-04 13:06:10,SDR_001,LinkedIn,write_message,cold_emailing_outreach,289,"Message: Linda Foster follow-up intro message",1
+2025-03-04 13:10:59,SDR_001,LinkedIn,view_feed,linkedin_outreach_social,178,"Feed: Engage prospects Scale Commerce Amy",1
+2025-03-04 13:13:37,SDR_001,LinkedIn,like_post,linkedin_outreach_social,34,"Like: Amy Nguyen post about ecommerce ops",1
+2025-03-04 13:14:11,SDR_001,Salesforce,log_call,qualifying_inbound,398,"Inbound: Pulse Analytics - Tom Reeves - qualified BANT",1
+2025-03-04 13:20:49,SDR_001,Salesforce,update_opportunity,crm_data_entry,198,"Opportunity: Pulse Analytics - Stage 3 Meeting Set",1
+2025-03-04 13:23:47,SDR_001,Salesforce,create_task,scheduling_discovery,123,"Task: Book discovery call Pulse Analytics - calendar link sent",1
+2025-03-04 13:25:50,SDR_001,Salesforce,log_call,cold_calling,234,"Call: Vertex AI Co - Chris Brown finally transferred - voicemail",1
+2025-03-04 13:30:04,SDR_001,Salesforce,view_reports,crm_data_entry,189,"Report: Weekly sequence engagement open rates",1
+2025-03-04 13:33:13,SDR_001,Zapier,view_history,crm_data_entry,134,"Zap history: 14 runs today 0 errors",1
+2025-03-04 13:35:27,SDR_001,Linear,update_issue,followup_cadence,98,"Update: Meridian Financial - call done stage 2",1
+2025-03-04 13:36:55,SDR_001,Salesforce,update_contact,crm_data_entry,201,"Contacts: End of day enrichment 5 records",1
+2025-03-05 08:33:21,SDR_001,Salesforce,view_dashboard,crm_data_entry,221,"Dashboard: Wednesday - heavy prospecting day",1
+2025-03-05 08:36:42,SDR_001,ZoomInfo,company_search,account_research,267,"Company: EnableCo overview ICP check",1
+2025-03-05 08:40:49,SDR_001,ZoomInfo,contact_search,account_research,189,"Contacts: EnableCo Kevin Park + 2 others",1
+2025-03-05 08:43:58,SDR_001,ZoomInfo,technology_filter,account_research,145,"Tech: EnableCo - Salesforce HubSpot Outreach",1
+2025-03-05 08:46:23,SDR_001,ZoomInfo,export_contacts,account_research,52,"Export: 3 EnableCo contacts",1
+2025-03-05 08:47:15,SDR_001,LinkedIn,view_profile,account_research,167,"Profile: Kevin Park deep research work history",1
+2025-03-05 08:49:52,SDR_001,LinkedIn,search_people,prospecting_lead_gen,198,"Search: Sales Manager SaaS Austin Texas",1
+2025-03-05 08:52:50,SDR_001,LinkedIn,view_profile,prospecting_lead_gen,143,"Profile: Brian Lee - Sales Manager GrowthOps",1
+2025-03-05 08:54:53,SDR_001,LinkedIn,view_profile,prospecting_lead_gen,167,"Profile: Carla Davis - RevOps Lead QuickSell",1
+2025-03-05 08:57:40,SDR_001,Salesforce,add_contact,crm_data_entry,189,"Batch add: 5 new contacts from ZoomInfo export",1
+2025-03-05 09:00:49,SDR_001,Salesforce,log_call,cold_calling,367,"Call: EnableCo - Kevin Park - 6min interested book time",1
+2025-03-05 09:06:56,SDR_001,Salesforce,update_opportunity,crm_data_entry,156,"Opportunity: EnableCo - NEW Stage 2",1
+2025-03-05 09:09:12,SDR_001,Salesforce,create_task,scheduling_discovery,98,"Task: Send EnableCo calendar link - Kevin Park",1
+2025-03-05 09:11:00,SDR_001,Salesforce,log_call,cold_calling,198,"Call: GrowthOps - Brian Lee - not interested different tool",1
+2025-03-05 09:14:18,SDR_001,Salesforce,log_call,cold_calling,432,"Call: QuickSell - Carla Davis - voicemail leave message",1
+2025-03-05 09:21:30,SDR_001,LinkedIn,write_message,cold_emailing_outreach,312,"InMail: Carla Davis QuickSell personalized RevOps pain point",1
+2025-03-05 09:26:42,SDR_001,LinkedIn,view_feed,linkedin_outreach_social,189,"Feed: Like share prospect posts 5 interactions",1
+2025-03-05 09:29:51,SDR_001,LinkedIn,search_people,prospecting_lead_gen,234,"Search: Head of Revenue VP Sales healthcare SaaS",1
+2025-03-05 09:33:20,SDR_001,ZoomInfo,company_search,account_research,201,"Company: MedTrack Solutions healthcare SaaS",1
+2025-03-05 09:36:41,SDR_001,ZoomInfo,view_intent_data,account_research,167,"Intent: MedTrack - CRM upgrade healthcare compliance",1
+2025-03-05 09:39:48,SDR_001,Salesforce,log_call,cold_calling,287,"Call: DataSync - Maria Lopez - objection pricing discussed",1
+2025-03-05 09:44:35,SDR_001,Salesforce,add_activity_log,objection_handling,145,"Activity: DataSync pricing objection notes - ROI calc needed",1
+2025-03-05 09:46:50,SDR_001,Jira,view_ticket,objection_handling,134,"Ticket: PROD-2198 revisit - competitor comparison note",1
+2025-03-05 09:48:44,SDR_001,Jira,create_ticket,objection_handling,189,"Ticket: SALES-44 DataSync needs custom ROI one-pager",1
+2025-03-05 09:51:53,SDR_001,Zapier,view_zap,followup_cadence,98,"Zap: Salesforce task due → email reminder to self",1
+2025-03-05 09:53:31,SDR_001,Zapier,edit_zap,followup_cadence,212,"Edit: Add Slack message to follow-up reminder Zap",1
+2025-03-05 09:57:03,SDR_001,Linear,view_board,crm_data_entry,134,"Board: Wednesday sprint check mark 3 done",1
+2025-03-05 09:59:17,SDR_001,Linear,update_issue,prospecting_lead_gen,112,"Update: Fintech batch 3 research - Done",1
+2025-03-05 10:00:49,SDR_001,Linear,create_issue,account_research,167,"Issue: Research healthcare SaaS vertical accounts",1
+2025-03-05 10:03:16,SDR_001,Salesforce,qualifying_inbound,qualifying_inbound,456,"Inbound form: EnableCo additional contact Jamie Wu - qualify",1
+2025-03-05 10:11:12,SDR_001,Salesforce,update_contact,crm_data_entry,134,"Contact: Jamie Wu EnableCo - BANT qualified notes",1
+2025-03-05 10:13:26,SDR_001,LinkedIn,send_connection,linkedin_outreach_social,67,"Connection: Jamie Wu EnableCo",1
+2025-03-05 13:00:55,SDR_001,Salesforce,view_dashboard,crm_data_entry,178,"Dashboard: Afternoon sequence review",1
+2025-03-05 13:03:23,SDR_001,Salesforce,log_call,cold_calling,389,"Call: MedTrack - Dr. Rita Patel - 6min interested compliance angle",1
+2025-03-05 13:09:52,SDR_001,Salesforce,update_opportunity,crm_data_entry,167,"Opportunity: MedTrack Solutions - NEW Stage 2",1
+2025-03-05 13:12:59,SDR_001,LinkedIn,view_notifications,linkedin_outreach_social,134,"Notifications: 3 accepts check messages",1
+2025-03-05 13:14:33,SDR_001,LinkedIn,write_message,cold_emailing_outreach,278,"Message: Emma Sato StreamlineHQ value prop message",1
+2025-03-05 13:19:11,SDR_001,Salesforce,log_call,cold_calling,234,"Call: TechFlow - Jennifer Walsh - connected - reschedule",1
+2025-03-05 13:23:25,SDR_001,Salesforce,create_task,scheduling_discovery,112,"Task: TechFlow rescheduled to Mar 12",1
+2025-03-05 13:25:37,SDR_001,Salesforce,view_reports,crm_data_entry,221,"Report: Wednesday sequence stats email open rates",1
+2025-03-05 13:29:08,SDR_001,ZoomInfo,contact_search,account_research,189,"Contacts: QuickSell additional stakeholders",1
+2025-03-05 13:32:17,SDR_001,ZoomInfo,export_contacts,account_research,45,"Export: 2 more QuickSell contacts",1
+2025-03-05 13:33:02,SDR_001,Zapier,view_history,crm_data_entry,112,"Zap history: check Wednesday runs",1
+2025-03-05 13:34:54,SDR_001,Salesforce,update_contact,crm_data_entry,198,"Batch update: 7 contact records enriched",1
+2025-03-06 08:32:11,SDR_001,Salesforce,view_dashboard,crm_data_entry,189,"Dashboard: Thursday - 2 meetings today",1
+2025-03-06 08:35:24,SDR_001,Salesforce,view_pipeline,crm_data_entry,267,"Pipeline: Stage 3+ accounts review pre-meeting",1
+2025-03-06 08:39:48,SDR_001,ZoomInfo,company_search,account_research,234,"Company: AlphaTech pre-meeting deep dive",1
+2025-03-06 08:43:57,SDR_001,ZoomInfo,view_intent_data,account_research,198,"Intent: AlphaTech - recent funding activity product launch",1
+2025-03-06 08:47:05,SDR_001,LinkedIn,view_profile,account_research,167,"Profile: Susan Park AlphaTech - recent posts news",1
+2025-03-06 08:49:32,SDR_001,LinkedIn,view_company,account_research,145,"Company: AlphaTech recent updates headcount",1
+2025-03-06 08:51:57,SDR_001,Salesforce,add_activity_log,crm_data_entry,134,"Activity: AlphaTech pre-call notes added",1
+2025-03-06 08:53:51,SDR_001,Salesforce,log_call,qualifying_inbound,478,"Meeting: AlphaTech - Susan Park - discovery 8min BANT qualified",1
+2025-03-06 09:01:49,SDR_001,Salesforce,update_opportunity,crm_data_entry,234,"Opportunity: AlphaTech - Stage 4 Demo Scheduled",1
+2025-03-06 09:05:43,SDR_001,Salesforce,create_task,scheduling_discovery,145,"Task: Prep AlphaTech demo Mar 15",1
+2025-03-06 09:07:28,SDR_001,Linear,update_issue,scheduling_discovery,112,"Update: AlphaTech demo prep task → In Progress",1
+2025-03-06 09:08:50,SDR_001,Salesforce,log_call,cold_calling,312,"Call: Meridian - Linda Foster - brief objection budget",1
+2025-03-06 09:14:02,SDR_001,Salesforce,add_activity_log,objection_handling,189,"Activity: Meridian Linda - budget timing objection response sent",1
+2025-03-06 09:17:31,SDR_001,Jira,view_ticket,objection_handling,145,"Ticket: Review competitor comparison for Meridian",1
+2025-03-06 09:19:56,SDR_001,LinkedIn,search_people,prospecting_lead_gen,201,"Search: VP Sales InsurTech Northeast",1
+2025-03-06 09:23:07,SDR_001,LinkedIn,view_profile,prospecting_lead_gen,178,"Profile: Paul Simmons VP Sales SafeGuard Insurance Tech",1
+2025-03-06 09:25:45,SDR_001,ZoomInfo,company_search,account_research,221,"Company: SafeGuard Insurance Tech",1
+2025-03-06 09:29:16,SDR_001,ZoomInfo,contact_search,account_research,167,"Contacts: SafeGuard VP level decision makers",1
+2025-03-06 09:31:53,SDR_001,Salesforce,add_contact,crm_data_entry,145,"Contact: Paul Simmons - SafeGuard Insurance Tech",1
+2025-03-06 09:33:38,SDR_001,LinkedIn,send_connection,linkedin_outreach_social,78,"Connection request: Paul Simmons SafeGuard",1
+2025-03-06 09:34:56,SDR_001,Salesforce,log_call,cold_calling,267,"Call: SafeGuard - Paul Simmons - gatekeeper blocked",1
+2025-03-06 09:39:13,SDR_001,Salesforce,log_call,cold_calling,534,"Meeting: Scale Commerce - Amy Nguyen - discovery full 9min",1
+2025-03-06 09:48:47,SDR_001,Salesforce,update_opportunity,crm_data_entry,212,"Opportunity: Scale Commerce - Stage 3 Demo Scheduled",1
+2025-03-06 09:52:19,SDR_001,Zapier,view_zap,crm_data_entry,98,"Zap: Scale Commerce stage change → Slack alert sent",1
+2025-03-06 09:53:57,SDR_001,Salesforce,log_call,cold_calling,201,"Call: StreamlineHQ - Emma Sato - left voicemail follow InMail",1
+2025-03-06 09:57:18,SDR_001,LinkedIn,write_message,followup_cadence,245,"Message: Follow-up touch 2 Emma Sato - resource share",1
+2025-03-06 10:01:33,SDR_001,Salesforce,log_call,cold_calling,365,"Call: QuickSell - Carla Davis - connected briefly - callback 4pm",1
+2025-03-06 10:07:38,SDR_001,Linear,create_issue,followup_cadence,156,"Issue: QuickSell Carla 4pm callback - set reminder",1
+2025-03-06 10:09:54,SDR_001,Jira,view_board,crm_data_entry,112,"Board: Product Q2 roadmap for objection handling",1
+2025-03-06 10:11:46,SDR_001,Jira,add_comment,objection_handling,167,"Comment: Added DataSync API export use case to PROD-2341",1
+2025-03-06 10:14:03,SDR_001,Salesforce,view_reports,crm_data_entry,234,"Report: Thursday pipeline health - 8 Stage 2+",1
+2025-03-06 13:01:28,SDR_001,LinkedIn,view_notifications,linkedin_outreach_social,145,"Notifications: 4 new accepts review messages",1
+2025-03-06 13:03:52,SDR_001,LinkedIn,write_message,cold_emailing_outreach,312,"Message: Touch 1 Brian Lee follow after call rejection",1
+2025-03-06 13:08:44,SDR_001,ZoomInfo,company_search,account_research,189,"Company: MedTrack deeper stakeholder map",1
+2025-03-06 13:11:53,SDR_001,Salesforce,log_call,qualifying_inbound,423,"Inbound: MedTrack - Rita Patel - inbound form BANT full qual",1
+2025-03-06 13:19:16,SDR_001,Salesforce,update_opportunity,crm_data_entry,198,"Opportunity: MedTrack - Stage 3 Demo Booked",1
+2025-03-06 13:22:45,SDR_001,Salesforce,log_call,cold_calling,389,"Call: QuickSell - Carla Davis - 4pm callback confirmed",1
+2025-03-06 13:29:34,SDR_001,Salesforce,update_opportunity,crm_data_entry,167,"Opportunity: QuickSell - NEW Stage 2",1
+2025-03-06 13:32:41,SDR_001,Zapier,edit_zap,followup_cadence,245,"Zap: Update outreach sequence trigger timing",1
+2025-03-06 13:36:56,SDR_001,Linear,view_board,crm_data_entry,145,"Board: EOD Thursday review all active issues",1
+2025-03-06 13:39:13,SDR_001,Salesforce,update_contact,crm_data_entry,178,"Batch: End of day CRM hygiene 10 records",1
+2025-03-07 08:34:16,SDR_001,Salesforce,view_dashboard,crm_data_entry,201,"Dashboard: Friday pipeline review",1
+2025-03-07 08:37:45,SDR_001,Salesforce,view_reports,crm_data_entry,267,"Report: Weekly activity summary",1
+2025-03-07 08:41:58,SDR_001,LinkedIn,view_notifications,linkedin_outreach_social,156,"Notifications: Friday morning engagement check",1
+2025-03-07 08:43:54,SDR_001,LinkedIn,view_feed,linkedin_outreach_social,212,"Feed: 15 min prospect engagement session",1
+2025-03-07 08:46:46,SDR_001,LinkedIn,comment_post,linkedin_outreach_social,112,"Comment: Tom Reeves Pulse Analytics post",1
+2025-03-07 08:48:18,SDR_001,LinkedIn,search_people,prospecting_lead_gen,189,"Search: Head of Sales EdTech Series A",1
+2025-03-07 08:51:27,SDR_001,ZoomInfo,company_search,account_research,223,"Company: LearnFast EdTech overview ICP score",1
+2025-03-07 08:55:10,SDR_001,ZoomInfo,view_intent_data,account_research,178,"Intent: LearnFast - LMS CRM integration signals",1
+2025-03-07 08:58:18,SDR_001,ZoomInfo,export_contacts,account_research,48,"Export: 2 LearnFast contacts to Salesforce",1
+2025-03-07 08:59:06,SDR_001,Salesforce,add_contact,crm_data_entry,167,"Contact: Nadia Osei - Head of Sales LearnFast",1
+2025-03-07 09:00:53,SDR_001,Salesforce,log_call,cold_calling,298,"Call: LearnFast - Nadia Osei - voicemail personalized",1
+2025-03-07 09:05:51,SDR_001,LinkedIn,write_message,cold_emailing_outreach,289,"InMail: Nadia Osei LearnFast follow voicemail",1
+2025-03-07 09:10:40,SDR_001,Salesforce,log_call,cold_calling,189,"Call: SafeGuard - Paul Simmons - connected 3min - no fit now",1
+2025-03-07 09:13:49,SDR_001,Salesforce,log_call,cold_calling,412,"Call: Meridian - Linda Foster - objection budget Q2 follow",1
+2025-03-07 09:20:41,SDR_001,Salesforce,add_activity_log,objection_handling,156,"Activity: Meridian objection - sent ROI case study email",1
+2025-03-07 09:22:57,SDR_001,Jira,view_ticket,objection_handling,134,"Ticket: SALES-44 DataSync one-pager - status check",1
+2025-03-07 09:24:51,SDR_001,Jira,add_comment,objection_handling,145,"Comment: DataSync one-pager in progress - need by Monday",1
+2025-03-07 09:26:56,SDR_001,Salesforce,log_call,cold_calling,356,"Call: DataSync - Maria Lopez - pricing objection addressed",1
+2025-03-07 09:32:52,SDR_001,Salesforce,update_opportunity,crm_data_entry,189,"Opportunity: DataSync - Stage 3 Demo Tentative",1
+2025-03-07 09:35:41,SDR_001,Zapier,view_history,crm_data_entry,112,"Zap history: Friday weekly summary check",1
+2025-03-07 09:37:13,SDR_001,Linear,view_board,crm_data_entry,189,"Board: Friday EOW review all issues",1
+2025-03-07 09:40:22,SDR_001,Linear,update_issue,followup_cadence,134,"Update: Close 5 completed issues for sprint",1
+2025-03-07 09:42:56,SDR_001,Salesforce,view_reports,crm_data_entry,267,"Report: Weekly summary - 28 calls 14 InMails 6 meetings",1
+2025-03-07 09:47:03,SDR_001,Salesforce,update_contact,crm_data_entry,201,"Batch: EOW CRM hygiene clean 15 records",1
+2025-03-07 09:50:44,SDR_001,LinkedIn,search_people,prospecting_lead_gen,212,"Search: Weekend prep - identify 20 new prospects list",1
+2025-03-07 09:54:16,SDR_001,ZoomInfo,company_search,account_research,189,"Batch research: 5 new target accounts ICP validation",1
+2025-03-07 09:57:45,SDR_001,Salesforce,create_task,prospecting_lead_gen,145,"Task: Monday outreach list - 15 accounts prepped",1
