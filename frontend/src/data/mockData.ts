@@ -1,5 +1,8 @@
 import type { Node, Edge } from 'reactflow'
 
+
+// This is pulled after user input the first survey form
+
 export const roleStats = {
   teamType: 'Sales',
   role: 'Sales Development Representative (SDR)',
@@ -7,6 +10,8 @@ export const roleStats = {
   avgToolsUsed: 8.3,
   avgWeeklyHours: 42.5,
 }
+
+// This is pulled after parsing telemetry data
 
 export const toolBuckets = [
   {
@@ -60,6 +65,8 @@ export const toolBuckets = [
   },
 ]
 
+
+// This is pulled after running the build markov script and obtaining the node domains, node duration, edge list, edge dwell
 // ─── Workflow diagram: existing ───────────────────────────────────────────────
 
 export const existingNodes: Node[] = [
@@ -212,3 +219,73 @@ Based on your team's current tool stack and workflow patterns, Apollo.io integra
     { title: 'CRM Data Enrichment',        description: 'Automatically enrich and update Salesforce records from Apollo\'s 265M+ contact database.' },
   ],
 }
+
+
+/**
+ * mockData.ts  (updated)
+ * ──────────────────────
+ * Static data that doesn't come from telemetry (role info, tool buckets)
+ * lives here as before.
+ *
+ * The workflow graph (nodes + edges) is now loaded dynamically from
+ * transition_matrix.json via `loadMarkovData()` in dataLoader.ts.
+ *
+ * HOW TO USE IN A COMPONENT:
+ *
+ *   // Option A — async component (Next.js App Router / React Server Component)
+ *   import { loadMarkovData } from '@/lib/dataLoader'
+ *   const { nodes, edges } = await loadMarkovData()
+ *
+ *   // Option B — client component with useState/useEffect
+ *   import { useMarkovData } from '@/hooks/useMarkovData'
+ *   const { nodes, edges, loading, error } = useMarkovData()
+ *
+ * For prototyping:
+ *   1. Run:  python 02_markov_builder.py
+ *   2. Copy: backend/data/transition_matrix.json  →  public/data/transition_matrix.json
+ *   3. Start your dev server — the graph auto-loads.
+ *
+ * To add a real upload flow later, call clearMarkovCache() then loadMarkovData(url)
+ * with the URL returned by your backend after processing the uploaded file.
+ */
+
+// ─── Re-export loader so components have one import path ─────────────────────
+export { loadMarkovData, clearMarkovCache, TOOL_ENRICHMENT } from '../hooks/dataLoader'
+export type { LoadedMarkovData } from '../hooks/dataLoader'
+
+// ─── Static data (unchanged from original) ───────────────────────────────────
+
+// ─── Legacy static graph (keep as fallback / Storybook fixture) ───────────────
+// These are the original hardcoded nodes/edges from before the JSON integration.
+// Import them as `fallbackNodes` / `fallbackEdges` if you need offline previews.
+
+export const fallbackNodes: Node[] = [
+  { id: 'prospect-research', type: 'taskNode', position: { x: 240, y: 0 },    data: { label: 'Prospect Research',        tools: ['LinkedIn', 'Salesforce', 'ZoomInfo'], minutes: 35, automatable: 'high' } },
+  { id: 'draft-outreach',    type: 'taskNode', position: { x: 240, y: 190 },  data: { label: 'Draft Outreach Message',   tools: ['Gmail', 'Notion'],                   minutes: 24, automatable: 'high' } },
+  { id: 'send-log',          type: 'taskNode', position: { x: 240, y: 380 },  data: { label: 'Send & Log Activity',      tools: ['Gmail', 'Salesforce'],               minutes: 8,  automatable: 'medium' } },
+  { id: 'follow-up',         type: 'taskNode', position: { x: 240, y: 570 },  data: { label: 'Follow-Up Sequence',       tools: ['Outreach', 'Gmail', 'Salesforce'],   minutes: 18, automatable: 'high' } },
+  { id: 'response-triage',   type: 'taskNode', position: { x: 240, y: 760 },  data: { label: 'Inbound Response Triage',  tools: ['Gmail', 'Salesforce', 'Slack'],      minutes: 14, automatable: 'medium' } },
+  { id: 'discovery-prep',    type: 'taskNode', position: { x: 240, y: 950 },  data: { label: 'Discovery Call Prep',      tools: ['Salesforce', 'Notion', 'Gong'],      minutes: 42, automatable: 'high' } },
+  { id: 'discovery-call',    type: 'taskNode', position: { x: 240, y: 1140 }, data: { label: 'Discovery Call Execution', tools: ['Zoom', 'Gong', 'Calendly'],          minutes: 38, automatable: 'low' } },
+  { id: 'not-qualified', type: 'terminalNode', position: { x: 600, y: 10 },   data: { label: 'Not Qualified',  nodeType: 'fail' } },
+  { id: 'unsubscribed',  type: 'terminalNode', position: { x: 600, y: 580 },  data: { label: 'Unsubscribed',   nodeType: 'fail' } },
+  { id: 'cold',          type: 'terminalNode', position: { x: 600, y: 770 },  data: { label: 'Cold / No Interest', nodeType: 'fail' } },
+  { id: 'qualified',     type: 'terminalNode', position: { x: 600, y: 1150 }, data: { label: 'Qualified Lead', nodeType: 'success' } },
+  { id: 'disqualified',  type: 'terminalNode', position: { x: 600, y: 1230 }, data: { label: 'Disqualified',   nodeType: 'fail' } },
+]
+
+export const fallbackEdges: Edge[] = [
+  { id: 'e1',  source: 'prospect-research', target: 'draft-outreach',  label: '75%', type: 'smoothstep', style: sStyle, labelStyle: sLbl, labelBgStyle: bg, labelBgPadding: pad },
+  { id: 'e1b', source: 'prospect-research', target: 'not-qualified',   label: '25%', type: 'smoothstep', style: fStyle, labelStyle: fLbl, labelBgStyle: bg, labelBgPadding: pad },
+  { id: 'e2',  source: 'draft-outreach',    target: 'send-log',        label: '90%', type: 'smoothstep', style: sStyle, labelStyle: sLbl, labelBgStyle: bg, labelBgPadding: pad },
+  { id: 'e2b', source: 'draft-outreach',    target: 'draft-outreach',  label: '10% revise', type: 'smoothstep', style: pStyle, labelStyle: pLbl, labelBgStyle: bg, labelBgPadding: pad },
+  { id: 'e3',  source: 'send-log',          target: 'follow-up',       label: '70%', type: 'smoothstep', style: pStyle, labelStyle: pLbl, labelBgStyle: bg, labelBgPadding: pad },
+  { id: 'e3b', source: 'send-log',          target: 'response-triage', label: '30%', type: 'smoothstep', style: sStyle, labelStyle: sLbl, labelBgStyle: bg, labelBgPadding: pad },
+  { id: 'e4',  source: 'follow-up',         target: 'response-triage', label: '35%', type: 'smoothstep', style: sStyle, labelStyle: sLbl, labelBgStyle: bg, labelBgPadding: pad },
+  { id: 'e4b', source: 'follow-up',         target: 'unsubscribed',    label: '10%', type: 'smoothstep', style: fStyle, labelStyle: fLbl, labelBgStyle: bg, labelBgPadding: pad },
+  { id: 'e5',  source: 'response-triage',   target: 'discovery-prep',  label: '40%', type: 'smoothstep', style: sStyle, labelStyle: sLbl, labelBgStyle: bg, labelBgPadding: pad },
+  { id: 'e5b', source: 'response-triage',   target: 'cold',            label: '60%', type: 'smoothstep', style: fStyle, labelStyle: fLbl, labelBgStyle: bg, labelBgPadding: pad },
+  { id: 'e6',  source: 'discovery-prep',    target: 'discovery-call',  label: '95%', type: 'smoothstep', style: sStyle, labelStyle: sLbl, labelBgStyle: bg, labelBgPadding: pad },
+  { id: 'e7',  source: 'discovery-call',    target: 'qualified',       label: '60%', type: 'smoothstep', style: sStyle, labelStyle: sLbl, labelBgStyle: bg, labelBgPadding: pad },
+  { id: 'e7b', source: 'discovery-call',    target: 'disqualified',    label: '40%', type: 'smoothstep', style: fStyle, labelStyle: fLbl, labelBgStyle: bg, labelBgPadding: pad },
+]

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ReactFlow, {
   useNodesState,
@@ -14,7 +14,10 @@ import 'reactflow/dist/style.css'
 import { Users, Clock, Plus, Layers } from 'lucide-react'
 import StepLayout from '../components/layout/StepLayout'
 import { nodeTypes } from '../components/workflow/CustomNodes'
-import { roleStats, toolBuckets, existingNodes, existingEdges } from '../data/mockData'
+// import { roleStats, toolBuckets, existingNodes, existingEdges } from '../data/mockData'
+import { roleStats, toolBuckets } from '../data/mockData'
+
+ import { useMarkovData } from '../hooks/pullMarkovData'
 
 const bucketColorMap: Record<string, string> = {
   indigo:  'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
@@ -32,10 +35,23 @@ const intensityDot: Record<string, string> = {
 }
 
 export default function WorkflowReport() {
+  const { existingNodes, existingEdges, loading, error } = useMarkovData()
+
   const navigate = useNavigate()
   const [nodes, setNodes, onNodesChange] = useNodesState(existingNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(existingEdges)
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
+
+  // if (loading) {
+  //   return <div className="text-slate-400 p-6">Loading workflow...</div>
+  // }
+
+  // if (error) {
+  //   return <div className="text-red-400 p-6">Failed to load workflow</div>
+  // }
+
+  console.log(existingNodes)
+  console.log(existingEdges)
 
   const onConnect = useCallback(
     (params: Connection) =>
@@ -69,6 +85,18 @@ export default function WorkflowReport() {
   // All tools flat for the popular-tools table
   const allTools = toolBuckets.flatMap((b) => b.tools)
   const topTools = [...allTools].sort((a, b) => b.hoursPerWeek - a.hoursPerWeek).slice(0, 6)
+
+  useEffect(() => {
+    if (existingNodes.length) {
+      setNodes(existingNodes)
+    }
+  }, [existingNodes])
+
+  useEffect(() => {
+    if (existingEdges.length) {
+      setEdges(existingEdges)
+    }
+  }, [existingEdges])
 
   return (
     <StepLayout
