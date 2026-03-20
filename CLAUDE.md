@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AgileOps is a B2B SaaS sales workflow simulation platform. It generates synthetic telemetry data, builds Markov transition matrices from that data, runs Monte Carlo simulations to model tool impact (e.g., adding Gong to a sales pipeline), and presents results through a React frontend with a guided 5-step UX flow.
+AgileOps is a B2B SaaS sales workflow simulation platform. The real-world pipeline is fully human-driven: intake form → interview call → paste transcript → LLM extracts tasks into `all_tasks.json` → downstream scripts generate synthetic telemetry, build Markov transition matrices, and run Monte Carlo simulations to model tool impact. Results are presented through a React frontend with a guided 5-step UX flow.
 
 ## Commands
 
@@ -18,9 +18,12 @@ npm run preview    # Preview production build
 ### Backend
 ```bash
 # First-time setup
-./setup.sh                              # Creates .venv and installs requirements.txt (numpy)
+./setup.sh                              # Creates .venv and installs requirements.txt (numpy, anthropic)
 
-# Run the pipeline stages individually
+# Transcript → tasks (requires ANTHROPIC_API_KEY env var)
+python backend/scripts/transcript_to_tasks.py -t path/to/transcript.txt   # Merges into backend/data/all_tasks.json
+
+# Run the downstream pipeline (after all_tasks.json is populated)
 python backend/scripts/syth_data_gen.py   # Stage 1: Generate synthetic telemetry → backend/data/telemetry.json
 python backend/scripts/markov_builder.py  # Stage 2: Build transition matrix → backend/data/transition_matrix.json
 python backend/scripts/sim.py             # Stage 3: Monte Carlo simulation → backend/data/monte_carlo_results.json
@@ -30,9 +33,11 @@ python backend/scripts/sim.py             # Stage 3: Monte Carlo simulation → 
 
 ## Architecture
 
-### Backend — Three-Stage Data Pipeline
+### Backend — Transcript-Driven Data Pipeline
 
-All stages are standalone Python scripts that read/write JSON files in `backend/data/`.
+All stages are standalone Python scripts that read/write JSON files in `backend/data/`. No real telemetry is used — data comes from human interviews.
+
+**Stage 0: `transcript_to_tasks.py`** — Takes an interview transcript and the existing `all_tasks.json`, sends both to Claude with merge instructions. Matches tasks semantically (not by exact name), updates incrementally (new tools added, durations averaged, descriptions enriched), and never drops existing nodes. Tracks which transcripts informed each node via a `"sources"` field. Supports interviewing multiple people at different times — each run merges into the same file.
 
 1. **`syth_data_gen.py`** — Generates synthetic telemetry events for 6 employees across a 15-node sales pipeline defined in `config.py`. Includes realistic interruptions (standups, meetings). Outputs `telemetry.json`.
 
