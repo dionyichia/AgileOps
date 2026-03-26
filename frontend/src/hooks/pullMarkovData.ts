@@ -5,7 +5,8 @@
  * Handles loading/error states and falls back to static data if the fetch fails.
  *
  * Usage:
- *   const { nodes, edges, loading, error } = useMarkovData()
+ *   const { nodes, edges, loading, error } = useMarkovData()           // static JSON
+ *   const { nodes, edges, loading, error } = useMarkovData(projectId)  // from API
  */
 
 import { useState, useEffect } from 'react'
@@ -25,7 +26,11 @@ interface UseMarkovDataResult {
   } | null
 }
 
-export function useMarkovData(url?: string): UseMarkovDataResult {
+/**
+ * @param projectId  When provided, fetches from /api/projects/{id}/markov.
+ *                   When omitted, fetches the static JSON from /public/data/.
+ */
+export function useMarkovData(projectId?: string): UseMarkovDataResult {
   const [existingNodes, setNodes] = useState<Node[]>(fallbackNodes)
   const [existingEdges, setEdges] = useState<Edge[]>(fallbackEdges)
   const [loading, setLoading] = useState(true)
@@ -38,7 +43,7 @@ export function useMarkovData(url?: string): UseMarkovDataResult {
     async function load() {
       try {
         setLoading(true)
-        const data = await loadMarkovData(url)
+        const data = await loadMarkovData(projectId)
         if (cancelled) return
         setNodes(data.nodes)
         setEdges(data.edges)
@@ -46,9 +51,8 @@ export function useMarkovData(url?: string): UseMarkovDataResult {
         setError(null)
       } catch (err) {
         if (cancelled) return
-        console.warn('[useMarkovData] Failed to load JSON, using fallback data:', err)
+        console.warn('[useMarkovData] Failed to load, using fallback data:', err)
         setError(err instanceof Error ? err.message : 'Unknown error')
-        // Keep showing fallback nodes/edges so the UI doesn't break
         setNodes(fallbackNodes)
         setEdges(fallbackEdges)
       } finally {
@@ -58,7 +62,7 @@ export function useMarkovData(url?: string): UseMarkovDataResult {
 
     load()
     return () => { cancelled = true }
-  }, [url])
+  }, [projectId])
 
   return { existingNodes, existingEdges, loading, error, stats }
 }

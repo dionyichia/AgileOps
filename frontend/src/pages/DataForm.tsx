@@ -89,7 +89,7 @@ export default function DataForm() {
 
   const handleNext = () => {
     localStorage.setItem('axisFormData', JSON.stringify({ role, selectedResponsibilities, tools, description }))
-    navigate('/workflow-report')
+    navigate('/internal/workflow-report')
   }
 
   return (
@@ -107,13 +107,13 @@ export default function DataForm() {
         {/* Role selection */}
         <div>
           <label className="block text-sm font-semibold text-slate-200 mb-2">
-            Assume Role <span className="text-indigo-400">*</span>
+            Assume Role <span className="text-gold">*</span>
           </label>
           <div className="relative">
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full appearance-none bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-indigo-500 focus:outline-none text-white rounded-xl px-4 py-3 pr-10 text-sm transition-colors cursor-pointer"
+              className="w-full appearance-none bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-cerulean focus:outline-none text-white rounded-xl px-4 py-3 pr-10 text-sm transition-colors cursor-pointer"
             >
               <option value="">Select a role...</option>
               {ROLES.map((r) => (
@@ -128,10 +128,10 @@ export default function DataForm() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-semibold text-slate-200">
-              Main Responsibilities <span className="text-indigo-400">*</span>
+              Main Responsibilities <span className="text-gold">*</span>
             </label>
             {responsibilities.length > 0 && (
-              <span className="text-xs text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">
+              <span className="text-xs text-gold bg-cerulean-500/10 px-2 py-0.5 rounded-full">
                 AI-generated options
               </span>
             )}
@@ -145,7 +145,7 @@ export default function DataForm() {
 
           {role && loadingResponsibilities && (
             <div className="bg-[#111827] border border-slate-800 rounded-xl p-5 flex items-center justify-center gap-3 text-slate-400 text-sm">
-              <Loader2 size={16} className="animate-spin text-indigo-400" />
+              <Loader2 size={16} className="animate-spin text-gold" />
               Generating responsibility options for {role.split('(')[0].trim()}...
             </div>
           )}
@@ -161,12 +161,12 @@ export default function DataForm() {
                     onClick={() => toggleResponsibility(r)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left transition-all ${
                       selected
-                        ? 'bg-indigo-500/15 border border-indigo-500/40 text-indigo-200'
+                        ? 'bg-cerulean-500/15 border border-cerulean-500/40 text-cerulean-200'
                         : 'bg-slate-800/50 border border-slate-700/50 text-slate-300 hover:border-slate-600'
                     }`}
                   >
                     <div className={`w-4 h-4 rounded flex-shrink-0 flex items-center justify-center border transition-all ${
-                      selected ? 'bg-indigo-600 border-indigo-500' : 'border-slate-600'
+                      selected ? 'bg-cerulean border-cerulean-400' : 'border-slate-600'
                     }`}>
                       {selected && <CheckCircle2 size={10} className="text-white" />}
                     </div>
@@ -181,7 +181,7 @@ export default function DataForm() {
         {/* Tools */}
         <div>
           <label className="block text-sm font-semibold text-slate-200 mb-1">
-            What main SaaS tools do you use on a daily/weekly basis? <span className="text-indigo-400">*</span>
+            What main SaaS tools do you use on a daily/weekly basis? <span className="text-gold">*</span>
           </label>
           <p className="text-xs text-slate-500 mb-2">List all tools your team regularly uses (one per line or comma-separated)</p>
           <textarea
@@ -189,7 +189,7 @@ export default function DataForm() {
             onChange={(e) => setTools(e.target.value)}
             placeholder="e.g. Salesforce, LinkedIn Sales Navigator, Outreach, Gmail, Slack, Zoom, Gong, ZoomInfo..."
             rows={4}
-            className="w-full bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-indigo-500 focus:outline-none text-white placeholder-slate-600 rounded-xl px-4 py-3 text-sm resize-none transition-colors"
+            className="w-full bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-cerulean focus:outline-none text-white placeholder-slate-600 rounded-xl px-4 py-3 text-sm resize-none transition-colors"
           />
         </div>
 
@@ -202,11 +202,11 @@ export default function DataForm() {
           <label className="cursor-pointer block">
             <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
               csvFile
-                ? 'border-indigo-500/60 bg-indigo-500/5'
+                ? 'border-cerulean-500/60 bg-cerulean-500/5'
                 : 'border-slate-700 hover:border-slate-600 bg-[#111827]'
             }`}>
               {csvFile ? (
-                <div className="flex items-center justify-center gap-3 text-indigo-400">
+                <div className="flex items-center justify-center gap-3 text-gold">
                   <CheckCircle2 size={20} />
                   <span className="text-sm font-medium">{csvFile.name}</span>
                   <span className="text-xs text-slate-500">({(csvFile.size / 1024).toFixed(1)} KB)</span>
@@ -214,7 +214,7 @@ export default function DataForm() {
               ) : (
                 <>
                   <Upload size={24} className="mx-auto mb-2 text-slate-500" />
-                  <p className="text-sm text-slate-400">Drop your CSV here or <span className="text-indigo-400 underline">browse</span></p>
+                  <p className="text-sm text-slate-400">Drop your CSV here or <span className="text-gold underline">browse</span></p>
                   <p className="text-xs text-slate-600 mt-1">Accepts .csv files up to 10MB</p>
                 </>
               )}
@@ -240,7 +240,7 @@ export default function DataForm() {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Walk us through a typical week. What does your team do first thing Monday morning? How do leads move through your process?..."
             rows={5}
-            className="w-full bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-indigo-500 focus:outline-none text-white placeholder-slate-600 rounded-xl px-4 py-3 text-sm resize-none transition-colors"
+            className="w-full bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-cerulean focus:outline-none text-white placeholder-slate-600 rounded-xl px-4 py-3 text-sm resize-none transition-colors"
           />
         </div>
 

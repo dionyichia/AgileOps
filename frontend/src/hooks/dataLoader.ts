@@ -20,9 +20,15 @@ import type { TransitionMatrixJSON } from '../schema'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-// Where to fetch the JSON during prototyping.
-// Swap this for `/api/markov` once you add a backend route.
-const DATA_URL = '/data/transition_matrix.json'
+// Static JSON for legacy/demo route (no projectId).
+const STATIC_DATA_URL = '/data/transition_matrix.json'
+
+// Builds the API URL for project-scoped data.
+function getDataUrl(projectId?: string): string {
+  return projectId
+    ? `/api/projects/${projectId}/markov`
+    : STATIC_DATA_URL
+}
 
 // Nodes that should always be rendered as terminal (success/fail) bubbles.
 // The builder appends a synthetic "END" node; real terminal names come from
@@ -257,34 +263,26 @@ export interface LoadedMarkovData {
   }
 }
 
-let _cache: LoadedMarkovData | null = null
+const _cache: Record<string, LoadedMarkovData> = {}
 
 /**
  * Fetches and transforms transition_matrix.json.
- * Results are cached in memory — safe to call from multiple components.
+ * Results are cached per URL — safe to call from multiple components.
  *
- * @param url  Override the default fetch URL (useful for testing or API swap)
+ * @param projectId  When provided, fetches from /api/projects/{id}/markov.
+ *                   When omitted, fetches from the static JSON in /public/data/.
  */
-export async function loadMarkovData(url = DATA_URL): Promise<LoadedMarkovData> {
-  if (_cache) return _cache
+export async function loadMarkovData(projectId?: string): Promise<LoadedMarkovData> {
+  const url = getDataUrl(projectId)
 
-  console.log("Fetching Markov data from:", url)
+  if (_cache[url]) return _cache[url]
 
   const res = await fetch(url)
-
-  console.log("Fetch response:", res.status)
-
   if (!res.ok) throw new Error(`Failed to fetch markov data: ${res.statusText}`)
 
   const data: TransitionMatrixJSON = await res.json()
-
-  console.log("Loaded JSON:", data)
-
   const nodes = buildNodes(data)
   const edges = buildEdges(data)
-
-  console.log("Nodes built:", nodes.length)
-  console.log("Edges built:", edges.length)
 
   const result: LoadedMarkovData = {
     nodes,
@@ -298,11 +296,16 @@ export async function loadMarkovData(url = DATA_URL): Promise<LoadedMarkovData> 
     },
   }
 
-  _cache = result
+  _cache[url] = result
   return result
 }
 
-/** Call this to bust the cache (e.g. after a new file upload) */
-export function clearMarkovCache() {
-  _cache = null
+/** Bust cache for a specific project or all entries */
+export function clearMarkovCache(projectId?: string) {
+  if (projectId) {
+    const url = getDataUrl(projectId)
+    delete _cache[url]
+  } else {
+    for (const key of Object.keys(_cache)) delete _cache[key]
+  }
 }

@@ -36,8 +36,8 @@ export default function StepLayout({
 }: StepLayoutProps) {
   const navigate = useNavigate()
 
-  const backPaths = ['/', '/form', '/workflow-report', '/tool-input', '/simulation']
-  const handleBack = () => navigate(backPath ?? backPaths[currentStep - 1] ?? '/')
+  const backPaths = ['/dashboard', '/internal/form', '/internal/workflow-report', '/internal/tool-input', '/simulation']
+  const handleBack = () => navigate(backPath ?? backPaths[currentStep - 1] ?? '/dashboard')
 
   return (
     <div className="min-h-screen bg-[#080C18] flex flex-col">
@@ -46,7 +46,7 @@ export default function StepLayout({
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-cerulean flex items-center justify-center">
               <Zap size={14} className="text-white" fill="white" />
             </div>
             <span className="font-bold text-white text-lg tracking-tight">axis</span>
@@ -64,9 +64,9 @@ export default function StepLayout({
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
                         isActive
-                          ? 'bg-indigo-600 text-white ring-2 ring-indigo-400/40'
+                          ? 'bg-cerulean text-white ring-2 ring-cerulean-400/40'
                           : isCompleted
-                          ? 'bg-indigo-900 text-indigo-300'
+                          ? 'bg-cerulean-900 text-cerulean-300'
                           : 'bg-slate-800 text-slate-500'
                       }`}
                     >
@@ -74,14 +74,14 @@ export default function StepLayout({
                     </div>
                     <span
                       className={`text-xs font-medium hidden sm:block ${
-                        isActive ? 'text-indigo-300' : isCompleted ? 'text-slate-400' : 'text-slate-600'
+                        isActive ? 'text-cerulean-300' : isCompleted ? 'text-slate-400' : 'text-slate-600'
                       }`}
                     >
                       {step}
                     </span>
                   </div>
                   {i < STEPS.length - 1 && (
-                    <div className={`w-6 h-px ${isCompleted ? 'bg-indigo-700' : 'bg-slate-700'}`} />
+                    <div className={`w-6 h-px ${isCompleted ? 'bg-cerulean-700' : 'bg-slate-700'}`} />
                   )}
                 </div>
               )
@@ -124,7 +124,7 @@ export default function StepLayout({
             <button
               onClick={onNext}
               disabled={nextDisabled}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors"
+              className="flex items-center gap-2 bg-cerulean hover:bg-cerulean-400 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors"
             >
               {nextLabel}
               <ArrowRight size={16} />

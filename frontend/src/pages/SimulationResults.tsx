@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import ReactFlow, {
   useNodesState,
   useEdgesState,
@@ -13,6 +13,8 @@ import { TrendingDown, TrendingUp, Minus, DollarSign, Zap, Info } from 'lucide-r
 import StepLayout from '../components/layout/StepLayout'
 import { nodeTypes } from '../components/workflow/CustomNodes'
 import { roleStats, toolBuckets, toolTimeMetrics, simulationNodes, simulationEdges } from '../data/mockData'
+import { toolEvals, simulation as simulationApi } from '../api/client'
+import { useJobProgress } from '../hooks/useJobProgress'
 
 const LOADING_STEPS = [
   { label: 'Parsing tool documentation…',    pct: 15 },
@@ -24,54 +26,84 @@ const LOADING_STEPS = [
 ]
 
 const bucketColorMap: Record<string, string> = {
-  indigo:  'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
-  violet:  'bg-violet-500/15 text-violet-300 border-violet-500/30',
-  cyan:    'bg-cyan-500/15  text-cyan-300  border-cyan-500/30',
-  emerald: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-  amber:   'bg-amber-500/15 text-amber-300 border-amber-500/30',
-  rose:    'bg-rose-500/15 text-rose-300 border-rose-500/30',
+  indigo:  'bg-cerulean-500/15 text-cerulean-300 border-cerulean-500/30',
+  violet:  'bg-magenta-500/15 text-magenta-300 border-magenta-500/30',
+  cyan:    'bg-cerulean-500/15 text-cerulean-200 border-cerulean-500/30',
+  emerald: 'bg-sea-500/15 text-sea-300 border-sea-500/30',
+  amber:   'bg-gold-500/15 text-gold-300 border-gold-500/30',
+  rose:    'bg-magenta-500/15 text-magenta-200 border-magenta-500/30',
 }
 
 export default function SimulationResults() {
+  const { projectId, toolEvalId } = useParams<{ projectId: string; toolEvalId: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
+  const isProjectScoped = !!(projectId && toolEvalId)
+
+  // Job progress for project-scoped mode (jobId passed via navigation state)
+  const passedJobId = (location.state as { jobId?: string } | null)?.jobId ?? null
+  const [jobId, setJobId] = useState<string | null>(passedJobId)
+  const jobProgress = useJobProgress(isProjectScoped ? jobId : null)
+
+  // Legacy loading animation state
   const [loadStep, setLoadStep] = useState(0)
-  const [done, setDone] = useState(false)
+  const [legacyDone, setLegacyDone] = useState(false)
   const [tooltip, setTooltip] = useState<string | null>(null)
 
-  const [nodes, , onNodesChange] = useNodesState(simulationNodes)
-  const [edges, , onEdgesChange] = useEdgesState(simulationEdges)
-
-  // Loading sequence
-  useEffect(() => {
-    if (done) return
-    if (loadStep >= LOADING_STEPS.length - 1) {
-      const t = setTimeout(() => setDone(true), 600)
-      return () => clearTimeout(t)
-    }
-    const t = setTimeout(() => setLoadStep((s) => s + 1), 700)
-    return () => clearTimeout(t)
-  }, [loadStep, done])
-
-  const toolName = (() => {
+  // Tool name — from API or localStorage
+  const [toolName, setToolName] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('axisToolInput') ?? '{}').toolName || 'Apollo.io'
     } catch {
       return 'Apollo.io'
     }
-  })()
+  })
+
+  const [nodes, , onNodesChange] = useNodesState(simulationNodes)
+  const [edges, , onEdgesChange] = useEdgesState(simulationEdges)
+
+  // Fetch tool name from API when project-scoped
+  useEffect(() => {
+    if (!isProjectScoped) return
+    toolEvals.get(projectId!, toolEvalId!)
+      .then((te) => setToolName(te.tool_name))
+      .catch(() => {})
+  }, [projectId, toolEvalId, isProjectScoped])
+
+  // Legacy loading sequence (only for flat route)
+  useEffect(() => {
+    if (isProjectScoped || legacyDone) return
+    if (loadStep >= LOADING_STEPS.length - 1) {
+      const t = setTimeout(() => setLegacyDone(true), 600)
+      return () => clearTimeout(t)
+    }
+    const t = setTimeout(() => setLoadStep((s) => s + 1), 700)
+    return () => clearTimeout(t)
+  }, [loadStep, legacyDone, isProjectScoped])
+
+  // Determine if we're done loading
+  const done = isProjectScoped
+    ? jobProgress.isDone || jobProgress.isFailed || !jobId
+    : legacyDone
 
   const totalSaved = toolTimeMetrics
     .filter((m) => m.change === 'decrease')
     .reduce((acc, m) => acc + ((m as any).saved ?? 0), 0)
 
   if (!done) {
-    const current = LOADING_STEPS[loadStep]
-    const pct = current.pct
+    // Project-scoped: use real job progress
+    const pct = isProjectScoped
+      ? (jobProgress.job?.progress_pct ?? 0)
+      : LOADING_STEPS[loadStep].pct
+    const stepLabel = isProjectScoped
+      ? (jobProgress.job?.current_step ?? 'Starting simulation...')
+      : LOADING_STEPS[loadStep].label
+
     return (
       <div className="min-h-screen bg-[#080C18] flex flex-col items-center justify-center gap-8 px-6">
         {/* Logo */}
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-cerulean flex items-center justify-center">
             <Zap size={16} className="text-white" fill="white" />
           </div>
           <span className="font-bold text-white text-xl tracking-tight">axis</span>
@@ -79,34 +111,40 @@ export default function SimulationResults() {
 
         <div className="w-full max-w-md text-center">
           <h2 className="text-xl font-bold text-white mb-2">Running Simulation</h2>
-          <p className="text-slate-400 text-sm mb-8">Analyzing how <span className="text-indigo-400 font-medium">{toolName}</span> would affect your SDR workflow…</p>
+          <p className="text-slate-400 text-sm mb-8">Analyzing how <span className="text-cerulean font-medium">{toolName}</span> would affect your SDR workflow…</p>
 
           {/* Progress bar */}
           <div className="w-full bg-slate-800 rounded-full h-2 mb-4 overflow-hidden">
             <div
-              className="bg-indigo-500 h-2 rounded-full transition-all duration-500"
+              className="bg-cerulean h-2 rounded-full transition-all duration-500"
               style={{ width: `${pct}%` }}
             />
           </div>
           <div className="flex justify-between text-xs text-slate-500 mb-8">
-            <span>{current.label}</span>
+            <span>{stepLabel}</span>
             <span>{pct}%</span>
           </div>
 
           {/* Steps list */}
           <div className="space-y-2 text-left">
-            {LOADING_STEPS.map((step, i) => (
-              <div key={i} className={`flex items-center gap-3 text-sm transition-all ${
-                i < loadStep ? 'text-emerald-400' : i === loadStep ? 'text-white' : 'text-slate-700'
-              }`}>
-                <div className={`w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] ${
-                  i < loadStep ? 'bg-emerald-500/20 text-emerald-400' : i === loadStep ? 'bg-indigo-500/20 text-indigo-400 animate-pulse-slow' : 'bg-slate-800'
+            {LOADING_STEPS.map((step, i) => {
+              const stepDone = isProjectScoped ? pct >= step.pct : i < loadStep
+              const stepActive = isProjectScoped
+                ? (pct >= (LOADING_STEPS[i - 1]?.pct ?? 0) && pct < step.pct)
+                : i === loadStep
+              return (
+                <div key={i} className={`flex items-center gap-3 text-sm transition-all ${
+                  stepDone ? 'text-sea-400' : stepActive ? 'text-white' : 'text-slate-700'
                 }`}>
-                  {i < loadStep ? '✓' : i === loadStep ? '●' : '○'}
+                  <div className={`w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] ${
+                    stepDone ? 'bg-sea-500/20 text-sea-400' : stepActive ? 'bg-cerulean-500/20 text-cerulean animate-pulse-slow' : 'bg-slate-800'
+                  }`}>
+                    {stepDone ? '✓' : stepActive ? '●' : '○'}
+                  </div>
+                  {step.label}
                 </div>
-                {step.label}
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>
@@ -118,7 +156,11 @@ export default function SimulationResults() {
       currentStep={4}
       title="Simulation Results"
       subtitle={`Impact of adding ${toolName} to your SDR workflow — ${totalSaved}min/day savings per rep`}
-      onNext={() => navigate('/recommendation')}
+      onNext={() => navigate(
+        isProjectScoped
+          ? `/projects/${projectId}/recommendation/${toolEvalId}`
+          : '/recommendation'
+      )}
       nextLabel="View Final Recommendation"
     >
       <div className="flex gap-6 h-full">
@@ -200,12 +242,12 @@ export default function SimulationResults() {
                         <span className="text-xs text-slate-500 line-through">{m.before}</span>
                         <span className="text-white text-xs font-semibold">{m.after}</span>
                         {m.change === 'decrease' && (
-                          <span className="flex items-center gap-0.5 text-emerald-400 text-xs font-bold">
+                          <span className="flex items-center gap-0.5 text-sea-400 text-xs font-bold">
                             <TrendingDown size={11} /> {(m as any).saved}m
                           </span>
                         )}
                         {m.change === 'increase' && (
-                          <span className="flex items-center gap-0.5 text-amber-400 text-xs font-bold">
+                          <span className="flex items-center gap-0.5 text-gold-400 text-xs font-bold">
                             <TrendingUp size={11} /> temp
                           </span>
                         )}
@@ -222,11 +264,11 @@ export default function SimulationResults() {
             <div className="mt-4 pt-3 border-t border-slate-800">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400 font-medium">Net time saved/day</span>
-                <span className="text-emerald-400 font-bold text-sm">{totalSaved}min</span>
+                <span className="text-sea-400 font-bold text-sm">{totalSaved}min</span>
               </div>
               <div className="flex items-center justify-between mt-1">
                 <span className="text-xs text-slate-400 font-medium">Per rep per week</span>
-                <span className="text-emerald-400 font-bold text-sm">{(totalSaved * 5 / 60).toFixed(1)}h</span>
+                <span className="text-sea-400 font-bold text-sm">{(totalSaved * 5 / 60).toFixed(1)}h</span>
               </div>
             </div>
           </div>
@@ -243,11 +285,11 @@ export default function SimulationResults() {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Est. value of time saved</span>
-                <span className="text-emerald-400 font-semibold">$56,000/yr</span>
+                <span className="text-sea-400 font-semibold">$56,000/yr</span>
               </div>
               <div className="flex justify-between border-t border-slate-700 pt-2 mt-2">
                 <span className="text-slate-300 font-semibold">Net ROI</span>
-                <span className="text-emerald-400 font-bold text-sm">6.7× </span>
+                <span className="text-sea-400 font-bold text-sm">6.7× </span>
               </div>
             </div>
             <div className="mt-3 text-[10px] text-slate-600">
@@ -265,7 +307,7 @@ export default function SimulationResults() {
                 <span className="ml-2 text-xs text-slate-500">New paths highlighted in blue</span>
               </div>
               <div className="flex items-center gap-3 text-xs text-slate-500">
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-emerald-500 inline-block rounded" /> Success</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-sea inline-block rounded" /> Success</span>
                 <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500 inline-block rounded" /> Fail</span>
                 <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-blue-400 inline-block rounded" /> New path</span>
               </div>

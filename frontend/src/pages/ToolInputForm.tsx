@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Upload, Link2, FileText, Globe, Briefcase, CheckCircle2 } from 'lucide-react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Upload, Link2, FileText, Globe, Briefcase, CheckCircle2, Loader2 } from 'lucide-react'
 import StepLayout from '../components/layout/StepLayout'
+import { toolEvals, pipeline as pipelineApi, uploads } from '../api/client'
 
 type UseCase = 'adoption' | 'compare'
 
@@ -13,6 +14,7 @@ interface FileEntry {
 const emptyFile = (): FileEntry => ({ file: null, link: '' })
 
 export default function ToolInputForm() {
+  const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
   const [useCase, setUseCase] = useState<UseCase>('adoption')
   const [toolName, setToolName] = useState('')
@@ -21,6 +23,7 @@ export default function ToolInputForm() {
   const [website, setWebsite] = useState('')
   const [caseStudies, setCaseStudies] = useState<FileEntry>(emptyFile())
   const [pitchDeck, setPitchDeck] = useState<FileEntry>(emptyFile())
+  const [submitting, setSubmitting] = useState(false)
 
   const handleFile = (setter: (v: FileEntry) => void, current: FileEntry) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -28,11 +31,45 @@ export default function ToolInputForm() {
 
   const canSubmit = toolName.trim().length > 0 && (
     docs.file || docs.link || api.file || website || caseStudies.file || pitchDeck.file
-  )
+  ) && !submitting
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    // Always save to localStorage for legacy route compatibility
     localStorage.setItem('axisToolInput', JSON.stringify({ useCase, toolName, website }))
-    navigate('/simulation')
+
+    if (projectId) {
+      // Project-scoped: save to API, upload files, trigger simulation, navigate
+      setSubmitting(true)
+      try {
+        const toolEval = await toolEvals.create(projectId, {
+          use_case: useCase,
+          tool_name: toolName.trim(),
+          website_url: website || undefined,
+        })
+
+        // Upload any attached files in parallel
+        const fileUploads: Promise<unknown>[] = []
+        if (pitchDeck.file) fileUploads.push(uploads.upload(projectId, pitchDeck.file, 'product_docs', toolEval.id))
+        if (docs.file) fileUploads.push(uploads.upload(projectId, docs.file, 'product_docs', toolEval.id))
+        if (api.file) fileUploads.push(uploads.upload(projectId, api.file, 'api_docs', toolEval.id))
+        if (caseStudies.file) fileUploads.push(uploads.upload(projectId, caseStudies.file, 'case_study', toolEval.id))
+        if (fileUploads.length > 0) {
+          await Promise.all(fileUploads)
+        }
+
+        const { job_id } = await pipelineApi.simulate(projectId, toolEval.id)
+        navigate(`/projects/${projectId}/simulation/${toolEval.id}`, {
+          state: { jobId: job_id },
+        })
+      } catch (err) {
+        console.error('Failed to create tool evaluation:', err)
+        navigate('/simulation')
+      } finally {
+        setSubmitting(false)
+      }
+    } else {
+      navigate('/simulation')
+    }
   }
 
   return (
@@ -59,15 +96,15 @@ export default function ToolInputForm() {
                 onClick={() => setUseCase(id)}
                 className={`p-4 rounded-xl border text-left transition-all ${
                   useCase === id
-                    ? 'border-indigo-500/60 bg-indigo-500/10'
+                    ? 'border-cerulean-500/60 bg-cerulean-500/10'
                     : 'border-slate-700 bg-[#111827] hover:border-slate-600'
                 }`}
               >
-                <Icon size={18} className={useCase === id ? 'text-indigo-400 mb-2' : 'text-slate-500 mb-2'} />
-                <div className={`text-sm font-semibold mb-1 ${useCase === id ? 'text-indigo-200' : 'text-slate-300'}`}>{label}</div>
+                <Icon size={18} className={useCase === id ? 'text-gold mb-2' : 'text-slate-500 mb-2'} />
+                <div className={`text-sm font-semibold mb-1 ${useCase === id ? 'text-cerulean-200' : 'text-slate-300'}`}>{label}</div>
                 <div className="text-xs text-slate-500 leading-snug">{desc}</div>
                 {id === 'adoption' && (
-                  <span className="inline-block mt-2 text-[10px] font-bold tracking-widest text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded">
+                  <span className="inline-block mt-2 text-[10px] font-bold tracking-widest text-gold bg-cerulean-500/10 px-1.5 py-0.5 rounded">
                     RECOMMENDED
                   </span>
                 )}
@@ -79,14 +116,14 @@ export default function ToolInputForm() {
         {/* Tool name */}
         <div>
           <label className="block text-sm font-semibold text-slate-200 mb-2">
-            Tool Name <span className="text-indigo-400">*</span>
+            Tool Name <span className="text-gold">*</span>
           </label>
           <input
             type="text"
             value={toolName}
             onChange={(e) => setToolName(e.target.value)}
             placeholder="e.g. Apollo.io, Gong, Seismic..."
-            className="w-full bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-indigo-500 focus:outline-none text-white placeholder-slate-600 rounded-xl px-4 py-3 text-sm transition-colors"
+            className="w-full bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-cerulean focus:outline-none text-white placeholder-slate-600 rounded-xl px-4 py-3 text-sm transition-colors"
           />
         </div>
 
@@ -102,7 +139,7 @@ export default function ToolInputForm() {
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
             placeholder="https://apollo.io"
-            className="w-full bg-[#0F1629] border border-slate-700 focus:border-indigo-500 focus:outline-none text-white placeholder-slate-600 rounded-lg px-3 py-2.5 text-sm transition-colors"
+            className="w-full bg-[#0F1629] border border-slate-700 focus:border-cerulean focus:outline-none text-white placeholder-slate-600 rounded-lg px-3 py-2.5 text-sm transition-colors"
           />
         </UploadField>
 
@@ -147,7 +184,7 @@ function UploadField({
         <Icon size={14} className="text-slate-500" />
         <label className="text-sm font-semibold text-slate-200">
           {label}
-          {required && <span className="text-indigo-400 ml-1">*</span>}
+          {required && <span className="text-gold ml-1">*</span>}
           {!required && <span className="text-slate-500 font-normal ml-1">(Optional)</span>}
         </label>
       </div>
@@ -177,12 +214,12 @@ function DualInput({
         value={entry.link}
         onChange={(e) => setter({ ...entry, link: e.target.value })}
         placeholder={placeholder}
-        className="flex-1 bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-indigo-500 focus:outline-none text-white placeholder-slate-600 rounded-xl px-3 py-2.5 text-sm transition-colors"
+        className="flex-1 bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-cerulean focus:outline-none text-white placeholder-slate-600 rounded-xl px-3 py-2.5 text-sm transition-colors"
       />
       <label className="cursor-pointer">
         <div className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
           entry.file
-            ? 'border-indigo-500/60 bg-indigo-500/10 text-indigo-300'
+            ? 'border-cerulean-500/60 bg-cerulean-500/10 text-cerulean-300'
             : 'border-slate-700 bg-[#111827] text-slate-400 hover:border-slate-600 hover:text-slate-300'
         }`}>
           <Upload size={14} />

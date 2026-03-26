@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import ReactFlow, {
   useNodesState,
   useEdgesState,
@@ -11,8 +11,9 @@ import ReactFlow, {
   Connection,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
-import { Users, Clock, Plus, Layers } from 'lucide-react'
+import { Users, Clock, Plus, Layers, AlertCircle } from 'lucide-react'
 import StepLayout from '../components/layout/StepLayout'
+import { SkeletonCard, PageLoader } from '../components/ui/Skeleton'
 import { nodeTypes } from '../components/workflow/CustomNodes'
 // import { roleStats, toolBuckets, existingNodes, existingEdges } from '../data/mockData'
 import { roleStats, toolBuckets } from '../data/mockData'
@@ -20,38 +21,72 @@ import { roleStats, toolBuckets } from '../data/mockData'
  import { useMarkovData } from '../hooks/pullMarkovData'
 
 const bucketColorMap: Record<string, string> = {
-  indigo:  'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
-  violet:  'bg-violet-500/15 text-violet-300 border-violet-500/30',
-  cyan:    'bg-cyan-500/15  text-cyan-300  border-cyan-500/30',
-  emerald: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-  amber:   'bg-amber-500/15 text-amber-300 border-amber-500/30',
-  rose:    'bg-rose-500/15 text-rose-300 border-rose-500/30',
+  indigo:  'bg-cerulean-500/15 text-cerulean-300 border-cerulean-500/30',
+  violet:  'bg-magenta-500/15 text-magenta-300 border-magenta-500/30',
+  cyan:    'bg-cerulean-500/15 text-cerulean-200 border-cerulean-500/30',
+  emerald: 'bg-sea-500/15 text-sea-300 border-sea-500/30',
+  amber:   'bg-gold-500/15 text-gold-300 border-gold-500/30',
+  rose:    'bg-magenta-500/15 text-magenta-200 border-magenta-500/30',
 }
 
 const intensityDot: Record<string, string> = {
-  High:   'bg-emerald-400',
-  Medium: 'bg-amber-400',
+  High:   'bg-sea-400',
+  Medium: 'bg-gold-400',
   Low:    'bg-red-400',
 }
 
 export default function WorkflowReport() {
-  const { existingNodes, existingEdges, loading, error } = useMarkovData()
+  const { projectId } = useParams<{ projectId: string }>()
+  const { existingNodes, existingEdges, loading, error } = useMarkovData(projectId)
 
   const navigate = useNavigate()
   const [nodes, setNodes, onNodesChange] = useNodesState(existingNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(existingEdges)
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
 
-  // if (loading) {
-  //   return <div className="text-slate-400 p-6">Loading workflow...</div>
-  // }
+  if (loading && projectId) {
+    return (
+      <StepLayout
+        currentStep={2}
+        title="Existing Workflow Report"
+        subtitle="Loading workflow data..."
+        hideNextButton
+      >
+        <div className="flex gap-6 h-full">
+          <div className="w-72 flex-shrink-0 space-y-5">
+            <SkeletonCard lines={5} />
+            <SkeletonCard lines={6} />
+          </div>
+          <div className="flex-1">
+            <PageLoader message="Loading workflow graph..." />
+          </div>
+        </div>
+      </StepLayout>
+    )
+  }
 
-  // if (error) {
-  //   return <div className="text-red-400 p-6">Failed to load workflow</div>
-  // }
-
-  console.log(existingNodes)
-  console.log(existingEdges)
+  if (error && projectId) {
+    return (
+      <StepLayout
+        currentStep={2}
+        title="Existing Workflow Report"
+        subtitle="Failed to load workflow data"
+        onNext={() => navigate(projectId ? `/projects/${projectId}/tool-input` : '/internal/tool-input')}
+        nextLabel="Analyze New Tool"
+      >
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <AlertCircle size={40} className="text-red-400" />
+          <p className="text-red-400 text-sm">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm text-cerulean hover:text-cerulean-300 underline"
+          >
+            Try again
+          </button>
+        </div>
+      </StepLayout>
+    )
+  }
 
   const onConnect = useCallback(
     (params: Connection) =>
@@ -103,7 +138,7 @@ export default function WorkflowReport() {
       currentStep={2}
       title="Existing Workflow Report"
       subtitle="Your team's current workflow, tool stack, and process flow — based on telemetry and role data."
-      onNext={() => navigate('/tool-input')}
+      onNext={() => navigate(projectId ? `/projects/${projectId}/tool-input` : '/internal/tool-input')}
       nextLabel="Analyze New Tool"
     >
       <div className="flex gap-6 h-full">
@@ -118,7 +153,7 @@ export default function WorkflowReport() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-xs text-slate-500">Type of team</span>
-                <span className="text-xs font-semibold text-white bg-indigo-500/15 text-indigo-300 px-2 py-0.5 rounded">{roleStats.teamType}</span>
+                <span className="text-xs font-semibold text-white bg-cerulean-500/15 text-cerulean-300 px-2 py-0.5 rounded">{roleStats.teamType}</span>
               </div>
               <div className="flex justify-between items-start">
                 <span className="text-xs text-slate-500">Role</span>
@@ -155,7 +190,7 @@ export default function WorkflowReport() {
                         onClick={() => setSelectedTool(tool.name === selectedTool ? null : tool.name)}
                         className={`w-full flex items-center justify-between text-xs px-2 py-1.5 rounded-lg transition-all ${
                           selectedTool === tool.name
-                            ? 'bg-indigo-500/15 text-indigo-300'
+                            ? 'bg-cerulean-500/15 text-cerulean-300'
                             : 'text-slate-300 hover:bg-slate-800'
                         }`}
                       >
@@ -183,7 +218,7 @@ export default function WorkflowReport() {
                   <span className="text-slate-300 font-medium truncate">{tool.name}</span>
                   <div className="flex items-center justify-center">
                     <div className="w-full max-w-[50px] bg-slate-700 rounded-full h-1">
-                      <div className="bg-indigo-500 h-1 rounded-full" style={{ width: `${tool.pctUsers}%` }} />
+                      <div className="bg-cerulean h-1 rounded-full" style={{ width: `${tool.pctUsers}%` }} />
                     </div>
                   </div>
                   <div className="flex items-center justify-end gap-1">
@@ -208,13 +243,13 @@ export default function WorkflowReport() {
               <div className="flex items-center gap-3">
                 {/* Legend */}
                 <div className="hidden lg:flex items-center gap-3 text-xs text-slate-500">
-                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-emerald-500 inline-block rounded" /> Success</span>
+                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-sea inline-block rounded" /> Success</span>
                   <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500 inline-block rounded" /> Fail</span>
-                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-amber-500 inline-block rounded" /> Retry</span>
+                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-gold inline-block rounded" /> Retry</span>
                 </div>
                 <button
                   onClick={addTask}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 px-3 py-1.5 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-cerulean bg-cerulean/10 hover:bg-cerulean/20 border border-cerulean-500/30 px-3 py-1.5 rounded-lg transition-colors"
                 >
                   <Plus size={12} /> Add Task
                 </button>

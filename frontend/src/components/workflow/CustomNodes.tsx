@@ -1,4 +1,5 @@
 import { Handle, Position } from 'reactflow'
+import { MessageSquare } from 'lucide-react'
 
 interface TaskNodeData {
   label: string
@@ -6,11 +7,14 @@ interface TaskNodeData {
   minutes: number
   automatable: 'high' | 'medium' | 'low'
   isNew?: boolean
+  commentCount?: number
+  onComment?: (nodeId: string) => void
+  nodeId?: string
 }
 
 const autoConfig = {
-  high:   { label: 'High automation',   cls: 'text-emerald-400 bg-emerald-500/10' },
-  medium: { label: 'Med automation',    cls: 'text-amber-400  bg-amber-500/10'  },
+  high:   { label: 'High automation',   cls: 'text-sea-400 bg-sea-500/10' },
+  medium: { label: 'Med automation',    cls: 'text-gold-400 bg-gold-500/10'  },
   low:    { label: 'Low automation',    cls: 'text-red-400    bg-red-500/10'    },
 }
 
@@ -34,14 +38,33 @@ export function TaskNode({ data }: { data: TaskNodeData }) {
         </span>
       )}
 
-      <div className="font-semibold text-white text-sm mb-2 leading-snug">{data.label}</div>
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="font-semibold text-white text-sm leading-snug">{data.label}</div>
+        {data.onComment && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              data.onComment!(data.nodeId!)
+            }}
+            className="relative flex-shrink-0 p-1 rounded-md hover:bg-slate-700/60 transition-colors group"
+            title="Leave feedback"
+          >
+            <MessageSquare size={14} className={`${data.commentCount ? 'text-gold' : 'text-slate-500 group-hover:text-slate-300'}`} />
+            {!!data.commentCount && (
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-gold text-[8px] font-bold text-black flex items-center justify-center">
+                {data.commentCount}
+              </span>
+            )}
+          </button>
+        )}
+      </div>
 
       <div className="flex flex-wrap gap-1 mb-2">
         {data.tools.map((tool) => (
           <span
             key={tool}
             className={`text-xs px-1.5 py-0.5 rounded font-medium ${
-              isNew ? 'bg-blue-500/20 text-blue-300' : 'bg-indigo-500/15 text-indigo-400'
+              isNew ? 'bg-blue-500/20 text-blue-300' : 'bg-cerulean-500/15 text-cerulean'
             }`}
           >
             {tool}
@@ -68,7 +91,7 @@ interface TerminalNodeData {
 }
 
 const terminalConfig = {
-  success: 'border-emerald-500 bg-emerald-500/10 text-emerald-300',
+  success: 'border-sea bg-sea-500/10 text-sea-300',
   fail:    'border-red-500    bg-red-500/10    text-red-300',
   neutral: 'border-slate-500  bg-slate-700/50  text-slate-300',
 }

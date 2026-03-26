@@ -95,17 +95,17 @@ input[type='range']::-webkit-slider-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #6366F1;
+  background: #2274A5;
   cursor: pointer;
-  border: 2px solid #818CF8;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  border: 2px solid #3D8DB9;
+  box-shadow: 0 0 0 3px rgba(34, 116, 165, 0.15);
 }
 
 input[type='range']::-moz-range-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #6366F1;
+  background: #2274A5;
   cursor: pointer;
-  border: 2px solid #818CF8;
+  border: 2px solid #3D8DB9;
 }
