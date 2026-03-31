@@ -10,7 +10,6 @@ import ReactFlow, {
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import {
-  Zap,
   Users,
   Clock,
   Layers,
@@ -80,6 +79,18 @@ const NAV_ITEMS = [
   { id: 'simulations', label: 'Simulations',   icon: FlaskConical },
   { id: 'reports',     label: 'Reports',       icon: FileBarChart },
 ]
+
+const BRAND = {
+  shell: '#F7F4FB',
+  panel: '#FFFFFF',
+  border: 'rgba(94, 20, 159, 0.10)',
+  text: '#111111',
+  muted: 'rgba(17, 17, 17, 0.52)',
+  violet: '#5E149F',
+  orchid: '#B4308B',
+  pink: '#E2409B',
+  coral: '#F75A8C',
+}
 
 // ── Component ────────────────────────────────────────────────────────────────
 
@@ -200,17 +211,22 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080C18] flex">
+    <div className="min-h-screen bg-[#F7F4FB] flex">
 
       {/* ── Left sidebar ───────────────────────────────────────────────────── */}
-      <aside className="w-64 flex-shrink-0 border-r border-slate-800 bg-[#0B0F1E] flex flex-col sticky top-0 h-screen">
+      <aside
+        className="w-64 flex-shrink-0 border-r flex flex-col sticky top-0 h-screen bg-white"
+        style={{ borderColor: BRAND.border }}
+      >
         {/* Logo */}
         <div className="px-6 py-6">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-cerulean flex items-center justify-center">
-              <Zap size={16} className="text-white" fill="white" />
-            </div>
-            <span className="font-bold text-white text-xl tracking-tight">axis</span>
+          <div className="flex items-center gap-3">
+            <img
+              src="/axis-logo.png"
+              alt="Axis logo"
+              className="h-11 w-11 rounded-2xl object-cover"
+            />
+            <span className="font-bold text-[#111111] text-[28px] tracking-[-0.04em]">Axis</span>
           </div>
         </div>
 
@@ -220,11 +236,12 @@ export default function Dashboard() {
             <button
               key={id}
               onClick={() => handleNavClick(id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-[15px] font-semibold transition-colors ${
                 activeNav === id
-                  ? 'bg-cerulean-500/15 text-cerulean-300'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  ? 'text-white'
+                  : 'text-black/58 hover:bg-black/[0.03] hover:text-black/88'
               }`}
+              style={activeNav === id ? { background: 'linear-gradient(90deg, #5E149F 0%, #B4308B 50%, #F75A8C 100%)', boxShadow: '0 12px 24px rgba(94,20,159,0.16)' } : {}}
             >
               <Icon size={18} />
               {label}
@@ -234,18 +251,21 @@ export default function Dashboard() {
 
         {/* Bottom */}
         <div className="px-3 pb-6">
-          <div className="border-t border-slate-800 pt-4 mb-3">
+          <div className="pt-4 mb-3" style={{ borderTop: `1px solid ${BRAND.border}` }}>
             <div className="flex items-center gap-3 px-3">
-              <div className="w-8 h-8 rounded-full bg-cerulean/30 border border-cerulean-500/30 flex items-center justify-center text-cerulean-300 text-xs font-semibold">
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold"
+                style={{ background: 'linear-gradient(180deg, #5E149F 0%, #F75A8C 100%)' }}
+              >
                 AC
               </div>
               <div className="min-w-0">
-                <div className="text-sm font-medium text-white truncate">Acme Corp</div>
-                <div className="text-xs text-slate-500 truncate">{roleStats.teamType} · {roleStats.role.split('(')[0].trim()}</div>
+                <div className="text-sm font-semibold text-black truncate">Acme Corp</div>
+                <div className="text-xs text-black/42 truncate">{roleStats.teamType} · {roleStats.role.split('(')[0].trim()}</div>
               </div>
             </div>
           </div>
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition-colors">
+          <button className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-[15px] font-semibold text-black/46 hover:bg-black/[0.03] hover:text-black/78 transition-colors">
             <LogOut size={18} />
             Log out
           </button>
@@ -256,23 +276,26 @@ export default function Dashboard() {
       <div className="flex-1 min-w-0 flex flex-col">
 
         {/* ── Top header ─────────────────────────────────────────────────── */}
-        <header className="border-b border-slate-800 bg-[#0B0F1E]/90 backdrop-blur-sm sticky top-0 z-40 px-8 py-4 flex items-center justify-between">
+        <header
+          className="border-b bg-white/90 backdrop-blur-sm sticky top-0 z-40 px-8 py-5 flex items-center justify-between"
+          style={{ borderColor: BRAND.border }}
+        >
           <div>
-            <h1 className="text-xl font-bold text-white">Dashboard</h1>
-            <p className="text-xs text-slate-500 mt-0.5">Your team's workflow overview and tool insights</p>
+            <h1 className="text-[36px] font-bold tracking-[-0.04em] text-black">Dashboard</h1>
+            <p className="text-[14px] text-black/48 mt-1">Your team&apos;s workflow overview and tool insights</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-4 text-xs text-slate-500">
+            <div className="hidden md:flex items-center gap-5 text-[14px] text-black/50 font-medium">
               <span className="flex items-center gap-1.5">
-                <Users size={12} className="text-cerulean" />
+                <Users size={14} style={{ color: BRAND.violet }} />
                 {roleStats.numEmployees} reps
               </span>
               <span className="flex items-center gap-1.5">
-                <Layers size={12} className="text-magenta" />
+                <Layers size={14} style={{ color: BRAND.pink }} />
                 {roleStats.avgToolsUsed} tools avg
               </span>
               <span className="flex items-center gap-1.5">
-                <Clock size={12} className="text-gold" />
+                <Clock size={14} style={{ color: BRAND.coral }} />
                 {roleStats.avgWeeklyHours}h/wk
               </span>
             </div>
@@ -280,50 +303,50 @@ export default function Dashboard() {
         </header>
 
         {/* ── Scrollable content ─────────────────────────────────────────── */}
-        <main className="flex-1 overflow-y-auto p-8 space-y-6">
+        <main className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#F7F4FB]">
 
           {/* ── Stat cards row ─────────────────────────────────────────── */}
           <div className="grid grid-cols-4 gap-4">
-            <div className="bg-cerulean/15 border border-cerulean-500/30 rounded-xl p-5">
-              <div className="text-xs font-bold text-cerulean-300 uppercase tracking-widest mb-1">Workflow Steps</div>
-              <div className="text-3xl font-bold text-white">{taskNodes.length}</div>
-              <div className="text-xs text-slate-500 mt-1">{totalMinutes} min total cycle</div>
+            <div className="rounded-[24px] p-5 bg-white border" style={{ borderColor: 'rgba(94,20,159,0.12)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+              <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: BRAND.violet }}>Workflow Steps</div>
+              <div className="text-3xl font-bold text-black">{taskNodes.length}</div>
+              <div className="text-xs text-black/42 mt-1">{totalMinutes} min total cycle</div>
             </div>
-            <div className="bg-gold/10 border border-gold-500/30 rounded-xl p-5">
-              <div className="text-xs font-bold text-gold-300 uppercase tracking-widest mb-1">Avg Utilization</div>
-              <div className="text-3xl font-bold text-white">{avgUtilization}%</div>
-              <div className="w-full bg-slate-700 rounded-full h-1.5 mt-2">
-                <div className={`h-1.5 rounded-full ${avgUtilization < 50 ? 'bg-gold' : 'bg-sea'}`} style={{ width: `${avgUtilization}%` }} />
+            <div className="rounded-[24px] p-5 bg-white border" style={{ borderColor: 'rgba(180,48,139,0.12)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+              <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: BRAND.orchid }}>Avg Utilization</div>
+              <div className="text-3xl font-bold text-black">{avgUtilization}%</div>
+              <div className="w-full rounded-full h-1.5 mt-2 bg-black/10">
+                <div className="h-1.5 rounded-full" style={{ width: `${avgUtilization}%`, background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }} />
               </div>
             </div>
-            <div className="bg-magenta/10 border border-magenta-500/30 rounded-xl p-5">
-              <div className="text-xs font-bold text-magenta-300 uppercase tracking-widest mb-1">Unused Features</div>
-              <div className="text-3xl font-bold text-white">{totalUnusedFeatures}</div>
-              <div className="text-xs text-slate-500 mt-1">across {allTools.length} tools</div>
+            <div className="rounded-[24px] p-5 bg-white border" style={{ borderColor: 'rgba(226,64,155,0.14)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+              <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: BRAND.pink }}>Unused Features</div>
+              <div className="text-3xl font-bold text-black">{totalUnusedFeatures}</div>
+              <div className="text-xs text-black/42 mt-1">across {allTools.length} tools</div>
             </div>
-            <div className="bg-sea/10 border border-sea-500/30 rounded-xl p-5">
-              <div className="text-xs font-bold text-sea-300 uppercase tracking-widest mb-1">Team Size</div>
-              <div className="text-3xl font-bold text-white">{roleStats.numEmployees}</div>
-              <div className="text-xs text-slate-500 mt-1">{roleStats.role.split('(')[0].trim()}s</div>
+            <div className="rounded-[24px] p-5 bg-white border" style={{ borderColor: 'rgba(247,90,140,0.14)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+              <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: BRAND.coral }}>Team Size</div>
+              <div className="text-3xl font-bold text-black">{roleStats.numEmployees}</div>
+              <div className="text-xs text-black/42 mt-1">{roleStats.role.split('(')[0].trim()}s</div>
             </div>
           </div>
 
           {/* ── Workflow map card ───────────────────────────────────────── */}
-          <div ref={workflowRef} className="bg-[#111827] border border-slate-800 rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800">
+          <div ref={workflowRef} className="bg-white border rounded-[24px] overflow-hidden" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
               <div className="flex items-center gap-3">
-                <BarChart3 size={16} className="text-cerulean" />
+                <BarChart3 size={16} style={{ color: BRAND.violet }} />
                 <div>
-                  <span className="text-sm font-semibold text-slate-200">Workflow Map</span>
-                  <span className="ml-2 text-xs text-slate-500">
+                  <span className="text-sm font-semibold text-black">Workflow Map</span>
+                  <span className="ml-2 text-xs text-black/42">
                     Click <MessageSquare size={10} className="inline" /> on any step to leave feedback
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-3 text-xs text-slate-500">
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-sea inline-block rounded" /> Success</span>
+              <div className="flex items-center gap-3 text-xs text-black/42">
+                <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ background: BRAND.violet }} /> Success</span>
                 <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500 inline-block rounded" /> Fail</span>
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-gold inline-block rounded" /> Retry</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ background: BRAND.coral }} /> Retry</span>
               </div>
             </div>
 
@@ -342,35 +365,35 @@ export default function Dashboard() {
                 maxZoom={1.5}
               >
                 <Controls />
-                <MiniMap nodeColor={() => '#1E2D4A'} maskColor="rgba(8,12,24,0.7)" />
-                <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#1E2D4A" />
+                <MiniMap nodeColor={() => '#CFA3E2'} maskColor="rgba(247,244,251,0.7)" />
+                <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
               </ReactFlow>
 
               {/* ── Comment panel ─────────────────────────────────────── */}
               {commentingNode && (
-                <div className="absolute top-0 right-0 h-full w-80 bg-[#0F1629] border-l border-slate-800 shadow-2xl flex flex-col z-10 animate-fade-in">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+                <div className="absolute top-0 right-0 h-full w-80 bg-white border-l shadow-2xl flex flex-col z-10 animate-fade-in" style={{ borderColor: BRAND.border }}>
+                  <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: BRAND.border }}>
                     <div className="min-w-0">
-                      <div className="text-xs text-slate-500 uppercase tracking-widest font-bold">Feedback</div>
-                      <div className="text-sm font-semibold text-white truncate">{commentingNodeLabel}</div>
+                      <div className="text-xs uppercase tracking-widest font-bold" style={{ color: BRAND.violet }}>Feedback</div>
+                      <div className="text-sm font-semibold text-black truncate">{commentingNodeLabel}</div>
                     </div>
-                    <button onClick={() => setCommentingNode(null)} className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
+                    <button onClick={() => setCommentingNode(null)} className="p-1.5 rounded-lg hover:bg-black/[0.04] text-black/40 hover:text-black transition-colors">
                       <X size={16} />
                     </button>
                   </div>
 
                   <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
                     {(comments[commentingNode] ?? []).length === 0 && (
-                      <p className="text-xs text-slate-600 text-center py-6">No feedback yet. Something look off? Let us know below.</p>
+                      <p className="text-xs text-black/40 text-center py-6">No feedback yet. Something look off? Let us know below.</p>
                     )}
                     {(comments[commentingNode] ?? []).map((c) => (
-                      <div key={c.id} className="bg-slate-800/60 border border-slate-700/50 rounded-lg p-3 group">
-                        <p className="text-sm text-slate-200 leading-relaxed">{c.text}</p>
+                      <div key={c.id} className="bg-[#F7F4FB] border rounded-2xl p-3 group" style={{ borderColor: BRAND.border }}>
+                        <p className="text-sm text-black/78 leading-relaxed">{c.text}</p>
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-[10px] text-slate-600">
+                          <span className="text-[10px] text-black/38">
                             {new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                           </span>
-                          <button onClick={() => handleDeleteComment(commentingNode, c.id)} className="text-[10px] text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => handleDeleteComment(commentingNode, c.id)} className="text-[10px] text-black/38 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                             Remove
                           </button>
                         </div>
@@ -378,7 +401,7 @@ export default function Dashboard() {
                     ))}
                   </div>
 
-                  <div className="px-4 py-3 border-t border-slate-800">
+                  <div className="px-4 py-3 border-t" style={{ borderColor: BRAND.border }}>
                     <div className="flex gap-2">
                       <textarea
                         ref={commentInputRef}
@@ -387,13 +410,14 @@ export default function Dashboard() {
                         onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmitComment() } }}
                         placeholder="What needs to change here?"
                         rows={2}
-                        className="flex-1 bg-[#111827] border border-slate-700 focus:border-cerulean focus:outline-none text-white placeholder-slate-600 rounded-lg px-3 py-2 text-sm resize-none transition-colors"
+                        className="flex-1 bg-[#F7F4FB] border rounded-2xl px-3 py-2 text-sm resize-none transition-colors text-black placeholder:text-black/30 focus:outline-none"
+                        style={{ borderColor: BRAND.border }}
                       />
-                      <button onClick={handleSubmitComment} disabled={!commentText.trim()} className="self-end p-2.5 bg-cerulean hover:bg-cerulean-400 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg transition-colors">
+                      <button onClick={handleSubmitComment} disabled={!commentText.trim()} className="self-end p-2.5 disabled:bg-black/10 disabled:text-black/30 text-white rounded-2xl transition-colors" style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}>
                         <Send size={14} />
                       </button>
                     </div>
-                    <p className="text-[10px] text-slate-600 mt-1.5">Press Enter to send</p>
+                    <p className="text-[10px] text-black/36 mt-1.5">Press Enter to send</p>
                   </div>
                 </div>
               )}
@@ -404,10 +428,10 @@ export default function Dashboard() {
           <div className="grid grid-cols-3 gap-4">
 
             {/* ── Tool Stack card ──────────────────────────────────────── */}
-            <div ref={toolsRef} className="bg-[#111827] border border-slate-800 rounded-xl p-5 max-h-[520px] overflow-y-auto">
+            <div ref={toolsRef} className="bg-white border rounded-[24px] p-5 max-h-[520px] overflow-y-auto" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Tool Stack</h3>
-                <span className="text-xs text-slate-600">{avgUtilization}% avg utilization</span>
+                <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Tool Stack</h3>
+                <span className="text-xs text-black/38">{avgUtilization}% avg utilization</span>
               </div>
 
               {/* Tool list with utilization bars */}
@@ -425,7 +449,7 @@ export default function Dashboard() {
                             <button
                               key={tool.name}
                               onClick={() => setSelectedTool(tool.name)}
-                              className="w-full text-left px-2.5 py-2 rounded-lg text-slate-300 hover:bg-slate-800 transition-all"
+                              className="w-full text-left px-2.5 py-2 rounded-2xl text-black/72 hover:bg-black/[0.03] transition-all"
                             >
                               <div className="flex items-center justify-between text-xs mb-1">
                                 <span className="font-medium">{tool.name}</span>
@@ -433,14 +457,14 @@ export default function Dashboard() {
                                   {tool.utilization}%
                                 </span>
                               </div>
-                              <div className="w-full bg-slate-700 rounded-full h-1">
+                              <div className="w-full bg-black/10 rounded-full h-1">
                                 <div
                                   className={`h-1 rounded-full transition-all ${tool.utilization < 40 ? 'bg-gold' : tool.utilization < 60 ? 'bg-cerulean' : 'bg-sea'}`}
                                   style={{ width: `${tool.utilization}%` }}
                                 />
                               </div>
                               {unusedCount > 0 && (
-                                <div className="text-[10px] text-slate-600 mt-1">{unusedCount} unused feature{unusedCount !== 1 ? 's' : ''}</div>
+                                <div className="text-[10px] text-black/34 mt-1">{unusedCount} unused feature{unusedCount !== 1 ? 's' : ''}</div>
                               )}
                             </button>
                           )
@@ -456,19 +480,19 @@ export default function Dashboard() {
                 <div>
                   <button
                     onClick={() => setSelectedTool(null)}
-                    className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 mb-3 transition-colors"
+                    className="flex items-center gap-1 text-xs text-black/46 hover:text-black mb-3 transition-colors"
                   >
                     <ChevronRight size={12} className="rotate-180" />
                     Back to all tools
                   </button>
 
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold text-white">{selectedToolData.name}</span>
+                    <span className="text-sm font-semibold text-black">{selectedToolData.name}</span>
                     <span className={`text-xs font-bold px-2 py-0.5 rounded ${selectedToolData.utilization < 40 ? 'bg-gold-500/15 text-gold-300' : 'bg-sea-500/15 text-sea-300'}`}>
                       {selectedToolData.utilization}% utilized
                     </span>
                   </div>
-                  <div className="w-full bg-slate-700 rounded-full h-1.5 mb-4">
+                  <div className="w-full bg-black/10 rounded-full h-1.5 mb-4">
                     <div
                       className={`h-1.5 rounded-full ${selectedToolData.utilization < 40 ? 'bg-gold' : selectedToolData.utilization < 60 ? 'bg-cerulean' : 'bg-sea'}`}
                       style={{ width: `${selectedToolData.utilization}%` }}
@@ -476,30 +500,30 @@ export default function Dashboard() {
                   </div>
 
                   {/* Used features */}
-                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Using</div>
+                  <div className="text-[10px] font-bold text-black/42 uppercase tracking-widest mb-2">Using</div>
                   <div className="space-y-1.5 mb-4">
                     {selectedToolData.features.filter((f) => f.used).map((f) => (
-                      <div key={f.name} className="flex items-start gap-2 px-2 py-1.5 rounded-lg bg-sea-500/5 border border-sea-500/10">
+                      <div key={f.name} className="flex items-start gap-2 px-2 py-1.5 rounded-2xl bg-[#F6FFFA] border border-sea-500/10">
                         <div className="w-1.5 h-1.5 rounded-full bg-sea mt-1 flex-shrink-0" />
                         <div>
-                          <div className="text-xs font-medium text-slate-300">{f.name}</div>
-                          <div className="text-[10px] text-slate-600">{f.description}</div>
+                          <div className="text-xs font-medium text-black/78">{f.name}</div>
+                          <div className="text-[10px] text-black/40">{f.description}</div>
                         </div>
                       </div>
                     ))}
                   </div>
 
                   {/* Unused features */}
-                  <div className="text-[10px] font-bold text-gold-300 uppercase tracking-widest mb-2">Not Using</div>
+                  <div className="text-[10px] font-bold text-[#B4308B] uppercase tracking-widest mb-2">Not Using</div>
                   <div className="space-y-1.5 mb-4">
                     {selectedToolData.features.filter((f) => !f.used).map((f) => (
-                      <div key={f.name} className="flex items-start gap-2 px-2 py-1.5 rounded-lg bg-gold-500/5 border border-gold-500/10">
+                      <div key={f.name} className="flex items-start gap-2 px-2 py-1.5 rounded-2xl bg-[#FFF7FC] border border-[#E2409B]/10">
                         <div className="w-1.5 h-1.5 rounded-full bg-gold mt-1 flex-shrink-0" />
                         <div>
-                          <div className="text-xs font-medium text-slate-300">{f.name}</div>
-                          <div className="text-[10px] text-slate-600">{f.description}</div>
+                          <div className="text-xs font-medium text-black/78">{f.name}</div>
+                          <div className="text-[10px] text-black/40">{f.description}</div>
                           {f.workflowStep && (
-                            <div className="text-[10px] text-cerulean-300 mt-0.5">
+                            <div className="text-[10px] mt-0.5" style={{ color: BRAND.violet }}>
                               Could save ~{f.potentialTimeSaved}min at "{f.workflowStep}"
                             </div>
                           )}
@@ -510,7 +534,8 @@ export default function Dashboard() {
 
                   <button
                     onClick={() => handleRunSimulation(selectedToolData.name)}
-                    className="w-full flex items-center justify-center gap-2 bg-cerulean hover:bg-cerulean-400 text-white px-4 py-2.5 rounded-lg font-semibold text-xs transition-colors"
+                    className="w-full flex items-center justify-center gap-2 text-white px-4 py-2.5 rounded-2xl font-semibold text-xs transition-colors"
+                    style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}
                   >
                     <Play size={13} />
                     Simulate Full Adoption
@@ -520,10 +545,10 @@ export default function Dashboard() {
             </div>
 
             {/* ── Recent Simulations card ──────────────────────────────── */}
-            <div ref={simulationsRef} className="bg-[#111827] border border-slate-800 rounded-xl p-5">
+            <div ref={simulationsRef} className="bg-white border rounded-[24px] p-5" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Recent Simulations</h3>
-                <span className="text-xs text-slate-600">{mockSimulations.length} runs</span>
+                <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Recent Simulations</h3>
+                <span className="text-xs text-black/38">{mockSimulations.length} runs</span>
               </div>
 
               <div className="space-y-2">
@@ -531,11 +556,12 @@ export default function Dashboard() {
                   <button
                     key={sim.id}
                     onClick={() => navigate('/simulation')}
-                    className="w-full flex items-center justify-between bg-[#0B0F1E] border border-slate-800 rounded-lg px-4 py-3 hover:border-slate-700 transition-colors group"
+                    className="w-full flex items-center justify-between bg-[#FBFAFD] border rounded-2xl px-4 py-3 transition-colors group"
+                    style={{ borderColor: BRAND.border }}
                   >
                     <div className="text-left">
-                      <div className="text-sm font-medium text-white group-hover:text-cerulean-300 transition-colors">{sim.toolName}</div>
-                      <div className="text-xs text-slate-500 mt-0.5">
+                      <div className="text-sm font-medium text-black transition-colors">{sim.toolName}</div>
+                      <div className="text-xs text-black/42 mt-0.5">
                         {new Date(sim.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </div>
                     </div>
@@ -549,7 +575,7 @@ export default function Dashboard() {
                           {sim.status}
                         </span>
                       </div>
-                      <ChevronRight size={14} className="text-slate-600 group-hover:text-slate-400" />
+                      <ChevronRight size={14} className="text-black/32" />
                     </div>
                   </button>
                 ))}
@@ -557,7 +583,8 @@ export default function Dashboard() {
 
               <button
                 onClick={() => navigate('/simulation')}
-                className="w-full mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-cerulean hover:text-cerulean-300 bg-cerulean-500/10 border border-cerulean-500/20 hover:border-cerulean-500/40 px-4 py-2.5 rounded-lg transition-colors"
+                className="w-full mt-4 flex items-center justify-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-2xl transition-colors"
+                style={{ color: BRAND.violet, background: 'rgba(94,20,159,0.08)', border: '1px solid rgba(94,20,159,0.14)' }}
               >
                 View all simulations
                 <ChevronRight size={14} />
@@ -565,11 +592,11 @@ export default function Dashboard() {
             </div>
 
             {/* ── Feedback summary card ────────────────────────────────── */}
-            <div className="bg-[#111827] border border-slate-800 rounded-xl p-5">
+            <div className="bg-white border rounded-[24px] p-5" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Feedback</h3>
+                <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Feedback</h3>
                 {totalComments > 0 && (
-                  <span className="text-xs font-medium text-gold bg-gold-500/10 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ color: BRAND.violet, background: 'rgba(94,20,159,0.08)' }}>
                     {totalComments} comment{totalComments !== 1 ? 's' : ''}
                   </span>
                 )}
@@ -577,23 +604,23 @@ export default function Dashboard() {
 
               {allCommentsList.length === 0 ? (
                 <div className="text-center py-10">
-                  <MessageSquare size={24} className="mx-auto mb-2 text-slate-700" />
-                  <p className="text-sm text-slate-500">No feedback yet</p>
-                  <p className="text-xs text-slate-600 mt-1">Click the comment icon on any workflow step to leave feedback</p>
+                  <MessageSquare size={24} className="mx-auto mb-2" style={{ color: BRAND.violet }} />
+                  <p className="text-sm text-black/52">No feedback yet</p>
+                  <p className="text-xs text-black/38 mt-1">Click the comment icon on any workflow step to leave feedback</p>
                 </div>
               ) : (
                 <div className="space-y-2 max-h-[300px] overflow-y-auto">
                   {allCommentsList.slice(0, 8).map((c) => {
                     const nodeLabel = existingNodes.find((n) => n.id === c.nodeId)?.data?.label ?? c.nodeId
                     return (
-                      <div key={c.id} className="bg-[#0B0F1E] border border-slate-800 rounded-lg px-3 py-2.5">
+                      <div key={c.id} className="bg-[#FBFAFD] border rounded-2xl px-3 py-2.5" style={{ borderColor: BRAND.border }}>
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[10px] font-bold text-cerulean-300 uppercase tracking-wide">{nodeLabel}</span>
-                          <span className="text-[10px] text-slate-600">
+                          <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: BRAND.violet }}>{nodeLabel}</span>
+                          <span className="text-[10px] text-black/38">
                             {new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-300 leading-relaxed line-clamp-2">{c.text}</p>
+                        <p className="text-xs text-black/72 leading-relaxed line-clamp-2">{c.text}</p>
                       </div>
                     )
                   })}

@@ -23,7 +23,6 @@ import {
   Table2,
   Trash2,
   X,
-  Zap,
   CheckCircle2,
   Circle,
   AlertCircle,
@@ -285,11 +284,11 @@ export default function TranscriptInput() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-[#080C18] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F7F4FB] flex items-center justify-center">
         <div className="text-center">
           <AlertCircle size={40} className="text-red-400 mx-auto mb-4" />
           <p className="text-red-400 mb-4">{loadError}</p>
-          <button onClick={() => navigate('/dashboard')} className="text-cerulean hover:text-cerulean-300 text-sm">
+          <button onClick={() => navigate('/dashboard')} className="text-[#5E149F] hover:opacity-70 text-sm">
             Back to Dashboard
           </button>
         </div>
@@ -298,21 +297,23 @@ export default function TranscriptInput() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080C18] flex flex-col">
+    <div className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-[#0B0F1E]/90 backdrop-blur-sm sticky top-0 z-40">
+      <header className="border-b border-black/8 bg-white/90 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-cerulean flex items-center justify-center">
-                <Zap size={14} className="text-white" fill="white" />
-              </div>
-              <span className="font-bold text-white text-lg tracking-tight">axis</span>
+              <img
+                src="/axis-logo.png"
+                alt="Axis logo"
+                className="h-11 w-11 rounded-2xl object-cover"
+              />
+              <span className="font-bold text-[#111111] text-[28px] tracking-[-0.04em]">Axis</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-slate-400">
-              <button onClick={() => navigate('/dashboard')} className="hover:text-white transition-colors">Dashboard</button>
+            <div className="flex items-center gap-2 text-sm text-black/44">
+              <button onClick={() => navigate('/dashboard')} className="hover:text-black transition-colors">Dashboard</button>
               <ChevronRight size={14} />
-              <span className="text-white">{project?.company_name ?? 'Loading...'}</span>
+              <span className="text-black">{project?.company_name ?? 'Loading...'}</span>
             </div>
           </div>
           {project && <StatusBadge status={project.status} />}
@@ -320,13 +321,13 @@ export default function TranscriptInput() {
       </header>
 
       {/* Project summary */}
-      <div className="border-b border-slate-800/60 bg-[#0B0F1E]">
+      <div className="border-b border-black/6 bg-white">
         <div className="max-w-7xl mx-auto px-6 py-5">
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-[36px] leading-tight font-bold tracking-[-0.04em] text-black">
             {project?.company_name ?? 'Loading...'} — Transcript Input
           </h1>
           {project && (
-            <p className="text-slate-400 text-sm mt-1">
+            <p className="text-black/48 text-sm mt-1">
               {project.team_name} &middot; {project.primary_role}
               {project.team_size && ` &middot; ${project.team_size} employees`}
             </p>
@@ -340,25 +341,25 @@ export default function TranscriptInput() {
           {/* ── Left: Transcript form (3 cols) ── */}
           <div className="lg:col-span-3 space-y-6">
             {/* Form card */}
-            <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6">
-              <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <Plus size={16} className="text-cerulean" />
+            <div className="bg-white border border-black/8 rounded-[24px] p-6 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
+              <h2 className="text-black font-semibold mb-4 flex items-center gap-2">
+                <Plus size={16} className="text-[#5E149F]" />
                 New Transcript
               </h2>
 
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-xs text-slate-400 font-medium mb-1.5">Interviewee Name *</label>
+                  <label className="block text-xs text-black/44 font-medium mb-1.5">Interviewee Name *</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Jordan Mills"
-                    className="w-full bg-[#0B0F1E] border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder:text-slate-600 focus:border-cerulean focus:ring-1 focus:ring-cerulean/30 outline-none transition-colors"
+                    className="w-full bg-[#F7F4FB] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm placeholder:text-black/28 focus:border-[#B4308B] focus:ring-1 focus:ring-[#B4308B]/20 outline-none transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 font-medium mb-1.5">Interviewee Role *</label>
+                  <label className="block text-xs text-black/44 font-medium mb-1.5">Interviewee Role *</label>
                   <input
                     type="text"
                     value={role}

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Zap,
   Search,
   Plus,
   ChevronRight,
@@ -250,32 +249,34 @@ export default function InternalDashboard() {
   const totalTranscripts = MOCK_PROJECTS.reduce((sum, p) => sum + p.transcripts.length, 0)
 
   return (
-    <div className="min-h-screen bg-[#080C18] flex flex-col">
+    <div className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="border-b border-slate-800 bg-[#0B0F1E]/90 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-black/8 bg-white/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-cerulean flex items-center justify-center">
-                <Zap size={14} className="text-white" fill="white" />
-              </div>
-              <span className="font-bold text-white text-lg tracking-tight">axis</span>
+            <div className="flex items-center gap-3">
+              <img
+                src="/axis-logo.png"
+                alt="Axis logo"
+                className="h-11 w-11 rounded-2xl object-cover"
+              />
+              <span className="font-bold text-[#111111] text-[28px] tracking-[-0.04em]">Axis</span>
             </div>
-            <span className="text-xs font-medium text-slate-500 bg-slate-800 px-2 py-0.5 rounded">INTERNAL</span>
+            <span className="text-xs font-medium text-[#5E149F] bg-[#F4E8FB] px-2.5 py-1 rounded-full">INTERNAL</span>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-black/34" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search projects, contacts..."
-                className="bg-[#111827] border border-slate-700 focus:border-cerulean focus:outline-none text-white placeholder-slate-600 rounded-lg pl-9 pr-4 py-2 text-sm w-72 transition-colors"
+                className="bg-[#F7F4FB] border border-black/10 focus:border-[#B4308B] focus:outline-none text-black placeholder:text-black/30 rounded-2xl pl-9 pr-4 py-2.5 text-sm w-72 transition-colors"
               />
             </div>
-            <button className="flex items-center gap-2 bg-cerulean hover:bg-cerulean-400 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
+            <button className="flex items-center gap-2 text-white px-4 py-2.5 rounded-full font-semibold text-sm transition-colors" style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}>
               <Plus size={14} />
               New Project
             </button>
@@ -288,25 +289,25 @@ export default function InternalDashboard() {
 
         {/* Overview stats */}
         <div className="grid grid-cols-5 gap-4 mb-8">
-          <div className="bg-[#111827] border border-slate-800 rounded-xl p-4">
-            <div className="text-xs text-slate-500 mb-1">Total Projects</div>
-            <div className="text-2xl font-bold text-white">{MOCK_PROJECTS.length}</div>
+          <div className="bg-white border border-black/8 rounded-[24px] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
+            <div className="text-xs text-black/42 mb-1">Total Projects</div>
+            <div className="text-2xl font-bold text-black">{MOCK_PROJECTS.length}</div>
           </div>
-          <div className="bg-[#111827] border border-slate-800 rounded-xl p-4">
-            <div className="text-xs text-slate-500 mb-1">Active</div>
-            <div className="text-2xl font-bold text-gold">{MOCK_PROJECTS.filter((p) => p.status !== 'delivered').length}</div>
+          <div className="bg-white border border-black/8 rounded-[24px] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
+            <div className="text-xs text-black/42 mb-1">Active</div>
+            <div className="text-2xl font-bold text-[#B4308B]">{MOCK_PROJECTS.filter((p) => p.status !== 'delivered').length}</div>
           </div>
-          <div className="bg-[#111827] border border-slate-800 rounded-xl p-4">
-            <div className="text-xs text-slate-500 mb-1">Transcripts</div>
-            <div className="text-2xl font-bold text-white">{totalTranscripts}</div>
+          <div className="bg-white border border-black/8 rounded-[24px] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
+            <div className="text-xs text-black/42 mb-1">Transcripts</div>
+            <div className="text-2xl font-bold text-black">{totalTranscripts}</div>
           </div>
-          <div className="bg-[#111827] border border-slate-800 rounded-xl p-4">
-            <div className="text-xs text-slate-500 mb-1">Delivered</div>
-            <div className="text-2xl font-bold text-sea">{MOCK_PROJECTS.filter((p) => p.status === 'delivered').length}</div>
+          <div className="bg-white border border-black/8 rounded-[24px] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
+            <div className="text-xs text-black/42 mb-1">Delivered</div>
+            <div className="text-2xl font-bold text-[#5E149F]">{MOCK_PROJECTS.filter((p) => p.status === 'delivered').length}</div>
           </div>
-          <div className="bg-[#111827] border border-slate-800 rounded-xl p-4">
-            <div className="text-xs text-slate-500 mb-1">Total Reps</div>
-            <div className="text-2xl font-bold text-white">{MOCK_PROJECTS.reduce((sum, p) => sum + p.teamSize, 0)}</div>
+          <div className="bg-white border border-black/8 rounded-[24px] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
+            <div className="text-xs text-black/42 mb-1">Total Reps</div>
+            <div className="text-2xl font-bold text-black">{MOCK_PROJECTS.reduce((sum, p) => sum + p.teamSize, 0)}</div>
           </div>
         </div>
 

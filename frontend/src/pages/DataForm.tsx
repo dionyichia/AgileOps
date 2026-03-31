@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Upload, Loader2, CheckCircle2, ChevronDown } from 'lucide-react'
-import StepLayout from '../components/layout/StepLayout'
+import { CheckCircle2, ChevronDown } from 'lucide-react'
 
 const ROLES = [
   'Sales Development Representative (SDR)',
@@ -22,10 +21,6 @@ const ROLE_RESPONSIBILITIES: Record<string, string[]> = {
     'Qualifying inbound leads',
     'LinkedIn outreach & social selling',
     'CRM data entry & hygiene',
-    'Scheduling discovery calls',
-    'Follow-up cadence management',
-    'Account & company research',
-    'Objection handling',
   ],
   'Account Executive (AE)': [
     'Running discovery calls',
@@ -34,8 +29,6 @@ const ROLE_RESPONSIBILITIES: Record<string, string[]> = {
     'Contract negotiation',
     'Stakeholder mapping',
     'Forecast management',
-    'Objection handling & deal closing',
-    'CRM opportunity management',
   ],
   'Customer Success Manager': [
     'Onboarding new customers',
@@ -57,12 +50,14 @@ const DEFAULT_RESPONSIBILITIES = [
 
 export default function DataForm() {
   const navigate = useNavigate()
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
   const [role, setRole] = useState('')
   const [loadingResponsibilities, setLoadingResponsibilities] = useState(false)
   const [responsibilities, setResponsibilities] = useState<string[]>([])
   const [selectedResponsibilities, setSelectedResponsibilities] = useState<string[]>([])
   const [tools, setTools] = useState('')
-  const [csvFile, setCsvFile] = useState<File | null>(null)
   const [description, setDescription] = useState('')
 
   useEffect(() => {
@@ -70,12 +65,11 @@ export default function DataForm() {
     setLoadingResponsibilities(true)
     setSelectedResponsibilities([])
     setResponsibilities([])
-    // Simulate LLM response delay
     const timer = setTimeout(() => {
       const options = ROLE_RESPONSIBILITIES[role] ?? DEFAULT_RESPONSIBILITIES
       setResponsibilities(options)
       setLoadingResponsibilities(false)
-    }, 1400)
+    }, 700)
     return () => clearTimeout(timer)
   }, [role])
 
@@ -85,166 +79,207 @@ export default function DataForm() {
     )
   }
 
-  const canSubmit = role && selectedResponsibilities.length > 0 && tools.trim().length > 0
+  const canSubmit =
+    firstName.trim().length > 0 &&
+    lastName.trim().length > 0 &&
+    email.trim().length > 0 &&
+    role &&
+    selectedResponsibilities.length > 0 &&
+    description.trim().length > 0
 
   const handleNext = () => {
-    localStorage.setItem('axisFormData', JSON.stringify({ role, selectedResponsibilities, tools, description }))
+    localStorage.setItem(
+      'axisFormData',
+      JSON.stringify({
+        firstName,
+        lastName,
+        email,
+        role,
+        selectedResponsibilities,
+        tools,
+        description,
+      }),
+    )
     navigate('/internal/workflow-report')
   }
 
+  const inputClass =
+    'w-full rounded-[18px] border border-black/10 bg-[#F6F6F6] px-5 py-4 text-[15px] text-black outline-none transition-colors placeholder:text-black/35 focus:border-[#B4308B]'
+
   return (
-    <StepLayout
-      currentStep={1}
-      title="Workflow Info"
-      subtitle="Tell us about your team's role, responsibilities, and tools so we can map your workflow."
-      onNext={handleNext}
-      nextDisabled={!canSubmit}
-      nextLabel="Generate Workflow Report"
-      showBack={true}
-    >
-      <div className="max-w-2xl mx-auto space-y-8">
-
-        {/* Role selection */}
-        <div>
-          <label className="block text-sm font-semibold text-slate-200 mb-2">
-            Assume Role <span className="text-gold">*</span>
-          </label>
-          <div className="relative">
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full appearance-none bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-cerulean focus:outline-none text-white rounded-xl px-4 py-3 pr-10 text-sm transition-colors cursor-pointer"
+    <div className="min-h-screen bg-white text-black">
+      <header className="border-b border-black/5 bg-white">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-5 flex items-center justify-between">
+          <button onClick={() => navigate('/')} className="flex items-center gap-3">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-lg font-bold"
+              style={{ background: 'linear-gradient(180deg, #5E149F 0%, #F75A8C 100%)' }}
             >
-              <option value="">Select a role...</option>
-              {ROLES.map((r) => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
-            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              A
+            </div>
+          </button>
+
+          <nav className="hidden md:flex items-center gap-10 text-[16px] font-medium">
+            <button onClick={() => navigate('/')} className="transition-opacity hover:opacity-70">Why Axis?</button>
+            <button onClick={() => navigate('/')} className="transition-opacity hover:opacity-70">How it Works</button>
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/login')}
+              className="hidden md:inline text-[16px] font-medium transition-opacity hover:opacity-70"
+            >
+              Client Login
+            </button>
+            <button className="axis-gradient-button rounded-full px-6 py-3 text-[16px] font-bold">
+              Get Started
+            </button>
           </div>
         </div>
+      </header>
 
-        {/* Responsibilities */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-semibold text-slate-200">
-              Main Responsibilities <span className="text-gold">*</span>
-            </label>
-            {responsibilities.length > 0 && (
-              <span className="text-xs text-gold bg-cerulean-500/10 px-2 py-0.5 rounded-full">
-                AI-generated options
-              </span>
-            )}
-          </div>
+      <main className="px-6 md:px-10 py-12 md:py-16">
+        <div className="max-w-7xl mx-auto grid gap-12 lg:grid-cols-[0.95fr_1.05fr] items-start">
+          <section className="pt-6 md:pt-16">
+            <p className="max-w-xl text-[24px] leading-[1.35] font-medium text-black/84">
+              Tell us about your team, your workflow, and the tools you&apos;re currently using. We&apos;ll analyze your setup and prepare a tailored recommendation through your consultation.
+            </p>
 
-          {!role && (
-            <div className="bg-[#111827] border border-slate-800 rounded-xl p-5 text-center text-slate-500 text-sm">
-              Select a role above to generate responsibility options
-            </div>
-          )}
-
-          {role && loadingResponsibilities && (
-            <div className="bg-[#111827] border border-slate-800 rounded-xl p-5 flex items-center justify-center gap-3 text-slate-400 text-sm">
-              <Loader2 size={16} className="animate-spin text-gold" />
-              Generating responsibility options for {role.split('(')[0].trim()}...
-            </div>
-          )}
-
-          {role && !loadingResponsibilities && responsibilities.length > 0 && (
-            <div className="bg-[#111827] border border-slate-700 rounded-xl p-4 space-y-2">
-              <p className="text-xs text-slate-500 mb-3">Select all that apply to your daily/weekly work:</p>
-              {responsibilities.map((r) => {
-                const selected = selectedResponsibilities.includes(r)
-                return (
-                  <button
-                    key={r}
-                    onClick={() => toggleResponsibility(r)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left transition-all ${
-                      selected
-                        ? 'bg-cerulean-500/15 border border-cerulean-500/40 text-cerulean-200'
-                        : 'bg-slate-800/50 border border-slate-700/50 text-slate-300 hover:border-slate-600'
-                    }`}
+            <ul className="mt-12 space-y-5">
+              {[
+                'A consultation tailored to your current workflow',
+                'A clearer view of where your team loses time today',
+                'Recommendations based on your stack and process',
+                'A practical starting point for your workflow audit',
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-4">
+                  <span
+                    className="mt-1 flex h-6 w-6 items-center justify-center rounded-full text-white"
+                    style={{ background: 'linear-gradient(180deg, #B4308B 0%, #F75A8C 100%)' }}
                   >
-                    <div className={`w-4 h-4 rounded flex-shrink-0 flex items-center justify-center border transition-all ${
-                      selected ? 'bg-cerulean border-cerulean-400' : 'border-slate-600'
-                    }`}>
-                      {selected && <CheckCircle2 size={10} className="text-white" />}
-                    </div>
-                    {r}
-                  </button>
-                )
-              })}
+                    <CheckCircle2 size={14} />
+                  </span>
+                  <span className="text-[17px] leading-7 text-black/70">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="bg-white rounded-[28px] p-7 md:p-9 axis-soft-shadow border border-black/5">
+            <h1 className="text-center text-[36px] leading-tight font-bold">Book a Consultation</h1>
+
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
+              <input
+                className={inputClass}
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <input
+                className={inputClass}
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
             </div>
-          )}
-        </div>
 
-        {/* Tools */}
-        <div>
-          <label className="block text-sm font-semibold text-slate-200 mb-1">
-            What main SaaS tools do you use on a daily/weekly basis? <span className="text-gold">*</span>
-          </label>
-          <p className="text-xs text-slate-500 mb-2">List all tools your team regularly uses (one per line or comma-separated)</p>
-          <textarea
-            value={tools}
-            onChange={(e) => setTools(e.target.value)}
-            placeholder="e.g. Salesforce, LinkedIn Sales Navigator, Outreach, Gmail, Slack, Zoom, Gong, ZoomInfo..."
-            rows={4}
-            className="w-full bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-cerulean focus:outline-none text-white placeholder-slate-600 rounded-xl px-4 py-3 text-sm resize-none transition-colors"
-          />
-        </div>
+            <div className="mt-4">
+              <input
+                className={inputClass}
+                placeholder="Work Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
 
-        {/* CSV Upload */}
-        <div>
-          <label className="block text-sm font-semibold text-slate-200 mb-1">
-            1 week of telemetry data (CSV)
-          </label>
-          <p className="text-xs text-slate-500 mb-2">Time-series tracking what your team clicks and which tools they use</p>
-          <label className="cursor-pointer block">
-            <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
-              csvFile
-                ? 'border-cerulean-500/60 bg-cerulean-500/5'
-                : 'border-slate-700 hover:border-slate-600 bg-[#111827]'
-            }`}>
-              {csvFile ? (
-                <div className="flex items-center justify-center gap-3 text-gold">
-                  <CheckCircle2 size={20} />
-                  <span className="text-sm font-medium">{csvFile.name}</span>
-                  <span className="text-xs text-slate-500">({(csvFile.size / 1024).toFixed(1)} KB)</span>
+            <div className="mt-4 relative">
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className={`${inputClass} appearance-none pr-12 cursor-pointer`}
+              >
+                <option value="">Your Team Role</option>
+                {ROLES.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+              <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-black/45 pointer-events-none" />
+            </div>
+
+            <div className="mt-4">
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Tell us about your workflow, key challenges, and what you want to improve."
+                rows={6}
+                className={`${inputClass} min-h-[170px] resize-none`}
+              />
+            </div>
+
+            <div className="mt-4">
+              <textarea
+                value={tools}
+                onChange={(e) => setTools(e.target.value)}
+                placeholder="Current tools you're using (optional)"
+                rows={4}
+                className={`${inputClass} min-h-[120px] resize-none`}
+              />
+            </div>
+
+            {role && (
+              <div className="mt-5 rounded-[22px] border border-black/6 bg-[#FAFAFA] p-5">
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-[14px] font-semibold uppercase tracking-[0.16em]" style={{ color: '#5E149F' }}>
+                    Team Responsibilities
+                  </p>
+                  {responsibilities.length > 0 && (
+                    <span className="text-[13px] font-medium text-black/45">
+                      Select all that apply
+                    </span>
+                  )}
                 </div>
-              ) : (
-                <>
-                  <Upload size={24} className="mx-auto mb-2 text-slate-500" />
-                  <p className="text-sm text-slate-400">Drop your CSV here or <span className="text-gold underline">browse</span></p>
-                  <p className="text-xs text-slate-600 mt-1">Accepts .csv files up to 10MB</p>
-                </>
-              )}
+
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {loadingResponsibilities && (
+                    <p className="text-[15px] text-black/55">Loading recommendations...</p>
+                  )}
+
+                  {!loadingResponsibilities && responsibilities.map((r) => {
+                    const selected = selectedResponsibilities.includes(r)
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => toggleResponsibility(r)}
+                        className="rounded-full border px-4 py-2 text-[14px] font-medium transition-colors"
+                        style={{
+                          borderColor: selected ? '#B4308B' : 'rgba(0,0,0,0.08)',
+                          background: selected ? 'rgba(180, 48, 139, 0.10)' : '#FFFFFF',
+                          color: selected ? '#5E149F' : 'rgba(0,0,0,0.72)',
+                        }}
+                      >
+                        {r}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-8 flex justify-end">
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={!canSubmit}
+                className="axis-gradient-button rounded-full px-10 py-4 text-[18px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+              </button>
             </div>
-            <input
-              type="file"
-              accept=".csv"
-              className="hidden"
-              onChange={(e) => setCsvFile(e.target.files?.[0] ?? null)}
-            />
-          </label>
+          </section>
         </div>
-
-        {/* Optional description */}
-        <div>
-          <label className="block text-sm font-semibold text-slate-200 mb-1">
-            How would you explain the workflow to a new hire?{' '}
-            <span className="text-slate-500 font-normal">(Optional)</span>
-          </label>
-          <p className="text-xs text-slate-500 mb-2">Free-form description of how your team works day to day</p>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Walk us through a typical week. What does your team do first thing Monday morning? How do leads move through your process?..."
-            rows={5}
-            className="w-full bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-cerulean focus:outline-none text-white placeholder-slate-600 rounded-xl px-4 py-3 text-sm resize-none transition-colors"
-          />
-        </div>
-
-      </div>
-    </StepLayout>
+      </main>
+    </div>
   )
 }

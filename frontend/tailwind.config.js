@@ -4,9 +4,15 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
       },
       colors: {
+        axispurple: {
+          900: '#5E149F',
+          700: '#B4308B',
+          500: '#E2409B',
+          300: '#F75A8C',
+        },
         navy: {
           950: '#050A18',
           900: '#080C18',

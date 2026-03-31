@@ -2,14 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --axis-white: #ffffff;
+  --axis-black: #000000;
+  --axis-violet-900: #5e149f;
+  --axis-violet-700: #b4308b;
+  --axis-pink-500: #e2409b;
+  --axis-coral-400: #f75a8c;
+  --axis-button-gradient: linear-gradient(90deg, #5e149f 0%, #b4308b 38%, #e2409b 72%, #f75a8c 100%);
+}
+
 * {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background-color: #080C18;
-  color: #F8FAFC;
+  margin: 0;
+  background-color: var(--axis-white);
+  color: var(--axis-black);
   min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.axis-gradient-button {
+  background: var(--axis-button-gradient);
+  color: var(--axis-white);
+  border: none;
+  box-shadow: 0 14px 34px rgba(94, 20, 159, 0.18);
+}
+
+.axis-gradient-button:hover {
+  filter: brightness(1.02);
+}
+
+.axis-soft-shadow {
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.14);
+}
+
+.axis-placeholder {
+  background: #d9d9d9;
 }
 
 /* React Flow dark theme overrides */

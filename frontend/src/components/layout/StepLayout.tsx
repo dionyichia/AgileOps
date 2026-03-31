@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Zap } from 'lucide-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 
 interface StepLayoutProps {
   currentStep: number          // 1–5 (form through recommendation)
@@ -40,16 +40,18 @@ export default function StepLayout({
   const handleBack = () => navigate(backPath ?? backPaths[currentStep - 1] ?? '/dashboard')
 
   return (
-    <div className="min-h-screen bg-[#080C18] flex flex-col">
+    <div className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-[#0B0F1E]/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-black/8 bg-white/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-cerulean flex items-center justify-center">
-              <Zap size={14} className="text-white" fill="white" />
-            </div>
-            <span className="font-bold text-white text-lg tracking-tight">axis</span>
+          <div className="flex items-center gap-3">
+            <img
+              src="/axis-logo.png"
+              alt="Axis logo"
+              className="h-11 w-11 rounded-2xl object-cover"
+            />
+            <span className="font-bold text-[#111111] text-[28px] tracking-[-0.04em]">Axis</span>
           </div>
 
           {/* Step indicator */}
@@ -62,26 +64,27 @@ export default function StepLayout({
                 <div key={step} className="flex items-center gap-2">
                   <div className="flex items-center gap-1.5">
                     <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
+                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
                         isActive
-                          ? 'bg-cerulean text-white ring-2 ring-cerulean-400/40'
+                          ? 'text-white'
                           : isCompleted
-                          ? 'bg-cerulean-900 text-cerulean-300'
-                          : 'bg-slate-800 text-slate-500'
+                          ? 'bg-[#F4E8FB] text-[#5E149F]'
+                          : 'bg-black/6 text-black/40'
                       }`}
+                      style={isActive ? { background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)', boxShadow: '0 10px 24px rgba(94,20,159,0.18)' } : {}}
                     >
                       {stepNum}
                     </div>
                     <span
                       className={`text-xs font-medium hidden sm:block ${
-                        isActive ? 'text-cerulean-300' : isCompleted ? 'text-slate-400' : 'text-slate-600'
+                        isActive ? 'text-[#5E149F]' : isCompleted ? 'text-black/54' : 'text-black/32'
                       }`}
                     >
                       {step}
                     </span>
                   </div>
                   {i < STEPS.length - 1 && (
-                    <div className={`w-6 h-px ${isCompleted ? 'bg-cerulean-700' : 'bg-slate-700'}`} />
+                    <div className={`w-6 h-px ${isCompleted ? 'bg-[#B4308B]' : 'bg-black/10'}`} />
                   )}
                 </div>
               )
@@ -93,10 +96,10 @@ export default function StepLayout({
       </header>
 
       {/* Page title */}
-      <div className="border-b border-slate-800/60 bg-[#0B0F1E]">
+      <div className="border-b border-black/6 bg-white">
         <div className="max-w-7xl mx-auto px-6 py-5">
-          <h1 className="text-2xl font-bold text-white">{title}</h1>
-          {subtitle && <p className="text-slate-400 text-sm mt-1">{subtitle}</p>}
+          <h1 className="text-[36px] leading-tight font-bold tracking-[-0.04em] text-black">{title}</h1>
+          {subtitle && <p className="text-black/48 text-sm mt-1">{subtitle}</p>}
         </div>
       </div>
 
@@ -106,12 +109,12 @@ export default function StepLayout({
       </main>
 
       {/* Footer nav */}
-      <footer className="border-t border-slate-800 bg-[#0B0F1E] sticky bottom-0">
+      <footer className="border-t border-black/8 bg-white/95 backdrop-blur-sm sticky bottom-0">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {showBack ? (
             <button
               onClick={handleBack}
-              className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors"
+              className="flex items-center gap-2 text-black/50 hover:text-black text-sm font-medium transition-colors"
             >
               <ArrowLeft size={16} />
               Back
@@ -124,7 +127,8 @@ export default function StepLayout({
             <button
               onClick={onNext}
               disabled={nextDisabled}
-              className="flex items-center gap-2 bg-cerulean hover:bg-cerulean-400 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors"
+              className="flex items-center gap-2 disabled:bg-black/10 disabled:text-black/30 disabled:cursor-not-allowed text-white px-6 py-3 rounded-full font-semibold text-sm transition-colors"
+              style={!nextDisabled ? { background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)', boxShadow: '0 12px 24px rgba(94,20,159,0.14)' } : {}}
             >
               {nextLabel}
               <ArrowRight size={16} />

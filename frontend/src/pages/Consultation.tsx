@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ArrowRight,
+  CheckCircle2,
+  ChevronDown,
   ChevronRight,
   FileText,
   Clock3,
@@ -10,61 +11,137 @@ import {
   Target,
 } from 'lucide-react'
 
-const COLORS = {
-  white: '#FFFFFF',
-  black: '#000000',
-  violet: '#5E149F',
-  orchid: '#B4308B',
-  pink: '#E2409B',
-  coral: '#F75A8C',
-}
-
-const navItems = [
-  { label: 'Why Axis?', href: '#why-axis' },
-  { label: 'How it Works', href: '#how-it-works' },
+const ROLES = [
+  'Sales Development Representative (SDR)',
+  'Account Executive (AE)',
+  'Customer Success Manager',
+  'Sales Manager / Director',
+  'Marketing Manager',
+  'Product Manager',
+  'Software Engineer',
+  'Data Analyst',
 ]
 
-export default function LandingPage() {
+const ROLE_RESPONSIBILITIES: Record<string, string[]> = {
+  'Sales Development Representative (SDR)': [
+    'Prospecting & lead generation',
+    'Cold calling',
+    'Cold emailing & outreach sequences',
+    'Qualifying inbound leads',
+    'LinkedIn outreach & social selling',
+    'CRM data entry & hygiene',
+  ],
+  'Account Executive (AE)': [
+    'Running discovery calls',
+    'Product demonstrations',
+    'Proposal & quote drafting',
+    'Contract negotiation',
+    'Stakeholder mapping',
+    'Forecast management',
+  ],
+  'Customer Success Manager': [
+    'Onboarding new customers',
+    'QBR preparation & delivery',
+    'Health score monitoring',
+    'Renewal & expansion conversations',
+    'Support ticket escalation',
+    'Training & product adoption',
+  ],
+}
+
+const DEFAULT_RESPONSIBILITIES = [
+  'Daily task planning',
+  'Internal meetings & collaboration',
+  'Documentation & reporting',
+  'Email & communication management',
+  'Cross-functional coordination',
+]
+
+const COLORS = {
+  white: '#FFFFFF',
+  violet: '#5E149F',
+}
+
+export default function Consultation() {
   const navigate = useNavigate()
-  const [scrolled, setScrolled] = useState(false)
-  const heroRef = useRef<HTMLElement>(null)
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
+  const [role, setRole] = useState('')
+  const [loadingResponsibilities, setLoadingResponsibilities] = useState(false)
+  const [responsibilities, setResponsibilities] = useState<string[]>([])
+  const [selectedResponsibilities, setSelectedResponsibilities] = useState<string[]>([])
+  const [tools, setTools] = useState('')
+  const [description, setDescription] = useState('')
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 40)
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    if (!role) return
+    setLoadingResponsibilities(true)
+    setSelectedResponsibilities([])
+    setResponsibilities([])
+    const timer = setTimeout(() => {
+      const options = ROLE_RESPONSIBILITIES[role] ?? DEFAULT_RESPONSIBILITIES
+      setResponsibilities(options)
+      setLoadingResponsibilities(false)
+    }, 700)
+    return () => clearTimeout(timer)
+  }, [role])
 
-  const goToConsultation = () => navigate('/get-started')
+  const toggleResponsibility = (responsibility: string) => {
+    setSelectedResponsibilities((prev) =>
+      prev.includes(responsibility)
+        ? prev.filter((item) => item !== responsibility)
+        : [...prev, responsibility],
+    )
+  }
+
+  const canSubmit =
+    firstName.trim().length > 0 &&
+    lastName.trim().length > 0 &&
+    email.trim().length > 0 &&
+    role &&
+    selectedResponsibilities.length > 0 &&
+    description.trim().length > 0
+
+  const handleNext = () => {
+    localStorage.setItem(
+      'axisFormData',
+      JSON.stringify({
+        firstName,
+        lastName,
+        email,
+        role,
+        selectedResponsibilities,
+        tools,
+        description,
+      }),
+    )
+    navigate('/internal/workflow-report')
+  }
+
+  const inputClass =
+    'w-full rounded-[18px] border border-black/10 bg-[#F6F6F6] px-5 py-4 text-[15px] text-black outline-none transition-colors placeholder:text-black/35 focus:border-[#B4308B]'
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <header
-        className="fixed top-0 inset-x-0 z-50 transition-all duration-300"
-        style={{
-          background: scrolled ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(14px)',
-          borderBottom: scrolled ? '1px solid rgba(0,0,0,0.07)' : '1px solid transparent',
-        }}
-      >
+      <header className="border-b border-black/5 bg-white">
         <div className="max-w-7xl mx-auto px-6 md:px-10 py-5 flex items-center justify-between">
-          <a href="#top" className="flex items-center">
+          <button onClick={() => navigate('/')} className="flex items-center">
             <img
               src="/axis-logo.png"
               alt="Axis logo"
               className="h-11 w-11 rounded-2xl object-cover"
             />
-          </a>
+          </button>
 
-          <div className="ml-auto flex items-center justify-end gap-3 md:gap-8">
+          <div className="ml-auto flex items-center justify-end gap-4 md:gap-8">
             <nav className="hidden md:flex items-center gap-10 text-[16px] font-medium">
-              {navItems.map(({ label, href }) => (
-                <a key={href} href={href} className="transition-opacity hover:opacity-70">
-                  {label}
-                </a>
-              ))}
+              <button onClick={() => navigate('/#why-axis')} className="transition-opacity hover:opacity-70">
+                Why Axis?
+              </button>
+              <button onClick={() => navigate('/#how-it-works')} className="transition-opacity hover:opacity-70">
+                How it Works
+              </button>
             </nav>
             <button
               onClick={() => navigate('/login')}
@@ -72,43 +149,164 @@ export default function LandingPage() {
             >
               Client Login
             </button>
-            <button
-              onClick={goToConsultation}
-              className="axis-gradient-button rounded-full px-6 py-3 text-[15px] md:text-[16px] font-bold transition-transform hover:-translate-y-0.5"
-            >
+            <button className="axis-gradient-button rounded-full px-6 py-3 text-[16px] font-bold">
               Get Started
             </button>
           </div>
         </div>
       </header>
 
-      <main id="top">
-        <section
-          ref={heroRef}
-          className="pt-40 pb-20 px-6 md:px-10"
-        >
-          <div className="max-w-5xl mx-auto text-center">
-            <h1 className="text-[44px] leading-[1.08] md:text-[70px] font-bold tracking-[-0.04em] text-black">
-              Stop guessing which tools your sales team needs.
+      <main className="pt-12 md:pt-16">
+        <div className="px-6 md:px-10">
+          <div className="max-w-7xl mx-auto grid gap-12 lg:grid-cols-[0.95fr_1.05fr] items-start">
+          <section className="pt-6 md:pt-16">
+            <h1 className="max-w-xl text-[40px] md:text-[56px] leading-[1.02] font-bold tracking-[-0.04em] text-black">
+              Evaluate your sales tools with confidence.
             </h1>
 
-            <p className="mt-8 max-w-3xl mx-auto text-[22px] leading-[1.35] font-medium text-black/80">
-              We analyze your team&apos;s workflow and recommend the tools that will <em className="italic font-medium">actually</em> improve productivity.
+            <p className="mt-8 max-w-xl text-[24px] leading-[1.35] font-medium text-black/84">
+              Tell us about your team, your workflow, and the tools you&apos;re currently using. We&apos;ll analyze your setup and prepare a tailored recommendation through your consultation.
             </p>
 
-            <button
-              onClick={goToConsultation}
-              className="axis-gradient-button mt-10 inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-[17px] font-bold transition-transform hover:-translate-y-0.5"
-            >
-              Get Your Workflow Audit
-              <ArrowRight size={18} />
-            </button>
+            <ul className="mt-12 space-y-3">
+              {[
+                'A consultation tailored to your current workflow',
+                'A clearer view of where your team loses time today',
+                'Recommendations based on your stack and process',
+                'A practical starting point for your workflow audit',
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <span
+                    className="mt-1 flex h-6 w-6 items-center justify-center rounded-full text-white"
+                    style={{ background: 'linear-gradient(180deg, #B4308B 0%, #F75A8C 100%)' }}
+                  >
+                    <CheckCircle2 size={14} />
+                  </span>
+                  <span className="text-[17px] leading-[1.35] text-black/70">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
 
-            <div className="mt-16 md:mt-20 rounded-[26px] axis-placeholder h-[280px] md:h-[420px] w-full" />
+          <section className="bg-white rounded-[28px] p-7 md:p-9 axis-soft-shadow border border-black/5">
+            <h1 className="text-center text-[36px] leading-tight font-bold">Book a Consultation</h1>
+
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
+              <input
+                className={inputClass}
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <input
+                className={inputClass}
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+
+            <div className="mt-4">
+              <input
+                className={inputClass}
+                placeholder="Work Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="mt-4 relative">
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className={`${inputClass} appearance-none pr-12 cursor-pointer`}
+              >
+                <option value="">Your Team Role</option>
+                {ROLES.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-black/45 pointer-events-none" />
+            </div>
+
+            <div className="mt-4">
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Tell us about your workflow, key challenges, and what you want to improve."
+                rows={6}
+                className={`${inputClass} min-h-[170px] resize-none`}
+              />
+            </div>
+
+            <div className="mt-4">
+              <textarea
+                value={tools}
+                onChange={(e) => setTools(e.target.value)}
+                placeholder="Current tools you're using (optional)"
+                rows={4}
+                className={`${inputClass} min-h-[120px] resize-none`}
+              />
+            </div>
+
+            {role && (
+              <div className="mt-5 rounded-[22px] border border-black/6 bg-[#FAFAFA] p-5">
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-[14px] font-semibold uppercase tracking-[0.16em]" style={{ color: '#5E149F' }}>
+                    Team Responsibilities
+                  </p>
+                  {responsibilities.length > 0 && (
+                    <span className="text-[13px] font-medium text-black/45">
+                      Select all that apply
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {loadingResponsibilities && (
+                    <p className="text-[15px] text-black/55">Loading recommendations...</p>
+                  )}
+
+                  {!loadingResponsibilities && responsibilities.map((item) => {
+                    const selected = selectedResponsibilities.includes(item)
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => toggleResponsibility(item)}
+                        className="rounded-full border px-4 py-2 text-[14px] font-medium transition-colors"
+                        style={{
+                          borderColor: selected ? '#B4308B' : 'rgba(0,0,0,0.08)',
+                          background: selected ? 'rgba(180, 48, 139, 0.10)' : '#FFFFFF',
+                          color: selected ? '#5E149F' : 'rgba(0,0,0,0.72)',
+                        }}
+                      >
+                        {item}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-8 flex justify-end">
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={!canSubmit}
+                className="axis-gradient-button rounded-full px-10 py-4 text-[18px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </section>
           </div>
-        </section>
+        </div>
 
-        <section id="why-axis" className="px-6 md:px-10 py-10 md:py-16">
+        <section className="px-6 md:px-10 pt-28 md:pt-40 pb-10 md:pb-16">
           <div className="max-w-6xl mx-auto grid gap-6 md:grid-cols-3">
             {[
               {
@@ -140,11 +338,9 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="how-it-works" className="px-6 md:px-10 py-10 md:py-16 pb-24">
+        <section className="px-6 md:px-10 py-10 md:py-16 pb-24">
           <div className="max-w-6xl mx-auto">
-            <div
-              className="text-[34px] md:text-[46px] leading-tight font-bold text-black"
-            >
+            <div className="text-[34px] md:text-[46px] leading-tight font-bold text-black">
               How It Works
             </div>
 
@@ -190,7 +386,7 @@ export default function LandingPage() {
                 Start with a quick consultation and we&apos;ll turn your current workflow into a clear plan.
               </p>
               <button
-                onClick={goToConsultation}
+                onClick={() => navigate('/get-started')}
                 className="axis-gradient-button inline-flex items-center gap-2 rounded-full px-8 py-4 text-[17px] font-bold transition-transform hover:-translate-y-0.5"
               >
                 Get Started
@@ -364,7 +560,7 @@ export default function LandingPage() {
                   Make your next tool decision with confidence.
                 </h3>
                 <button
-                  onClick={goToConsultation}
+                  onClick={() => navigate('/get-started')}
                   className="mt-6 rounded-full bg-white px-6 py-3 text-[15px] font-bold text-black transition-transform hover:-translate-y-0.5"
                 >
                   Get My Recommendation

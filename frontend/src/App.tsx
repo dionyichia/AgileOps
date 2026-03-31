@@ -8,6 +8,8 @@ import SimulationResults from './pages/SimulationResults'
 import FinalRecommendation from './pages/FinalRecommendation'
 import TranscriptInput from './pages/TranscriptInput'
 import InternalDashboard from './pages/InternalDashboard'
+import Consultation from './pages/Consultation'
+import Login from './pages/Login'
 
 export default function App() {
   return (
@@ -15,6 +17,8 @@ export default function App() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/get-started" element={<Consultation />} />
+        <Route path="/login" element={<Login />} />
 
         {/* Client workspace */}
         <Route path="/dashboard" element={<Dashboard />} />

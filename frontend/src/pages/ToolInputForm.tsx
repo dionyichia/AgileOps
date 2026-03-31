@@ -85,7 +85,7 @@ export default function ToolInputForm() {
 
         {/* Use Case */}
         <div>
-          <label className="block text-sm font-semibold text-slate-200 mb-3">Use Case</label>
+          <label className="block text-sm font-semibold text-black/42 mb-3">Use Case</label>
           <div className="grid grid-cols-2 gap-3">
             {[
               { id: 'adoption' as UseCase, label: 'Increase adoption of existing tool', icon: CheckCircle2, desc: 'Understand how to get your team to use a tool you already pay for.' },
@@ -96,15 +96,21 @@ export default function ToolInputForm() {
                 onClick={() => setUseCase(id)}
                 className={`p-4 rounded-xl border text-left transition-all ${
                   useCase === id
-                    ? 'border-cerulean-500/60 bg-cerulean-500/10'
-                    : 'border-slate-700 bg-[#111827] hover:border-slate-600'
+                    ? 'border-[#5E149F]/25 bg-white'
+                    : 'border-black/8 bg-white hover:border-black/14'
                 }`}
+                style={{
+                  boxShadow: useCase === id ? '0 20px 40px rgba(94,20,159,0.10)' : '0 14px 28px rgba(15,23,42,0.04)',
+                  background: useCase === id
+                    ? 'linear-gradient(180deg, #FFFFFF 0%, #FCF7FF 100%)'
+                    : 'linear-gradient(180deg, #FFFFFF 0%, #FFF8FC 100%)',
+                }}
               >
-                <Icon size={18} className={useCase === id ? 'text-gold mb-2' : 'text-slate-500 mb-2'} />
-                <div className={`text-sm font-semibold mb-1 ${useCase === id ? 'text-cerulean-200' : 'text-slate-300'}`}>{label}</div>
-                <div className="text-xs text-slate-500 leading-snug">{desc}</div>
+                <Icon size={18} className={useCase === id ? 'text-[#F75A8C] mb-2' : 'text-black/32 mb-2'} />
+                <div className={`text-sm font-semibold mb-1 ${useCase === id ? 'text-[#5E149F]' : 'text-black'}`}>{label}</div>
+                <div className="text-xs text-black/52 leading-snug">{desc}</div>
                 {id === 'adoption' && (
-                  <span className="inline-block mt-2 text-[10px] font-bold tracking-widest text-gold bg-cerulean-500/10 px-1.5 py-0.5 rounded">
+                  <span className="inline-block mt-2 text-[10px] font-bold tracking-widest text-[#B4308B] bg-[#FCEAF4] border border-[#B4308B]/12 px-2 py-1 rounded-full">
                     RECOMMENDED
                   </span>
                 )}
@@ -115,15 +121,16 @@ export default function ToolInputForm() {
 
         {/* Tool name */}
         <div>
-          <label className="block text-sm font-semibold text-slate-200 mb-2">
-            Tool Name <span className="text-gold">*</span>
+          <label className="block text-sm font-semibold text-black/72 mb-2">
+            Tool Name <span className="text-[#F75A8C]">*</span>
           </label>
           <input
             type="text"
             value={toolName}
             onChange={(e) => setToolName(e.target.value)}
             placeholder="e.g. Apollo.io, Gong, Seismic..."
-            className="w-full bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-cerulean focus:outline-none text-white placeholder-slate-600 rounded-xl px-4 py-3 text-sm transition-colors"
+            className="w-full bg-white border border-black/8 hover:border-black/14 focus:border-[#B4308B]/40 focus:outline-none text-black placeholder:text-black/28 rounded-xl px-4 py-3 text-sm transition-colors"
+            style={{ boxShadow: '0 14px 28px rgba(15,23,42,0.04)' }}
           />
         </div>
 
@@ -139,7 +146,8 @@ export default function ToolInputForm() {
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
             placeholder="https://apollo.io"
-            className="w-full bg-[#0F1629] border border-slate-700 focus:border-cerulean focus:outline-none text-white placeholder-slate-600 rounded-lg px-3 py-2.5 text-sm transition-colors"
+            className="w-full bg-white border border-black/8 hover:border-black/14 focus:border-[#B4308B]/40 focus:outline-none text-black placeholder:text-black/28 rounded-xl px-3 py-2.5 text-sm transition-colors"
+            style={{ boxShadow: '0 14px 28px rgba(15,23,42,0.04)' }}
           />
         </UploadField>
 
@@ -181,14 +189,14 @@ function UploadField({
   return (
     <div>
       <div className="flex items-center gap-2 mb-1">
-        <Icon size={14} className="text-slate-500" />
-        <label className="text-sm font-semibold text-slate-200">
+        <Icon size={14} className="text-black/34" />
+        <label className="text-sm font-semibold text-black/72">
           {label}
-          {required && <span className="text-gold ml-1">*</span>}
-          {!required && <span className="text-slate-500 font-normal ml-1">(Optional)</span>}
+          {required && <span className="text-[#F75A8C] ml-1">*</span>}
+          {!required && <span className="text-black/38 font-normal ml-1">(Optional)</span>}
         </label>
       </div>
-      <p className="text-xs text-slate-500 mb-2">{hint}</p>
+      <p className="text-xs text-black/48 mb-2">{hint}</p>
       {children}
     </div>
   )
@@ -214,13 +222,14 @@ function DualInput({
         value={entry.link}
         onChange={(e) => setter({ ...entry, link: e.target.value })}
         placeholder={placeholder}
-        className="flex-1 bg-[#111827] border border-slate-700 hover:border-slate-600 focus:border-cerulean focus:outline-none text-white placeholder-slate-600 rounded-xl px-3 py-2.5 text-sm transition-colors"
+        className="flex-1 bg-white border border-black/8 hover:border-black/14 focus:border-[#B4308B]/40 focus:outline-none text-black placeholder:text-black/28 rounded-xl px-3 py-2.5 text-sm transition-colors"
+        style={{ boxShadow: '0 14px 28px rgba(15,23,42,0.04)' }}
       />
       <label className="cursor-pointer">
         <div className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
           entry.file
-            ? 'border-cerulean-500/60 bg-cerulean-500/10 text-cerulean-300'
-            : 'border-slate-700 bg-[#111827] text-slate-400 hover:border-slate-600 hover:text-slate-300'
+            ? 'border-[#B4308B]/25 bg-[#FCEAF4] text-[#B4308B]'
+            : 'border-black/8 bg-white text-black/56 hover:border-black/14 hover:text-black/72'
         }`}>
           <Upload size={14} />
           {entry.file ? entry.file.name.slice(0, 12) + '…' : 'Upload'}

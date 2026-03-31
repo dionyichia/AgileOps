@@ -26,12 +26,12 @@ const LOADING_STEPS = [
 ]
 
 const bucketColorMap: Record<string, string> = {
-  indigo:  'bg-cerulean-500/15 text-cerulean-300 border-cerulean-500/30',
-  violet:  'bg-magenta-500/15 text-magenta-300 border-magenta-500/30',
-  cyan:    'bg-cerulean-500/15 text-cerulean-200 border-cerulean-500/30',
-  emerald: 'bg-sea-500/15 text-sea-300 border-sea-500/30',
-  amber:   'bg-gold-500/15 text-gold-300 border-gold-500/30',
-  rose:    'bg-magenta-500/15 text-magenta-200 border-magenta-500/30',
+  indigo:  'bg-[#F4E8FB] text-[#5E149F] border-[#5E149F]/20',
+  violet:  'bg-[#FCEAF4] text-[#B4308B] border-[#B4308B]/20',
+  cyan:    'bg-[#F2EEFF] text-[#5E149F] border-[#5E149F]/16',
+  emerald: 'bg-[#EEF8F4] text-[#248F63] border-[#248F63]/18',
+  amber:   'bg-[#FFF5DF] text-[#C98400] border-[#C98400]/18',
+  rose:    'bg-[#FFE9EF] text-[#E2409B] border-[#E2409B]/20',
 }
 
 export default function SimulationResults() {
@@ -100,51 +100,82 @@ export default function SimulationResults() {
       : LOADING_STEPS[loadStep].label
 
     return (
-      <div className="min-h-screen bg-[#080C18] flex flex-col items-center justify-center gap-8 px-6">
-        {/* Logo */}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-cerulean flex items-center justify-center">
-            <Zap size={16} className="text-white" fill="white" />
-          </div>
-          <span className="font-bold text-white text-xl tracking-tight">axis</span>
-        </div>
+      <div
+        className="min-h-screen flex items-center justify-center px-6 py-12"
+        style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #FCF7FF 100%)' }}
+      >
+        <div
+          className="w-full max-w-2xl rounded-[32px] border bg-white px-10 py-12"
+          style={{
+            borderColor: 'rgba(94,20,159,0.10)',
+            boxShadow: '0 28px 60px rgba(15,23,42,0.08)',
+            background: 'linear-gradient(180deg, #FFFFFF 0%, #FCF7FF 100%)',
+          }}
+        >
+          <div className="flex flex-col items-center text-center">
+            <div className="flex items-center gap-3 mb-8">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: 'linear-gradient(180deg, #5E149F 0%, #F75A8C 100%)' }}
+              >
+                <Zap size={18} className="text-white" fill="white" />
+              </div>
+              <span className="font-bold text-black text-[1.75rem] tracking-tight">Axis</span>
+            </div>
 
-        <div className="w-full max-w-md text-center">
-          <h2 className="text-xl font-bold text-white mb-2">Running Simulation</h2>
-          <p className="text-slate-400 text-sm mb-8">Analyzing how <span className="text-cerulean font-medium">{toolName}</span> would affect your SDR workflow…</p>
-
-          {/* Progress bar */}
-          <div className="w-full bg-slate-800 rounded-full h-2 mb-4 overflow-hidden">
-            <div
-              className="bg-cerulean h-2 rounded-full transition-all duration-500"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <div className="flex justify-between text-xs text-slate-500 mb-8">
-            <span>{stepLabel}</span>
-            <span>{pct}%</span>
+            <h2 className="text-[2rem] leading-tight font-bold text-black mb-3">Running Simulation</h2>
+            <p className="text-black/56 text-base max-w-xl mb-10">
+              Analyzing how <span className="text-[#5E149F] font-semibold">{toolName}</span> would affect your SDR workflow.
+            </p>
           </div>
 
-          {/* Steps list */}
-          <div className="space-y-2 text-left">
-            {LOADING_STEPS.map((step, i) => {
-              const stepDone = isProjectScoped ? pct >= step.pct : i < loadStep
-              const stepActive = isProjectScoped
-                ? (pct >= (LOADING_STEPS[i - 1]?.pct ?? 0) && pct < step.pct)
-                : i === loadStep
-              return (
-                <div key={i} className={`flex items-center gap-3 text-sm transition-all ${
-                  stepDone ? 'text-sea-400' : stepActive ? 'text-white' : 'text-slate-700'
-                }`}>
-                  <div className={`w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] ${
-                    stepDone ? 'bg-sea-500/20 text-sea-400' : stepActive ? 'bg-cerulean-500/20 text-cerulean animate-pulse-slow' : 'bg-slate-800'
-                  }`}>
-                    {stepDone ? '✓' : stepActive ? '●' : '○'}
+          <div className="rounded-[24px] border border-black/6 bg-white/80 px-6 py-6">
+            <div className="w-full bg-black/8 rounded-full h-2.5 mb-4 overflow-hidden">
+              <div
+                className="h-2.5 rounded-full transition-all duration-500"
+                aria-hidden="true"
+                style={{
+                  width: `${pct}%`,
+                  background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)',
+                }}
+              />
+            </div>
+            <div className="flex justify-between text-sm text-black/50 mb-8">
+              <span>{stepLabel}</span>
+              <span className="font-semibold text-[#5E149F]">{pct}%</span>
+            </div>
+
+            <div className="space-y-3 text-left">
+              {LOADING_STEPS.map((step, i) => {
+                const stepDone = isProjectScoped ? pct >= step.pct : i < loadStep
+                const stepActive = isProjectScoped
+                  ? (pct >= (LOADING_STEPS[i - 1]?.pct ?? 0) && pct < step.pct)
+                  : i === loadStep
+                return (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-3 rounded-[16px] px-3 py-3 text-sm transition-all ${
+                      stepDone
+                        ? 'bg-[#EEF8F4] text-[#248F63]'
+                        : stepActive
+                          ? 'bg-[#F4E8FB] text-[#5E149F]'
+                          : 'bg-black/[0.02] text-black/34'
+                    }`}
+                  >
+                    <div className={`w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold ${
+                      stepDone
+                        ? 'bg-[#248F63] text-white'
+                        : stepActive
+                          ? 'bg-[#5E149F] text-white animate-pulse-slow'
+                          : 'bg-black/8 text-black/32'
+                    }`}>
+                      {stepDone ? '✓' : stepActive ? '●' : '○'}
+                    </div>
+                    {step.label}
                   </div>
-                  {step.label}
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -169,16 +200,19 @@ export default function SimulationResults() {
         <div className="w-72 flex-shrink-0 space-y-4 overflow-y-auto max-h-[calc(100vh-260px)] pr-1">
 
           {/* Role + tool stack */}
-          <div className="bg-[#111827] border border-slate-800 rounded-2xl p-5">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Role Stats</h3>
+          <div
+            className="bg-white border rounded-[24px] p-5"
+            style={{ borderColor: 'rgba(94,20,159,0.10)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
+          >
+            <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3">Role Stats</h3>
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between"><span className="text-slate-500">Team</span><span className="text-white font-medium">{roleStats.teamType}</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">Role</span><span className="text-slate-200 text-right max-w-[150px] leading-snug">SDR</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">Employees</span><span className="text-white font-bold">{roleStats.numEmployees}</span></div>
+              <div className="flex justify-between"><span className="text-black/46">Team</span><span className="text-black font-medium">{roleStats.teamType}</span></div>
+              <div className="flex justify-between"><span className="text-black/46">Role</span><span className="text-black/78 text-right max-w-[150px] leading-snug">SDR</span></div>
+              <div className="flex justify-between"><span className="text-black/46">Employees</span><span className="text-black font-bold">{roleStats.numEmployees}</span></div>
             </div>
 
-            <div className="border-t border-slate-800 mt-3 pt-3">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Tool Stack (Updated)</h3>
+            <div className="border-t border-black/8 mt-3 pt-3">
+              <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3">Tool Stack (Updated)</h3>
               <div className="space-y-3">
                 {toolBuckets.map((b) => (
                   <div key={b.category}>
@@ -187,8 +221,8 @@ export default function SimulationResults() {
                     </span>
                     <div className="mt-1.5 pl-1 space-y-1">
                       {b.tools.map((t) => (
-                        <div key={t.name} className="text-xs text-slate-400 flex items-center gap-1">
-                          <span className="w-1 h-1 rounded-full bg-slate-600" />
+                        <div key={t.name} className="text-xs text-black/56 flex items-center gap-1">
+                          <span className="w-1 h-1 rounded-full bg-black/22" />
                           {t.name}
                         </div>
                       ))}
@@ -197,12 +231,12 @@ export default function SimulationResults() {
                 ))}
                 {/* New tool */}
                 <div>
-                  <span className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded border bg-blue-500/15 text-blue-300 border-blue-500/30">
+                  <span className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded border bg-[#FCEAF4] text-[#B4308B] border-[#B4308B]/20">
                     NEW · Sales Engagement
                   </span>
                   <div className="mt-1.5 pl-1">
-                    <div className="text-xs text-blue-300 flex items-center gap-1 font-semibold">
-                      <Zap size={10} className="text-blue-400" />
+                    <div className="text-xs text-[#5E149F] flex items-center gap-1 font-semibold">
+                      <Zap size={10} className="text-[#F75A8C]" />
                       {toolName}
                     </div>
                   </div>
@@ -212,47 +246,50 @@ export default function SimulationResults() {
           </div>
 
           {/* Estimated time per tool */}
-          <div className="bg-[#111827] border border-slate-800 rounded-2xl p-5">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Estimated Time Impact</h3>
+          <div
+            className="bg-white border rounded-[24px] p-5"
+            style={{ borderColor: 'rgba(94,20,159,0.10)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
+          >
+            <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3">Estimated Time Impact</h3>
             <div className="space-y-3">
               {toolTimeMetrics.map((m) => (
                 <div key={m.tool} className="relative">
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-xs text-slate-300 font-medium leading-snug">{m.tool}</span>
+                    <span className="text-xs text-black/78 font-medium leading-snug">{m.tool}</span>
                     <button
                       onMouseEnter={() => setTooltip(m.tool)}
                       onMouseLeave={() => setTooltip(null)}
-                      className="text-slate-600 hover:text-slate-400 flex-shrink-0"
+                      className="text-black/26 hover:text-black/52 flex-shrink-0"
                     >
                       <Info size={11} />
                     </button>
                   </div>
 
                   {tooltip === m.tool && (
-                    <div className="absolute right-0 top-5 z-10 bg-[#1A2235] border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 max-w-[200px] shadow-xl">
+                    <div className="absolute right-0 top-5 z-10 bg-white border border-black/8 rounded-lg px-3 py-2 text-xs text-black/62 max-w-[200px] shadow-xl">
                       {m.note}
                     </div>
                   )}
 
                   <div className="flex items-center gap-2 mt-1">
                     {m.change === 'new' ? (
-                      <span className="text-xs text-blue-400 font-semibold bg-blue-500/10 px-2 py-0.5 rounded">NEW · {m.after}</span>
+                      <span className="text-xs text-[#B4308B] font-semibold bg-[#FCEAF4] px-2 py-0.5 rounded">NEW · {m.after}</span>
                     ) : (
                       <>
-                        <span className="text-xs text-slate-500 line-through">{m.before}</span>
-                        <span className="text-white text-xs font-semibold">{m.after}</span>
+                        <span className="text-xs text-black/34 line-through">{m.before}</span>
+                        <span className="text-black text-xs font-semibold">{m.after}</span>
                         {m.change === 'decrease' && (
-                          <span className="flex items-center gap-0.5 text-sea-400 text-xs font-bold">
+                          <span className="flex items-center gap-0.5 text-[#248F63] text-xs font-bold">
                             <TrendingDown size={11} /> {(m as any).saved}m
                           </span>
                         )}
                         {m.change === 'increase' && (
-                          <span className="flex items-center gap-0.5 text-gold-400 text-xs font-bold">
+                          <span className="flex items-center gap-0.5 text-[#C98400] text-xs font-bold">
                             <TrendingUp size={11} /> temp
                           </span>
                         )}
                         {m.change === 'same' && (
-                          <Minus size={10} className="text-slate-600" />
+                          <Minus size={10} className="text-black/26" />
                         )}
                       </>
                     )}
@@ -261,38 +298,41 @@ export default function SimulationResults() {
               ))}
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-800">
+            <div className="mt-4 pt-3 border-t border-black/8">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400 font-medium">Net time saved/day</span>
-                <span className="text-sea-400 font-bold text-sm">{totalSaved}min</span>
+                <span className="text-xs text-black/46 font-medium">Net time saved/day</span>
+                <span className="text-[#248F63] font-bold text-sm">{totalSaved}min</span>
               </div>
               <div className="flex items-center justify-between mt-1">
-                <span className="text-xs text-slate-400 font-medium">Per rep per week</span>
-                <span className="text-sea-400 font-bold text-sm">{(totalSaved * 5 / 60).toFixed(1)}h</span>
+                <span className="text-xs text-black/46 font-medium">Per rep per week</span>
+                <span className="text-[#248F63] font-bold text-sm">{(totalSaved * 5 / 60).toFixed(1)}h</span>
               </div>
             </div>
           </div>
 
           {/* Cost estimation */}
-          <div className="bg-[#111827] border border-slate-800 rounded-2xl p-5">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+          <div
+            className="bg-white border rounded-[24px] p-5"
+            style={{ borderColor: 'rgba(94,20,159,0.10)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
+          >
+            <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3 flex items-center gap-1.5">
               <DollarSign size={11} /> Cost Estimation
             </h3>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-500">Annual license ({toolName})</span>
-                <span className="text-white font-medium">$8,400</span>
+                <span className="text-black/46">Annual license ({toolName})</span>
+                <span className="text-black font-medium">$8,400</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Est. value of time saved</span>
-                <span className="text-sea-400 font-semibold">$56,000/yr</span>
+                <span className="text-black/46">Est. value of time saved</span>
+                <span className="text-[#248F63] font-semibold">$56,000/yr</span>
               </div>
-              <div className="flex justify-between border-t border-slate-700 pt-2 mt-2">
-                <span className="text-slate-300 font-semibold">Net ROI</span>
-                <span className="text-sea-400 font-bold text-sm">6.7× </span>
+              <div className="flex justify-between border-t border-black/8 pt-2 mt-2">
+                <span className="text-black/78 font-semibold">Net ROI</span>
+                <span className="text-[#248F63] font-bold text-sm">6.7× </span>
               </div>
             </div>
-            <div className="mt-3 text-[10px] text-slate-600">
+            <div className="mt-3 text-[10px] text-black/34">
               Based on 24 SDRs @ $60k avg salary + {totalSaved}min/day savings
             </div>
           </div>
@@ -300,16 +340,24 @@ export default function SimulationResults() {
 
         {/* ── Right panel: modified workflow ─────────────────────────────────── */}
         <div className="flex-1 min-w-0">
-          <div className="bg-[#111827] border border-slate-800 rounded-2xl overflow-hidden" style={{ height: 'calc(100vh - 260px)' }}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+          <div
+            className="bg-white border rounded-[24px] overflow-hidden"
+            style={{
+              height: 'calc(100vh - 260px)',
+              borderColor: 'rgba(94,20,159,0.10)',
+              boxShadow: '0 18px 40px rgba(15,23,42,0.05)',
+              background: 'linear-gradient(180deg, #FFFFFF 0%, #FCF7FF 100%)',
+            }}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-black/8">
               <div>
-                <span className="text-sm font-semibold text-slate-200">Modified Workflow</span>
-                <span className="ml-2 text-xs text-slate-500">New paths highlighted in blue</span>
+                <span className="text-sm font-semibold text-black">Modified Workflow</span>
+                <span className="ml-2 text-xs text-black/42">New paths highlighted in violet</span>
               </div>
-              <div className="flex items-center gap-3 text-xs text-slate-500">
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-sea inline-block rounded" /> Success</span>
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500 inline-block rounded" /> Fail</span>
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-blue-400 inline-block rounded" /> New path</span>
+              <div className="flex items-center gap-3 text-xs text-black/42">
+                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#248F63] inline-block rounded" /> Success</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#F75A8C] inline-block rounded" /> Fail</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#5E149F] inline-block rounded" /> New path</span>
               </div>
             </div>
 
@@ -327,8 +375,8 @@ export default function SimulationResults() {
               nodesConnectable={false}
             >
               <Controls showInteractive={false} />
-              <MiniMap nodeColor={(n) => n.data?.isNew ? '#3B82F6' : '#1E2D4A'} maskColor="rgba(8,12,24,0.7)" />
-              <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#1E2D4A" />
+              <MiniMap nodeColor={(n) => n.data?.isNew ? '#B4308B' : '#EEDFF8'} maskColor="rgba(255,255,255,0.75)" />
+              <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#E8D8F4" />
             </ReactFlow>
           </div>
         </div>
