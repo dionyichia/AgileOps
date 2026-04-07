@@ -57,32 +57,32 @@ Key assumptions (documented in `sim.py`): memoryless Markov transitions, lognorm
 
 `backend/api/` contains a FastAPI server that bridges the frontend to the database and pipeline scripts.
 
-- **`main.py`** — App setup with CORS middleware (allows Vite dev server), auto-creates tables on startup via SQLAlchemy
-- **`config.py`** — Database URL (SQLite for dev, set `DATABASE_URL` env var for PostgreSQL in prod), CORS origins
-- **`deps.py`** — Async database session dependency injection
-- **`models/db.py`** — SQLAlchemy 2.0 models: `Project`, `WorkflowProfile` (more tables planned)
-- **`schemas/api.py`** — Pydantic v2 request/response schemas
+- **`main.py`** — App setup with CORS middleware, auto-creates all tables on startup. All routers registered.
+- **`config.py`** — Database URL (SQLite dev / PostgreSQL prod via `DATABASE_URL`), CORS origins, `DATA_DIR`, `UPLOAD_MAX_BYTES`
+- **`deps.py`** — Async DB session injection, JWT auth (`get_current_user`) via python-jose (HS256). `SECRET_KEY` is hardcoded for dev — **must** be set via env var in prod.
+- **`models/db.py`** — SQLAlchemy 2.0 models: `User`, `Project`, `WorkflowProfile`, `Transcript`, `Job`, `ToolEvaluation`, `UploadedFile`, `SimulationResult`
+- **`schemas/api.py`** — Pydantic v2 request/response schemas for all endpoints
+- **`routes/auth.py`** — `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`
 - **`routes/projects.py`** — CRUD: `GET/POST /api/projects`, `GET/PATCH/DELETE /api/projects/{id}`
 - **`routes/profiles.py`** — `GET/PUT /api/projects/{id}/profile` (upsert)
+- **`routes/transcripts.py`** — `GET/POST /api/projects/{id}/transcripts`, `GET /api/projects/{id}/transcripts/{id}`
+- **`routes/tasks.py`** — `GET /api/projects/{id}/tasks`, `POST /api/projects/{id}/tasks/reset`
+- **`routes/pipeline.py`** — `POST /api/projects/{id}/pipeline/run`, `POST /api/projects/{id}/pipeline/simulate`
+- **`routes/tools.py`** — `GET/POST /api/projects/{id}/tools`, `GET /api/projects/{id}/tools/{id}`
+- **`routes/uploads.py`** — `POST/GET /api/projects/{id}/uploads`, `DELETE /api/projects/{id}/uploads/{id}`
+- **`routes/simulation.py`** — `GET /api/projects/{id}/simulation/{evalId}`
+- **`routes/recommendation.py`** — `GET /api/projects/{id}/recommendation/{evalId}`
+- **`routes/markov.py`** — `GET /api/projects/{id}/markov`
+- **`routes/jobs.py`** — `GET /api/jobs/{jobId}` (HTTP) + `WS /ws/jobs/{jobId}` (WebSocket)
+- **`services/data_io.py`** — Project-scoped file I/O helpers; all pipeline files live under `backend/data/{project_id}/`
+- **`services/job_runner.py`** — Async background job execution; spawns pipeline scripts as subprocesses, emits progress via WebSocket
+- **`services/ws_manager.py`** — In-process WebSocket connection registry (broadcast to all subscribers of a job)
+- **`services/recommendation.py`** — `derive(tool_eval, sim_result)` — computes confidence score, impact ranges, use cases
 
 Database file: `backend/data/agileops.db` (SQLite, auto-created on first run).
+Pipeline data: `backend/data/{project_id}/` — namespaced per project.
 
-**Planned endpoints (not yet implemented — backend team):**
-- `GET /api/projects/{id}/markov` — return `TransitionMatrixJSON` (consumed by WorkflowReport)
-- `POST /api/projects/{id}/transcripts` — submit transcript, kicks off async parsing job
-- `GET /api/projects/{id}/transcripts` — list transcripts for project
-- `GET /api/projects/{id}/tasks` — get current task graph
-- `POST /api/projects/{id}/tasks/reset` — clear task graph
-- `POST /api/projects/{id}/pipeline/run` — run full pipeline (stages 1-3), returns `{ job_id }`
-- `POST /api/projects/{id}/pipeline/simulate` — run simulation only, accepts `{ tool_evaluation_id }`, returns `{ job_id }`
-- `POST /api/projects/{id}/tools` — create tool evaluation, returns `ToolEvaluation`
-- `GET /api/projects/{id}/tools` — list tool evaluations
-- `GET /api/projects/{id}/tools/{evalId}` — get tool evaluation detail
-- `GET /api/projects/{id}/simulation/{evalId}` — return `SimulationData` (consumed by SimulationResults)
-- `GET /api/projects/{id}/recommendation/{evalId}` — return `RecommendationData` (consumed by FinalRecommendation)
-- `GET /api/jobs/{jobId}` — poll job status (progress_pct, current_step, status)
-
-See `frontend/src/api/client.ts` for the exact TypeScript types each endpoint should return.
+See `frontend/src/api/client.ts` for the TypeScript types each endpoint returns.
 
 ### Frontend — Guided Workflow + Internal Tools
 
@@ -128,20 +128,20 @@ React 18 + TypeScript SPA built with Vite. Uses Tailwind CSS with custom color p
 
 ### Current State
 
-- Backend pipeline scripts are functional (synthetic data → Markov → simulation)
-- FastAPI server running with projects CRUD + workflow profile endpoints
-- Database: SQLite for dev (auto-created), PostgreSQL-ready via `DATABASE_URL` env var
+- Backend pipeline scripts are functional (transcript → tasks, synthetic data → Markov → simulation)
+- FastAPI server fully implemented: all 28 endpoints live, all routers registered
+- Database: SQLite for dev (auto-created), PostgreSQL-ready via `DATABASE_URL` env var. All tables: `users`, `projects`, `workflow_profiles`, `transcripts`, `jobs`, `tool_evaluations`, `uploaded_files`, `simulation_results`
+- **Auth:** JWT-based (HS256) with `/api/auth/register` and `/api/auth/login`. `SECRET_KEY` is a dev placeholder — set via env var before prod.
+- **Pipeline integration complete:** transcript → tasks, full pipeline run, and simulation-only run all work end-to-end via async background jobs with WebSocket progress streaming
 - **Public landing page** at `/` with gold full-screen hero, intake form (popup modal + inline), "we'll be in touch" confirmation
-- **Client Dashboard** at `/dashboard` — workspace with editable workflow map + tool stack sidebar (click tool → Run Simulation). Not a wizard or form — clients interact with their workflow here.
-- **Frontend is fully wired for production (all 5 phases complete):**
+- **Client Dashboard** at `/dashboard` — workspace with editable workflow map + tool stack sidebar. Not a wizard.
+- **Frontend is fully wired for production:**
   - All pages are dual-mode: project-scoped routes use API data, legacy flat routes use localStorage + mock data
   - WorkflowReport: loading skeletons + error state with retry when fetching from API
   - ToolInputForm: uploads files via multipart/form-data to `/api/projects/{id}/uploads`
   - SimulationResults: real-time job progress via WebSocket (polling fallback)
   - FinalRecommendation: loading spinner while fetching recommendation data from API
-- TranscriptInput page built with full UI, wired to planned API endpoints
-- Typed API client (`src/api/client.ts`) defines the complete frontend-backend contract including file uploads
+- Typed API client (`src/api/client.ts`) defines the complete frontend-backend contract
 - Job progress: WebSocket-first with automatic HTTP polling fallback
 - Vite dev proxy configured: `/api/*` → `localhost:8000`, `/ws/*` → WebSocket
-- **Backend team TODO:** Implement all planned endpoints listed above (see `src/api/client.ts` for types)
-- No tests, no auth — `classifier.py` and `parser_scraper.py` are stubs
+- No tests — `classifier.py` and `parser_scraper.py` are stubs
