@@ -1,18 +1,16 @@
 /**
  * dataLoader.ts
  * ─────────────
- * Transforms transition_matrix.json (output of 02_markov_builder.py)
+ * Transforms transition_matrix.json (output of markov_builder.py)
  * into React Flow Node[] and Edge[] for the workflow diagram.
  *
- * USAGE (in any component or page):
- *
- *   import { loadMarkovData } from '@/lib/dataLoader'
- *
- *   const { nodes, edges, roleStats, toolBuckets } = await loadMarkovData()
- *
- * DATA SOURCE (for prototyping):
- *   Drop transition_matrix.json into your /public/data/ folder.
- *   Later, swap the fetch URL for your real API endpoint.
+ * Layout:
+ *   - Happy path nodes: vertical column at x=0
+ *   - FAIL nodes: synthetic, positioned LEFT of their parent node
+ *   - SUCCESS node: synthetic, positioned below the final pipeline node
+ *   - Retry edges: exit and re-enter from the RIGHT handle
+ *   - Fail edges: exit LEFT handle → enter RIGHT handle of FAIL node
+ *   - Forward edges: exit BOTTOM → enter TOP
  */
 
 import type { Node, Edge } from 'reactflow'
@@ -20,45 +18,71 @@ import type { TransitionMatrixJSON } from '../schema'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-// Static JSON for legacy/demo route (no projectId).
 const STATIC_DATA_URL = '/data/transition_matrix.json'
 
-// Builds the API URL for project-scoped data.
 function getDataUrl(projectId?: string): string {
-  return projectId
-    ? `/api/projects/${projectId}/markov`
-    : STATIC_DATA_URL
+  return projectId ? `/api/projects/${projectId}/markov` : STATIC_DATA_URL
 }
 
-// Nodes that should always be rendered as terminal (success/fail) bubbles.
-// The builder appends a synthetic "END" node; real terminal names come from
-// your pipeline_nodes list — extend this set as needed.
-const TERMINAL_SUCCESS = new Set(['qualified', 'closed-won', 'END'])
+// Known non-pipeline terminal node IDs (from explicit domain labelling).
+// END is handled programmatically — not listed here.
+const TERMINAL_SUCCESS = new Set(['qualified', 'closed-won'])
 const TERMINAL_FAIL = new Set([
-  'not-qualified',
-  'unsubscribed',
-  'cold',
-  'disqualified',
-  'no-show',
+  'not-qualified', 'unsubscribed', 'cold', 'disqualified', 'no-show',
 ])
 
-// How to bucket automation potential based on avg node duration (minutes).
-// Tune these thresholds to match your domain.
+const Y_STEP = 220   // vertical gap between pipeline stages
+const FAIL_X = -420  // FAIL nodes sit 420 px to the left of their parent
+
+// ─── Fail descriptions ────────────────────────────────────────────────────────
+// Surfaced as the label on each synthetic FAIL terminal node.
+
+const FAIL_DESCRIPTIONS: Record<string, string> = {
+  prospect_research:          'Cold lead / no fit',
+  draft_outreach:             'No response to outreach',
+  send_and_log:               'Bounced / unsubscribed',
+  follow_up_sequence:         'Ghosted after follow-up',
+  response_triage:            'Disqualified early',
+  discovery_call_prep:        'Cancelled / no-show',
+  discovery_call_execution:   'Not a fit',
+  call_debrief_logging:       'Deal stalled post-discovery',
+  stakeholder_mapping:        'No internal champion',
+  demo_scheduling_and_prep:   'Unresponsive after scheduling',
+  demo_delivery:              'Demo did not land',
+  objection_handling:         'Could not overcome objections',
+  proposal_drafting:          'Ghosted after proposal',
+  contract_negotiation:       'Failed negotiation',
+  deal_closure_and_handoff:   'Last-minute pull-out',
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function inferAutomatable(avgMin: number): 'high' | 'medium' | 'low' {
   if (avgMin >= 30) return 'high'
   if (avgMin >= 10) return 'medium'
   return 'low'
 }
 
-// ─── Layout helper ────────────────────────────────────────────────────────────
-// Simple left-to-right topological layout.
-// Replace with ELK / Dagre if you want auto-routing later.
+/** "prospect_research" or "prospect-research" → "Prospect Research" */
+function formatLabel(id: string): string {
+  return id
+    .replace(/_/g, '-')
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+}
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
+// BFS topological sort — only called on pipeline nodes with forward edges.
+// Depth → Y axis. Siblings at the same depth are centered on X=0.
+
+import type { MarkovEdge } from '../schema'
 
 function assignPositions(
   states: string[],
   edges: MarkovEdge[],
 ): Record<string, { x: number; y: number }> {
-  // Build adjacency to detect in-degree
+  const stateSet = new Set(states)
   const inDegree: Record<string, number> = {}
   const outEdges: Record<string, string[]> = {}
 
@@ -68,15 +92,14 @@ function assignPositions(
   }
 
   for (const e of edges) {
-    if (e.source !== e.target) {
-      inDegree[e.target] = (inDegree[e.target] ?? 0) + 1
-      outEdges[e.source].push(e.target)
-    }
+    if (e.source === e.target) continue
+    if (!stateSet.has(e.source) || !stateSet.has(e.target)) continue
+    inDegree[e.target] = (inDegree[e.target] ?? 0) + 1
+    outEdges[e.source].push(e.target)
   }
 
-  // Topological BFS to assign column (depth)
   const depth: Record<string, number> = {}
-  const queue = states.filter((s) => inDegree[s] === 0)
+  const queue = states.filter((s) => (inDegree[s] ?? 0) === 0)
   queue.forEach((s) => (depth[s] = 0))
 
   while (queue.length) {
@@ -87,7 +110,7 @@ function assignPositions(
     }
   }
 
-  // Group by depth → assign y positions within each column
+  // Group by depth level
   const cols: Record<number, string[]> = {}
   for (const s of states) {
     const d = depth[s] ?? 0
@@ -95,157 +118,221 @@ function assignPositions(
     cols[d].push(s)
   }
 
+  const X_STEP = 300
   const positions: Record<string, { x: number; y: number }> = {}
-  const X_STEP = 320
-  const Y_STEP = 190
 
-  for (const [col, nodes] of Object.entries(cols)) {
-    const x = Number(col) * X_STEP
-    nodes.forEach((id, idx) => {
-      positions[id] = { x, y: idx * Y_STEP }
+  for (const [col, nodeIds] of Object.entries(cols)) {
+    const y = Number(col) * Y_STEP
+    const totalWidth = (nodeIds.length - 1) * X_STEP
+    nodeIds.forEach((id, idx) => {
+      positions[id] = { x: idx * X_STEP - totalWidth / 2, y }
     })
   }
 
   return positions
 }
 
-// ─── Transforms ───────────────────────────────────────────────────────────────
+// ─── Tool enrichment ──────────────────────────────────────────────────────────
 
-import type { MarkovEdge } from '../schema'
+export const TOOL_ENRICHMENT: Record<string, string[]> = {
+  prospect_research:        ['LinkedIn', 'Salesforce', 'ZoomInfo'],
+  draft_outreach:           ['Gmail', 'Notion'],
+  send_and_log:             ['Gmail', 'Salesforce'],
+  follow_up_sequence:       ['Outreach', 'Gmail', 'Salesforce'],
+  response_triage:          ['Gmail', 'Salesforce', 'Slack'],
+  discovery_call_prep:      ['Salesforce', 'Notion', 'Gong'],
+  discovery_call_execution: ['Zoom', 'Gong', 'Calendly'],
+}
 
-function buildNodes(data: TransitionMatrixJSON): Node[] {
+// ─── Node builder ─────────────────────────────────────────────────────────────
+
+interface BuiltNodes {
+  nodes: Node[]
+  finalNodeId: string   // deepest pipeline node — its END edge goes to SUCCESS
+  positions: Record<string, { x: number; y: number }>
+}
+
+function buildNodes(data: TransitionMatrixJSON): BuiltNodes {
   const { states } = data.metadata
-  const positions = assignPositions(states, data.edge_list)
 
-  return states.map((id) => {
-    const isSuccess = TERMINAL_SUCCESS.has(id)
-    const isFail = TERMINAL_FAIL.has(id)
-    const isTerminal = isSuccess || isFail
+  // Identify pure pipeline nodes (exclude END and any known terminal labels)
+  const pipelineStates = states.filter(
+    (s) => s !== 'END' && !TERMINAL_SUCCESS.has(s) && !TERMINAL_FAIL.has(s),
+  )
 
-    if (isTerminal) {
-      return {
-        id,
-        type: 'terminalNode',
-        position: positions[id] ?? { x: 800, y: 0 },
-        data: {
-          label: formatLabel(id),
-          nodeType: isSuccess ? 'success' : 'fail',
-        },
-      }
-    }
+  // Forward edges only (no self-loops, no END-bound) for depth assignment
+  const forwardEdges = data.edge_list.filter(
+    (e) =>
+      e.source !== e.target &&
+      e.target !== 'END' &&
+      !TERMINAL_FAIL.has(e.target) &&
+      !TERMINAL_SUCCESS.has(e.target),
+  )
 
-    // Task node — derive stats from the builder output
-    const durationSamples = data.node_durations[id] ?? []
+  const positions = assignPositions(pipelineStates, forwardEdges)
+
+  // Pipeline node that sits deepest in the BFS = last happy-path step
+  let finalNodeId = pipelineStates[0] ?? 'END'
+  let maxY = positions[finalNodeId]?.y ?? 0
+  for (const id of pipelineStates) {
+    const y = positions[id]?.y ?? 0
+    if (y > maxY) { maxY = y; finalNodeId = id }
+  }
+
+  // Which pipeline nodes have an outgoing edge to END?
+  const failExitSet = new Set(
+    data.edge_list
+      .filter((e) => e.target === 'END' && pipelineStates.includes(e.source))
+      .map((e) => e.source),
+  )
+
+  const nodes: Node[] = []
+
+  // ── Pipeline (task) nodes + their synthetic FAIL sibling ──────────────────
+  for (const id of pipelineStates) {
+    const pos = positions[id] ?? { x: 0, y: 0 }
+    const durationSamples = (data.node_durations as Record<string, number[]>)[id] ?? []
     const avgMin =
       durationSamples.length > 0
         ? durationSamples.reduce((a, b) => a + b, 0) / durationSamples.length
         : 0
 
-    return {
+    nodes.push({
       id,
       type: 'taskNode',
-      position: positions[id] ?? { x: 0, y: 0 },
+      position: pos,
       data: {
         label: formatLabel(id),
-        // tools: not in telemetry JSON — augment via the toolEnrichment map below
         tools: TOOL_ENRICHMENT[id] ?? [],
         minutes: Math.round(avgMin),
         automatable: inferAutomatable(avgMin),
-        // raw samples exposed for custom tooltips
         durationSamples,
       },
+    })
+
+    // Synthetic FAIL terminal: same Y as parent, FAIL_X to the left
+    if (failExitSet.has(id)) {
+      nodes.push({
+        id: `FAIL_${id}`,
+        type: 'terminalNode',
+        position: { x: pos.x + FAIL_X, y: pos.y },
+        data: {
+          label: FAIL_DESCRIPTIONS[id] ?? 'Deal lost',
+          nodeType: 'fail',
+        },
+      })
     }
+  }
+
+  // ── Synthetic SUCCESS node at the bottom of the happy path ────────────────
+  const successY = maxY + Y_STEP
+  nodes.push({
+    id: 'SUCCESS',
+    type: 'terminalNode',
+    position: { x: 0, y: successY },
+    data: { label: 'Closed — Won', nodeType: 'success' },
   })
+
+  return { nodes, finalNodeId, positions }
 }
 
-function buildEdges(data: TransitionMatrixJSON): Edge[] {
-  const sStyle = { stroke: '#10B981', strokeWidth: 2 }
-  const fStyle = { stroke: '#EF4444', strokeWidth: 2 }
-  const pStyle = { stroke: '#F59E0B', strokeWidth: 2 }
-  const sLbl = { fill: '#10B981', fontWeight: 700, fontSize: 11 }
-  const fLbl = { fill: '#EF4444', fontWeight: 700, fontSize: 11 }
-  const pLbl = { fill: '#F59E0B', fontWeight: 700, fontSize: 11 }
-  const bg = { fill: '#0F1629', fillOpacity: 0.9 }
-  const pad: [number, number] = [4, 8]
+// ─── Edge builder ─────────────────────────────────────────────────────────────
 
-  // Only render edges above a minimum probability to keep the graph readable
-  const MIN_PROB = 0.05
+function buildEdges(data: TransitionMatrixJSON, finalNodeId: string): Edge[] {
+  const successStyle = { stroke: '#10B981', strokeWidth: 2.5 }
+  const failStyle    = { stroke: '#EF4444', strokeWidth: 2.5 }
+  const retryStyle   = { stroke: '#F59E0B', strokeWidth: 2.5 }
+  const fwdStyle     = { stroke: '#5E149F', strokeWidth: 2.5 }
 
-  return data.edge_list
-    .filter(
-      (e) =>
-        e.probability >= MIN_PROB &&
-        e.source !== e.target && // skip self-loops for now
-        e.target !== 'END', // hide synthetic END edges (or remove this line to show them)
-    )
-    .map((e, idx) => {
-      const isFail =
-        TERMINAL_FAIL.has(e.target) || e.probability < 0.25
-      const isPositive =
-        TERMINAL_SUCCESS.has(e.target) || e.probability >= 0.6
+  const lbl = (color: string) => ({ fill: color, fontWeight: 700, fontSize: 13 })
+  const bg  = { fill: '#111111', fillOpacity: 0.82 }
+  const pad: [number, number] = [3, 7]
 
-      const style = isFail ? fStyle : isPositive ? sStyle : pStyle
-      const labelStyle = isFail ? fLbl : isPositive ? sLbl : pLbl
+  // Nodes that should NOT be edge sources (they're terminal sinks)
+  const terminalSources = new Set([...TERMINAL_SUCCESS, ...TERMINAL_FAIL, 'END'])
 
-      const pctLabel = `${Math.round(e.probability * 100)}%`
-      const dwellKey = `${e.source},${e.target}`
-      const dwellSamples = data.transition_dwell[dwellKey] ?? []
-      const avgDwellMin =
-        dwellSamples.length > 0
-          ? Math.round(
-              dwellSamples.reduce((a, b) => a + b, 0) /
-                dwellSamples.length /
-                60,
-            )
-          : null
+  const edges: Edge[] = []
 
-      const label = avgDwellMin != null
-        ? `${pctLabel} · ~${avgDwellMin}m`
-        : pctLabel
+  data.edge_list.forEach((e, idx) => {
+    if (terminalSources.has(e.source)) return  // skip edges FROM terminals
+    const pct = `${Math.round(e.probability * 100)}%`
 
-      return {
-        id: `e${idx}-${e.source}-${e.target}`,
+    if (e.target === 'END') {
+      if (e.source === finalNodeId) {
+        // ── Final node → SUCCESS (bottom of happy path) ─────────────────────
+        edges.push({
+          id: `e${idx}-success`,
+          source: e.source,
+          target: 'SUCCESS',
+          sourceHandle: 'bottom',
+          targetHandle: 'top',
+          label: pct,
+          type: 'smoothstep',
+          style: successStyle,
+          labelStyle: lbl('#10B981'),
+          labelBgStyle: bg,
+          labelBgPadding: pad,
+          data: { probability: e.probability, count: e.count },
+        })
+      } else {
+        // ── Mid-pipeline → FAIL node (exits left) ───────────────────────────
+        edges.push({
+          id: `e${idx}-fail`,
+          source: e.source,
+          target: `FAIL_${e.source}`,
+          sourceHandle: 'left-source',
+          targetHandle: 'right',
+          label: pct,
+          type: 'smoothstep',
+          style: failStyle,
+          labelStyle: lbl('#EF4444'),
+          labelBgStyle: bg,
+          labelBgPadding: pad,
+          data: { probability: e.probability, count: e.count },
+        })
+      }
+      return
+    }
+
+    if (e.source === e.target) {
+      // ── Retry / self-loop (exits and re-enters right) ────────────────────
+      edges.push({
+        id: `e${idx}-retry`,
         source: e.source,
         target: e.target,
-        label,
-        type: 'smoothstep',
-        style,
-        labelStyle,
+        sourceHandle: 'right-source',
+        targetHandle: 'right-target',
+        label: pct,
+        type: 'default',
+        style: retryStyle,
+        labelStyle: lbl('#F59E0B'),
         labelBgStyle: bg,
         labelBgPadding: pad,
-        data: {
-          probability: e.probability,
-          count: e.count,
-          timeStats: e.time_stats,
-          dwellSamples,
-        },
-      }
+        data: { probability: e.probability, count: e.count },
+      })
+      return
+    }
+
+    if (TERMINAL_FAIL.has(e.target) || TERMINAL_SUCCESS.has(e.target)) return  // skip explicit terminal edges
+
+    // ── Normal forward edge (bottom → top) ───────────────────────────────────
+    edges.push({
+      id: `e${idx}-${e.source}-${e.target}`,
+      source: e.source,
+      target: e.target,
+      sourceHandle: 'bottom',
+      targetHandle: 'top',
+      label: pct,
+      type: 'smoothstep',
+      style: fwdStyle,
+      labelStyle: lbl('#5E149F'),
+      labelBgStyle: bg,
+      labelBgPadding: pad,
+      data: { probability: e.probability, count: e.count },
     })
-}
+  })
 
-// ─── Tool enrichment ──────────────────────────────────────────────────────────
-// The telemetry JSON doesn't carry tool-per-node info.
-// Maintain this map manually (or add a tools field to your telemetry events).
-// Keys should match your pipeline_nodes node_id strings.
-
-export const TOOL_ENRICHMENT: Record<string, string[]> = {
-  'prospect-research': ['LinkedIn', 'Salesforce', 'ZoomInfo'],
-  'draft-outreach': ['Gmail', 'Notion'],
-  'send-log': ['Gmail', 'Salesforce'],
-  'follow-up': ['Outreach', 'Gmail', 'Salesforce'],
-  'response-triage': ['Gmail', 'Salesforce', 'Slack'],
-  'discovery-prep': ['Salesforce', 'Notion', 'Gong'],
-  'discovery-call': ['Zoom', 'Gong', 'Calendly'],
-}
-
-// ─── Label formatter ──────────────────────────────────────────────────────────
-// Converts "prospect-research" → "Prospect Research"
-
-function formatLabel(id: string): string {
-  return id
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ')
+  return edges
 }
 
 // ─── Main loader ──────────────────────────────────────────────────────────────
@@ -254,7 +341,6 @@ export interface LoadedMarkovData {
   nodes: Node[]
   edges: Edge[]
   raw: TransitionMatrixJSON
-  // convenience stats for the summary cards
   stats: {
     nSequences: number
     nStates: number
@@ -265,24 +351,16 @@ export interface LoadedMarkovData {
 
 const _cache: Record<string, LoadedMarkovData> = {}
 
-/**
- * Fetches and transforms transition_matrix.json.
- * Results are cached per URL — safe to call from multiple components.
- *
- * @param projectId  When provided, fetches from /api/projects/{id}/markov.
- *                   When omitted, fetches from the static JSON in /public/data/.
- */
 export async function loadMarkovData(projectId?: string): Promise<LoadedMarkovData> {
   const url = getDataUrl(projectId)
-
   if (_cache[url]) return _cache[url]
 
   const res = await fetch(url)
   if (!res.ok) throw new Error(`Failed to fetch markov data: ${res.statusText}`)
 
   const data: TransitionMatrixJSON = await res.json()
-  const nodes = buildNodes(data)
-  const edges = buildEdges(data)
+  const { nodes, finalNodeId } = buildNodes(data)
+  const edges = buildEdges(data, finalNodeId)
 
   const result: LoadedMarkovData = {
     nodes,
@@ -290,7 +368,7 @@ export async function loadMarkovData(projectId?: string): Promise<LoadedMarkovDa
     raw: data,
     stats: {
       nSequences: data.metadata.n_sequences,
-      nStates: data.metadata.n_states,
+      nStates:    data.metadata.n_states,
       nTransitions: data.metadata.n_transitions_observed,
       topTransitions: data.top_transitions,
     },
@@ -300,11 +378,9 @@ export async function loadMarkovData(projectId?: string): Promise<LoadedMarkovDa
   return result
 }
 
-/** Bust cache for a specific project or all entries */
 export function clearMarkovCache(projectId?: string) {
   if (projectId) {
-    const url = getDataUrl(projectId)
-    delete _cache[url]
+    delete _cache[getDataUrl(projectId)]
   } else {
     for (const key of Object.keys(_cache)) delete _cache[key]
   }

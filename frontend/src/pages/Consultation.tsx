@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { projects as projectsApi, profiles as profilesApi } from '../api/client'
 import {
   CheckCircle2,
   ChevronDown,
@@ -73,6 +74,7 @@ export default function Consultation() {
   const [selectedResponsibilities, setSelectedResponsibilities] = useState<string[]>([])
   const [tools, setTools] = useState('')
   const [description, setDescription] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (!role) return
@@ -103,20 +105,35 @@ export default function Consultation() {
     selectedResponsibilities.length > 0 &&
     description.trim().length > 0
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    // Always persist to localStorage so legacy/demo routes keep working
     localStorage.setItem(
       'axisFormData',
-      JSON.stringify({
-        firstName,
-        lastName,
-        email,
-        role,
-        selectedResponsibilities,
-        tools,
-        description,
-      }),
+      JSON.stringify({ firstName, lastName, email, role, selectedResponsibilities, tools, description }),
     )
-    navigate('/internal/workflow-report')
+
+    setSubmitting(true)
+    try {
+      const project = await projectsApi.create({
+        company_name: email,         // best proxy until a company field is added
+        team_name:    `${firstName} ${lastName}`,
+        primary_role: role,
+        notes:        description || undefined,
+      })
+      await profilesApi.upsert(project.id, {
+        role,
+        selected_responsibilities: selectedResponsibilities,
+        tools:       tools || undefined,
+        description: description || undefined,
+      })
+      navigate(`/projects/${project.id}/transcripts`)
+    } catch (err) {
+      console.error('Failed to create project via API:', err)
+      // Fallback: continue with the legacy internal flow
+      navigate('/internal/workflow-report')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const inputClass =
@@ -296,10 +313,10 @@ export default function Consultation() {
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={!canSubmit}
+                disabled={!canSubmit || submitting}
                 className="axis-gradient-button rounded-full px-10 py-4 text-[18px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Next
+                {submitting ? 'Saving...' : 'Next'}
               </button>
             </div>
           </section>

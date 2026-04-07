@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import Dashboard from './pages/Dashboard'
-import DataForm from './pages/DataForm'
+import DataForm from './pages/unused_DataForm'
 import WorkflowReport from './pages/WorkflowReport'
 import ToolInputForm from './pages/ToolInputForm'
 import SimulationResults from './pages/SimulationResults'
@@ -20,18 +20,20 @@ export default function App() {
         <Route path="/get-started" element={<Consultation />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Client workspace */}
+        {/* Client workspace — legacy flat routes (no project scope) */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/simulation" element={<SimulationResults />} />
         <Route path="/recommendation" element={<FinalRecommendation />} />
 
-        {/* Internal tools (our side — not client-facing) */}
+        {/* Internal tools hub */}
         <Route path="/internal" element={<InternalDashboard />} />
+        {/* Internal step routes — legacy, replaced by project-scoped flow */}
         <Route path="/internal/form" element={<DataForm />} />
         <Route path="/internal/workflow-report" element={<WorkflowReport />} />
         <Route path="/internal/tool-input" element={<ToolInputForm />} />
 
         {/* Project-scoped routes (production) */}
+        <Route path="/projects/:projectId/dashboard" element={<Dashboard />} />
         <Route path="/projects/:projectId/transcripts" element={<TranscriptInput />} />
         <Route path="/projects/:projectId/workflow-report" element={<WorkflowReport />} />
         <Route path="/projects/:projectId/tool-input" element={<ToolInputForm />} />

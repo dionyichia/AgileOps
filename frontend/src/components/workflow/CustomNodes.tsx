@@ -20,6 +20,7 @@ const autoConfig = {
 
 export function TaskNode({ data }: { data: TaskNodeData }) {
   const isNew = data.isNew
+  const handleStyle = { background: '#D29AE8', width: 8, height: 8, border: '2px solid #fff' }
 
   return (
     <div
@@ -36,8 +37,14 @@ export function TaskNode({ data }: { data: TaskNodeData }) {
         borderColor: isNew ? '#E2409B' : 'rgba(94,20,159,0.10)',
       }}
     >
-      <Handle type="target" position={Position.Top}    style={{ background: '#D29AE8', width: 8, height: 8, border: '2px solid #fff' }} />
-      <Handle type="target" position={Position.Left}   style={{ background: '#D29AE8', width: 8, height: 8, border: '2px solid #fff' }} />
+      {/* Incoming: forward edges from above */}
+      <Handle id="top" type="target" position={Position.Top} style={handleStyle} />
+      {/* Outgoing: fail edge exits left */}
+      <Handle id="left-source" type="source" position={Position.Left} style={{ ...handleStyle, background: '#EF4444' }} />
+      {/* Outgoing: retry self-loop exits right */}
+      <Handle id="right-source" type="source" position={Position.Right} style={{ ...handleStyle, background: '#F59E0B' }} />
+      {/* Incoming: retry self-loop re-enters right (offset slightly so handles don't overlap) */}
+      <Handle id="right-target" type="target" position={Position.Right} style={{ ...handleStyle, background: '#F59E0B', top: '65%' }} />
 
       {isNew && (
         <span className="inline-block text-[10px] font-bold tracking-widest text-[#B4308B] bg-[#FCEAF4] border border-[#B4308B]/12 px-2 py-0.5 rounded-full mb-2">
@@ -86,8 +93,8 @@ export function TaskNode({ data }: { data: TaskNodeData }) {
         </span>
       </div>
 
-      <Handle type="source" position={Position.Bottom} style={{ background: '#D29AE8', width: 8, height: 8, border: '2px solid #fff' }} />
-      <Handle type="source" position={Position.Right}  style={{ background: '#D29AE8', width: 8, height: 8, border: '2px solid #fff' }} />
+      {/* Outgoing: forward edge exits bottom to next pipeline node */}
+      <Handle id="bottom" type="source" position={Position.Bottom} style={{ background: '#D29AE8', width: 8, height: 8, border: '2px solid #fff' }} />
     </div>
   )
 }
@@ -104,13 +111,16 @@ const terminalConfig = {
 }
 
 export function TerminalNode({ data }: { data: TerminalNodeData }) {
+  const handleStyle = { background: '#D29AE8', width: 8, height: 8, border: '2px solid #fff' }
   return (
     <div
       className={`border rounded-[16px] px-4 py-2.5 text-sm font-semibold ${terminalConfig[data.nodeType]}`}
       style={{ boxShadow: '0 12px 24px rgba(15,23,42,0.05)' }}
     >
-      <Handle type="target" position={Position.Top}  style={{ background: '#D29AE8', width: 8, height: 8, border: '2px solid #fff' }} />
-      <Handle type="target" position={Position.Left} style={{ background: '#D29AE8', width: 8, height: 8, border: '2px solid #fff' }} />
+      {/* SUCCESS node: receives edge from bottom of final pipeline node */}
+      <Handle id="top" type="target" position={Position.Top} style={handleStyle} />
+      {/* FAIL nodes: positioned left of parent — receive edge from parent's left-source */}
+      <Handle id="right" type="target" position={Position.Right} style={handleStyle} />
       {data.label}
     </div>
   )

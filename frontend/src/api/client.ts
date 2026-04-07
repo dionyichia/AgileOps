@@ -7,9 +7,21 @@
 
 const BASE = '/api'
 
+// ── Token helpers ──────────────────────────────────────
+export const token = {
+  get: (): string | null => localStorage.getItem('access_token'),
+  set: (t: string) => localStorage.setItem('access_token', t),
+  clear: () => localStorage.removeItem('access_token'),
+}
+
+function authHeaders(): Record<string, string> {
+  const t = token.get()
+  return t ? { Authorization: `Bearer ${t}` } : {}
+}
+
 async function request<T>(path: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...opts?.headers },
+    headers: { 'Content-Type': 'application/json', ...authHeaders(), ...opts?.headers },
     ...opts,
   })
   if (!res.ok) {
@@ -108,6 +120,27 @@ export interface Job {
   started_at: string | null
   completed_at: string | null
   created_at: string
+}
+
+// ── Auth ───────────────────────────────────────────────
+
+export interface AuthToken {
+  access_token: string
+  token_type: string
+}
+
+export const auth = {
+  register: (email: string, password: string) =>
+    request<AuthToken>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+  login: (email: string, password: string) =>
+    request<AuthToken>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+  logout: () => token.clear(),
 }
 
 // ── Projects ───────────────────────────────────────────

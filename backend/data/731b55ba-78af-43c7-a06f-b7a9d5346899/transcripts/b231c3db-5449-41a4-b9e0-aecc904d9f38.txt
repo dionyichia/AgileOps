@@ -1,0 +1,69 @@
+Alex: Thanks for making time, Marcus. We're trying to map out how deals actually move through your pipeline — not the theory, the real day-to-day. Let's start at the top. When a new lead isn't handed to you, how do you find prospects?
+
+Marcus: Yeah, so sourcing is honestly a big chunk of my week. I'd say I spend maybe 30 to 40 minutes per prospect when I'm doing it properly. I start in Salesforce — pull up whatever list we're targeting, check if there's already a contact record — and then I'm over on LinkedIn looking at their profile, their company page, recent activity. I'm trying to answer one question: does this person fit our ICP? Company size, vertical, the tech stack they're running. If it looks like a fit, I create or update the record in Salesforce and move on.
+
+Alex: And then you reach out. Walk me through drafting the message.
+
+Marcus: So I'll write a cold email or a LinkedIn DM — depends on where they're more active. I try not to use templates verbatim, so I'm usually in Notion pulling up the template and then rewriting the first two lines to make it feel personal. Reference something specific — a funding round, a LinkedIn post, whatever. That whole process, from blank page to a message I'm happy to send, probably takes me 20 to 25 minutes per prospect. Sometimes less if I'm in a groove.
+
+Alex: After you send it, what happens?
+
+Marcus: Send and log. The message goes out from Gmail, and I immediately flip to Salesforce and log the activity — sent email, date, which sequence it's part of. That's quick, maybe 5 to 10 minutes total including any note I leave on the contact. Then the follow-up sequence kicks in.
+
+Alex: Tell me about that.
+
+Marcus: So I run a multi-touch cadence — usually 5 to 7 touches over two weeks. Mix of email and LinkedIn. I'm in Outreach for most of it, but I'll manually check Gmail too if something feels off. The whole point is staying in front of them without being annoying. I'm watching open rates, click signals in Outreach. If someone opens three times but doesn't reply, I'll change the subject line. If they click a link, I'll send a more direct follow-up. Managing one sequence probably costs me 15 to 20 minutes spread across the week — not all at once.
+
+Alex: And when someone replies?
+
+Marcus: That's response triage. First thing I do is read the reply and classify it in my head — hot, warm, cold, or unsubscribe. Hot reply, I'm responding within the hour, sometimes immediately. I'll draft something quick, usually reference what they said, and try to book a call. I update the stage in Salesforce right away and I'll ping my manager on Slack if it's a big account. Warm reply gets a slightly longer response. Cold or objection-heavy, I route it to a later follow-up. From reading to responding and logging, it's probably 10 to 15 minutes.
+
+Alex: Once you've got a call booked, how do you prep?
+
+Marcus: Discovery call prep is where I probably spend the most focused time in the top of funnel. I'd say 40 to 45 minutes, sometimes longer. I'm pulling up their company on Google, Crunchbase if they're VC-backed, back on LinkedIn to look at the people I'll be talking to. I want to know their tech stack, any recent funding or layoffs, what their competitors are doing. Then I open Notion and build a call agenda — I use a MEDDIC template, so I'm writing out my qualification questions: What's the economic buyer situation? Who's the champion? What's the compelling event? I also skim back through all the prior touchpoints in Salesforce so I don't ask something they already told me.
+
+Alex: And the actual discovery call?
+
+Marcus: Usually 30 to 45 minutes on Zoom with Gong running. I try to stick to my agenda but I let it breathe — good discovery is mostly listening. I'm qualifying as we go: pain points, budget signals, decision-making process, timeline. At the end I want a clear next step booked — either I'm moving them forward or I'm calling it. Gong is recording the whole thing so I'm not typing frantically, just a few live notes on the side.
+
+Alex: After the call?
+
+Marcus: The debrief is critical and I try to do it same day. I pull up the Gong transcript, skim through it, write a structured call summary in Notion — what they said about pain, what the budget situation looks like, what their timeline is, what the blockers are. Then I update the MEDDIC fields in Salesforce on the opportunity record. Log the outcome, add the follow-up tasks. If it's a tag-team deal with a solutions engineer I'll share the notes in Slack. That's probably 20 to 25 minutes when I'm being thorough.
+
+Alex: What about understanding who you're actually selling to at the company?
+
+Marcus: Stakeholder mapping. I usually do this right after the first discovery call when I have enough intel. I'm trying to figure out who's the economic buyer, who's the champion, who's the blocker that hasn't been on any call yet. I go back to LinkedIn, cross-reference what the prospect told me about their org, sometimes I'll ask the champion directly. I'll sketch out something in Notion or Lucidchart if it's a complex deal. Update the contacts in Salesforce. It takes me maybe 25 to 35 minutes to do it properly.
+
+Alex: Then demo prep and the demo itself?
+
+Marcus: Demo prep is bigger than people think. I need to get the logistics sorted — finding a time that works for all the stakeholders is annoying, usually involves Calendly and a few back-and-forths. But more importantly I need to customize the demo flow. I'll reread my discovery notes and figure out which use cases to lead with, which features to skip. If they have a unique workflow I'll set up a sandbox environment to show it. That can take 45 to 55 minutes total.
+
+The demo itself is on Zoom, Gong running again. I try to make it feel like a workshop rather than a slideshow — I'm showing them their specific problem getting solved. I read the room the whole time, if someone goes quiet I'll ask a direct question. It usually runs 45 to 60 minutes. Afterwards I capture the feedback notes from what I heard in the room.
+
+Alex: Objections — when do those come up and how do you handle them?
+
+Marcus: Usually right after the demo or when we're moving toward a proposal. Common ones are price, timing — "we're in a budget freeze" — or a competitor comparison. I'll draft a written response, pull relevant case studies from Notion or Google Drive, sometimes use our ROI calculator to build a financial argument. For technical objections I'll bring in a solutions engineer. For pricing I go to my manager on Slack before I respond. That whole process can run 30 to 40 minutes per objection cycle.
+
+Alex: Walk me through proposal drafting.
+
+Marcus: That's one of the heavier lifts. I'm building out pricing tiers in Salesforce CPQ, writing up the scope of work against an SOW template in Google Docs, adding a timeline and an ROI projection. I need manager sign-off before I send anything with a discount. I'll do an internal review in Slack, incorporate feedback, then send from Gmail. Start to finish it's probably 60 to 70 minutes for a proper proposal.
+
+Alex: And then negotiation?
+
+Marcus: That's where deals can stall. Legal gets involved if they want custom MSA terms, which means I'm managing redlines back and forth via email and Google Docs. I have to keep a close eye on version history — easy to lose track of what changed. And there's always a quarter-end clock ticking. It can take anywhere from an hour to several hours spread across multiple days. I'd say a typical negotiation cycle is 80 to 100 minutes of actual work time, but with a lot of waiting in between.
+
+Alex: And when it closes?
+
+Marcus: The finish line is more work than people realize. I confirm we have the signed DocuSign contract, make sure payment terms are set. I flip the opportunity to Closed-Won in Salesforce. Then I write a handoff doc for Customer Success — I use a Notion template for that. It covers who the stakeholders are, what pain points they bought to solve, any commitments I made during the sale that CS needs to deliver on, and I schedule the kickoff call. That whole close-and-handoff is probably 25 to 30 minutes.
+
+Alex: Is there anything about your workflow that feels like it's eating time it shouldn't?
+
+Marcus: Honestly? The CRM logging is the worst. Every step I have to flip to Salesforce and manually update things — stages, activities, next steps. And writing call summaries after every Gong call is important but tedious. Those feel like the highest-automation-potential tasks to me. Proposal drafting too — I'm rebuilding the same structure every time, just with different numbers.
+
+Alex: Super helpful. Last question — anything you'd want a tool to handle that nothing does today?
+
+Marcus: Honestly, if something could watch the Gong recording and auto-fill the Salesforce MEDDIC fields plus draft the call summary, that would save me 20 minutes a day minimum. And auto-sequencing that adjusts based on engagement signals without me having to babysit Outreach would be huge.
+
+Alex: Perfect. That's exactly the kind of signal we're looking for. Thanks Marcus.
+
+Marcus: Happy to help.

@@ -23,6 +23,9 @@ import sys
 from datetime import date
 from pathlib import Path
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import anthropic
 
 # ─── Paths ────────────────────────────────────────────────────────────────────

@@ -1,5 +1,8 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useMarkovData } from '../hooks/pullMarkovData'
+import { toolEvals as toolEvalsApi, projects as projectsApi } from '../api/client'
+import type { ToolEvaluation, Project } from '../api/client'
 import ReactFlow, {
   useNodesState,
   useEdgesState,
@@ -28,7 +31,7 @@ import {
   TrendingUp,
 } from 'lucide-react'
 import { nodeTypes } from '../components/workflow/CustomNodes'
-import { roleStats, toolBuckets, existingNodes, existingEdges } from '../data/mockData'
+import { roleStats as mockRoleStats, toolBuckets, existingNodes as mockNodes, existingEdges as mockEdges } from '../data/mockData'
 import type { Tool } from '../data/mockData'
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -96,6 +99,40 @@ const BRAND = {
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const { projectId } = useParams<{ projectId?: string }>()
+
+  // ── API data (project-scoped routes only) ────────────────────────────────
+  const { existingNodes, existingEdges, loading: markovLoading, error: markovError, isRealData, stats: markovStats } = useMarkovData(projectId)
+  const [apiProject, setApiProject]     = useState<Project | null>(null)
+  const [apiToolEvals, setApiToolEvals] = useState<ToolEvaluation[] | null>(null)
+
+  useEffect(() => {
+    if (!projectId) return
+    projectsApi.get(projectId).then(setApiProject).catch(() => {/* use mock */})
+    toolEvalsApi.list(projectId).then(setApiToolEvals).catch(() => {/* use mock */})
+  }, [projectId])
+
+  // Merge API data with mock fallbacks
+  const roleStats = apiProject
+    ? {
+        ...mockRoleStats,
+        company:    apiProject.company_name,
+        primaryRole: apiProject.primary_role,
+        teamSize:   apiProject.team_size ?? mockRoleStats.numEmployees,
+        numEmployees: apiProject.team_size ?? mockRoleStats.numEmployees,
+      }
+    : mockRoleStats
+
+  const liveSimulations: SimulationRun[] = apiToolEvals
+    ? apiToolEvals.map((e) => ({
+        id:        e.id,
+        toolName:  e.tool_name,
+        status:    'completed' as const,   // ToolEvaluation has no status field; default to completed
+        timeSaved: '—',
+        date:      e.created_at.slice(0, 10),
+      }))
+    : mockSimulations
+
   const [activeNav, setActiveNav] = useState('overview')
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
 
@@ -158,17 +195,21 @@ export default function Dashboard() {
           onComment: handleOpenComment,
         },
       })),
-    [comments, handleOpenComment],
+    [existingNodes, comments, handleOpenComment],
   )
 
   const [nodes, , onNodesChange] = useNodesState(nodesWithComments)
-  const [edges, , onEdgesChange] = useEdgesState(existingEdges)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(existingEdges)
 
   useEffect(() => {
     onNodesChange(
       nodesWithComments.map((n) => ({ type: 'reset' as const, item: n })),
     )
   }, [nodesWithComments])
+
+  useEffect(() => {
+    setEdges(existingEdges)
+  }, [existingEdges])
 
   // ── Derived stats ────────────────────────────────────────────────────────
   const allTools = toolBuckets.flatMap((b) => b.tools)
@@ -180,15 +221,19 @@ export default function Dashboard() {
     cmts.map((c) => ({ ...c, nodeId })),
   ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   const taskNodes = existingNodes.filter((n) => n.type === 'taskNode')
-  const totalMinutes = taskNodes.reduce((sum, n) => sum + (n.data.minutes ?? 0), 0)
+  const totalMinutes = taskNodes.reduce((sum, n) => sum + ((n.data as { minutes?: number }).minutes ?? 0), 0)
 
   const commentingNodeLabel = commentingNode
-    ? existingNodes.find((n) => n.id === commentingNode)?.data?.label ?? commentingNode
+    ? (existingNodes.find((n) => n.id === commentingNode)?.data as { label?: string } | undefined)?.label ?? commentingNode
     : ''
 
   const handleRunSimulation = (toolName: string) => {
     localStorage.setItem('axisToolInput', JSON.stringify({ useCase: 'adoption', toolName }))
-    navigate('/simulation')
+    if (projectId) {
+      navigate(`/projects/${projectId}/tool-input`)
+    } else {
+      navigate('/simulation')
+    }
   }
 
   // ── Scroll to section when nav clicked ───────────────────────────────────
@@ -338,19 +383,79 @@ export default function Dashboard() {
                 <BarChart3 size={16} style={{ color: BRAND.violet }} />
                 <div>
                   <span className="text-sm font-semibold text-black">Workflow Map</span>
-                  <span className="ml-2 text-xs text-black/42">
-                    Click <MessageSquare size={10} className="inline" /> on any step to leave feedback
-                  </span>
+                  {isRealData && (
+                    <span className="ml-2 text-xs text-black/42">
+                      Click <MessageSquare size={10} className="inline" /> on any step to leave feedback
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-3 text-xs text-black/42">
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ background: BRAND.violet }} /> Success</span>
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500 inline-block rounded" /> Fail</span>
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ background: BRAND.coral }} /> Retry</span>
+              <div className="flex items-center gap-4">
+                {/* Graph status badge */}
+                {markovLoading && projectId && (
+                  <span className="flex items-center gap-1.5 text-xs text-black/42 font-medium">
+                    <span className="w-2 h-2 rounded-full bg-black/20 animate-pulse" />
+                    Loading graph...
+                  </span>
+                )}
+                {!markovLoading && isRealData && (
+                  <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: '#248F63' }}>
+                    <span className="w-2 h-2 rounded-full bg-[#248F63]" />
+                    Ready · {markovStats?.nStates ?? existingNodes.length} nodes
+                  </span>
+                )}
+                {!markovLoading && !isRealData && !projectId && (
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-orange-500">
+                    <span className="w-2 h-2 rounded-full bg-orange-400" />
+                    Fallback
+                  </span>
+                )}
+                {!markovLoading && !isRealData && projectId && (
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-amber-600">
+                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                    Pipeline not run
+                  </span>
+                )}
+                <div className="flex items-center gap-3 text-xs text-black/42">
+                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ background: BRAND.violet }} /> Success</span>
+                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500 inline-block rounded" /> Fail</span>
+                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ background: BRAND.coral }} /> Retry</span>
+                </div>
               </div>
             </div>
 
             <div className="relative" style={{ height: 520 }}>
+              {/* State A: loading */}
+              {markovLoading && projectId && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#F7F4FB]">
+                  <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: BRAND.violet, borderTopColor: 'transparent' }} />
+                  <span className="text-sm text-black/42">Building workflow graph...</span>
+                </div>
+              )}
+
+              {/* State B: pipeline not run yet */}
+              {!markovLoading && !isRealData && projectId && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#F7F4FB]">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(94,20,159,0.08)' }}>
+                    <GitBranch size={24} style={{ color: BRAND.violet }} />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-black">No workflow data yet</p>
+                    <p className="text-xs text-black/42 mt-1">Submit transcripts and run the pipeline to generate your workflow graph.</p>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/projects/${projectId}/transcripts`)}
+                    className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-full transition-colors"
+                    style={{ background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)` }}
+                  >
+                    <ChevronRight size={15} />
+                    Go to Transcripts
+                  </button>
+                </div>
+              )}
+
+              {/* State C: data loaded — show ReactFlow */}
+              {(!projectId || isRealData) && (
               <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -368,6 +473,7 @@ export default function Dashboard() {
                 <MiniMap nodeColor={() => '#CFA3E2'} maskColor="rgba(247,244,251,0.7)" />
                 <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
               </ReactFlow>
+              )}
 
               {/* ── Comment panel ─────────────────────────────────────── */}
               {commentingNode && (
@@ -548,14 +654,17 @@ export default function Dashboard() {
             <div ref={simulationsRef} className="bg-white border rounded-[24px] p-5" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Recent Simulations</h3>
-                <span className="text-xs text-black/38">{mockSimulations.length} runs</span>
+                <span className="text-xs text-black/38">{liveSimulations.length} runs</span>
               </div>
 
               <div className="space-y-2">
-                {mockSimulations.map((sim) => (
+                {liveSimulations.map((sim) => (
                   <button
                     key={sim.id}
-                    onClick={() => navigate('/simulation')}
+                    onClick={() => projectId
+                      ? navigate(`/projects/${projectId}/simulation/${sim.id}`)
+                      : navigate('/simulation')
+                    }
                     className="w-full flex items-center justify-between bg-[#FBFAFD] border rounded-2xl px-4 py-3 transition-colors group"
                     style={{ borderColor: BRAND.border }}
                   >

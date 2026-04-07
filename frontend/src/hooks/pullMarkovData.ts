@@ -19,6 +19,7 @@ interface UseMarkovDataResult {
   existingEdges: Edge[]
   loading: boolean
   error: string | null
+  isRealData: boolean
   stats: {
     nSequences: number
     nStates: number
@@ -35,6 +36,7 @@ export function useMarkovData(projectId?: string): UseMarkovDataResult {
   const [existingEdges, setEdges] = useState<Edge[]>(fallbackEdges)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isRealData, setIsRealData] = useState(false)
   const [stats, setStats] = useState<UseMarkovDataResult['stats']>(null)
 
   useEffect(() => {
@@ -49,10 +51,12 @@ export function useMarkovData(projectId?: string): UseMarkovDataResult {
         setEdges(data.edges)
         setStats(data.stats)
         setError(null)
+        setIsRealData(true)
       } catch (err) {
         if (cancelled) return
         console.warn('[useMarkovData] Failed to load, using fallback data:', err)
         setError(err instanceof Error ? err.message : 'Unknown error')
+        setIsRealData(false)
         setNodes(fallbackNodes)
         setEdges(fallbackEdges)
       } finally {
@@ -64,5 +68,5 @@ export function useMarkovData(projectId?: string): UseMarkovDataResult {
     return () => { cancelled = true }
   }, [projectId])
 
-  return { existingNodes, existingEdges, loading, error, stats }
+  return { existingNodes, existingEdges, loading, error, isRealData, stats }
 }

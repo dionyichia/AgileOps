@@ -1,7 +1,38 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { auth, projects, token } from '../api/client'
 
 export default function Login() {
   const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [mode, setMode] = useState<'login' | 'register'>('login')
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit() {
+    setError(null)
+    setLoading(true)
+    try {
+      const result = mode === 'login'
+        ? await auth.login(email, password)
+        : await auth.register(email, password)
+
+      token.set(result.access_token)
+
+      // Fetch user's projects and redirect to the first one
+      const userProjects = await projects.list()
+      if (userProjects.length > 0) {
+        navigate(`/projects/${userProjects[0].id}/dashboard`)
+      } else {
+        navigate('/internal')
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F7FB] text-black flex flex-col">
@@ -45,9 +76,7 @@ export default function Login() {
               </div>
 
               <h1 className="mt-14 text-[50px] md:text-[64px] leading-[0.98] font-bold tracking-[-0.05em] text-black">
-                Hello,
-                <br />
-                Welcome Back
+                {mode === 'login' ? <>Hello,<br />Welcome Back</> : <>Create<br />Account</>}
               </h1>
 
               <p className="mt-5 text-[18px] leading-8 text-black/42">
@@ -58,34 +87,39 @@ export default function Login() {
                 <input
                   type="email"
                   placeholder="stanley@gmail.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full h-14 rounded-[14px] border border-black/10 px-5 text-[16px] outline-none focus:border-[#B4308B]"
                 />
                 <input
                   type="password"
                   placeholder="••••••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
                   className="w-full h-14 rounded-[14px] border border-black/10 px-5 text-[16px] outline-none focus:border-[#B4308B]"
                 />
 
-                <div className="flex items-center justify-between pt-1 text-[14px] text-black/48">
-                  <label className="flex items-center gap-3">
-                    <input type="checkbox" defaultChecked className="h-4 w-4 rounded accent-[#7B4CE2]" />
-                    <span>Remember me</span>
-                  </label>
-                  <button className="transition-opacity hover:opacity-70">Forgot Password?</button>
-                </div>
+                {error && (
+                  <p className="text-[14px] text-red-500">{error}</p>
+                )}
 
                 <button
                   type="button"
-                  onClick={() => navigate('/dashboard')}
-                  className="mt-5 inline-flex h-14 items-center justify-center rounded-[14px] px-8 text-[18px] font-bold text-white axis-gradient-button"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="mt-5 inline-flex h-14 w-full items-center justify-center rounded-[14px] px-8 text-[18px] font-bold text-white axis-gradient-button disabled:opacity-60"
                 >
-                  Sign In
+                  {loading ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Create Account'}
                 </button>
 
                 <p className="pt-16 text-[14px] text-black/42">
-                  Don&apos;t have an account?{' '}
-                  <button className="font-semibold text-[#7B4CE2] transition-opacity hover:opacity-70">
-                    Sign Up
+                  {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
+                  <button
+                    onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(null) }}
+                    className="font-semibold text-[#7B4CE2] transition-opacity hover:opacity-70"
+                  >
+                    {mode === 'login' ? 'Sign Up' : 'Sign In'}
                   </button>
                 </p>
               </div>

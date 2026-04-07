@@ -8,22 +8,40 @@ Output:
   - markov_graph.json        (networkx-ready edge list for script 04)
 """
 
+import argparse
 import json
 import numpy as np
 from collections import defaultdict, Counter
 from pathlib import Path
 
 # ── 0. PARAMS ───────────────────────────────────────────────────────────────────
-INCLUDE_RETRIES = False   # flip to True if you want self-loop edgesc
-TELEMETRY_PATH = "backend/data/telemetry.json"
-TRANSITION_MTX__PATH = "backend/data/transition_matrix.json"
+INCLUDE_RETRIES = False   # flip to True if you want self-loop edges
+
+# CLI args override defaults so the job_runner can pass project-scoped paths
+_parser = argparse.ArgumentParser(description="Build Markov transition matrix from telemetry")
+_parser.add_argument(
+    "--telemetry_path",
+    type=str,
+    default="backend/data/telemetry.json",
+    help="Path to telemetry.json (default: backend/data/telemetry.json)",
+)
+_parser.add_argument(
+    "--output_path",
+    type=str,
+    default="backend/data/transition_matrix.json",
+    help="Destination for transition_matrix.json (default: backend/data/transition_matrix.json)",
+)
+_args = _parser.parse_args()
+
+TELEMETRY_PATH       = _args.telemetry_path
+TRANSITION_MTX__PATH = _args.output_path
 
 # ── 1. LOAD ───────────────────────────────────────────────────────────────────
 
 dir = Path.cwd()
 print(dir)
 
-with open(dir / TELEMETRY_PATH ) as f:
+with open(TELEMETRY_PATH) as f:
     data = json.load(f)
 
 events = data["events"]
@@ -261,7 +279,9 @@ output = {
     }
 }
 
-with open(dir / TRANSITION_MTX__PATH, "w") as f:
+out_path = Path(TRANSITION_MTX__PATH)
+out_path.parent.mkdir(parents=True, exist_ok=True)
+with open(out_path, "w") as f:
     json.dump(output, f, indent=2)
 
 print("\nSaved → transition_matrix.json")

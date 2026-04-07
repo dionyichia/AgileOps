@@ -1,0 +1,457 @@
+[
+  {
+    "node_id": "prospect_research",
+    "label": "Prospect Research and Qualification",
+    "description": "Research prospects using multiple data sources to determine if they fit the ideal customer profile. Check company size, vertical, tech stack, and other qualifying criteria.",
+    "action_verb": "research",
+    "inputs": [
+      "target list",
+      "prospect name",
+      "company name"
+    ],
+    "outputs": [
+      "qualification assessment",
+      "updated contact record",
+      "research notes"
+    ],
+    "app_cluster": [
+      "salesforce",
+      "linkedin",
+      "google"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 35,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "high",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "cold_outreach_drafting",
+    "label": "Cold Outreach Message Drafting",
+    "description": "Write personalized cold emails or LinkedIn messages using templates as a base but customizing the opening lines with specific references to the prospect.",
+    "action_verb": "produce",
+    "inputs": [
+      "prospect research",
+      "message templates",
+      "personalization details"
+    ],
+    "outputs": [
+      "personalized cold message",
+      "outreach copy"
+    ],
+    "app_cluster": [
+      "notion",
+      "gmail",
+      "linkedin"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 23,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "outreach_logging",
+    "label": "Outreach Activity Logging",
+    "description": "Log sent messages and outreach activities in the CRM system with proper attribution to sequences and campaigns.",
+    "action_verb": "log",
+    "inputs": [
+      "sent message",
+      "prospect record",
+      "sequence information"
+    ],
+    "outputs": [
+      "logged activity",
+      "updated contact timeline"
+    ],
+    "app_cluster": [
+      "salesforce",
+      "gmail"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 8,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "high",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "follow_up_sequence_management",
+    "label": "Follow-up Sequence Management",
+    "description": "Manage multi-touch cadences across email and LinkedIn, monitoring engagement signals and adjusting messaging based on prospect behavior.",
+    "action_verb": "sequence",
+    "inputs": [
+      "initial outreach",
+      "engagement signals",
+      "sequence templates"
+    ],
+    "outputs": [
+      "scheduled follow-ups",
+      "adjusted messaging",
+      "engagement tracking"
+    ],
+    "app_cluster": [
+      "outreach",
+      "gmail",
+      "linkedin"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 18,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "response_triage",
+    "label": "Response Triage and Reply",
+    "description": "Classify incoming prospect responses as hot, warm, cold, or unsubscribe and craft appropriate follow-up responses with urgency matching the classification.",
+    "action_verb": "classify",
+    "inputs": [
+      "prospect reply",
+      "conversation history"
+    ],
+    "outputs": [
+      "response classification",
+      "follow-up message",
+      "updated opportunity stage"
+    ],
+    "app_cluster": [
+      "gmail",
+      "salesforce",
+      "slack"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 13,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "discovery_call_prep",
+    "label": "Discovery Call Preparation",
+    "description": "Research company and attendees, build call agenda using qualification frameworks like MEDDIC, and review all prior touchpoints to avoid redundant questions.",
+    "action_verb": "prepare",
+    "inputs": [
+      "prospect information",
+      "company data",
+      "previous interactions",
+      "qualification framework"
+    ],
+    "outputs": [
+      "call agenda",
+      "qualification questions",
+      "research summary"
+    ],
+    "app_cluster": [
+      "google",
+      "crunchbase",
+      "linkedin",
+      "notion",
+      "salesforce"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 43,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "discovery_call_execution",
+    "label": "Discovery Call Execution",
+    "description": "Conduct qualification calls to understand pain points, budget, decision process, and timeline while maintaining a conversational flow focused on listening.",
+    "action_verb": "converse",
+    "inputs": [
+      "call agenda",
+      "qualification questions",
+      "prospect context"
+    ],
+    "outputs": [
+      "qualification insights",
+      "pain point identification",
+      "next steps",
+      "call recording"
+    ],
+    "app_cluster": [
+      "zoom",
+      "gong"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 38,
+      "std_minutes": 8
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "call_debrief_documentation",
+    "label": "Call Debrief and Documentation",
+    "description": "Review call transcripts and create structured summaries covering pain points, budget, timeline, and blockers while updating CRM qualification fields.",
+    "action_verb": "log",
+    "inputs": [
+      "call recording",
+      "call transcript",
+      "qualification framework"
+    ],
+    "outputs": [
+      "call summary",
+      "updated MEDDIC fields",
+      "follow-up tasks"
+    ],
+    "app_cluster": [
+      "gong",
+      "notion",
+      "salesforce",
+      "slack"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 23,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "high",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "stakeholder_mapping",
+    "label": "Stakeholder Mapping",
+    "description": "Identify and map key stakeholders including economic buyers, champions, and potential blockers within the prospect organization.",
+    "action_verb": "map",
+    "inputs": [
+      "discovery call insights",
+      "organizational information",
+      "linkedin profiles"
+    ],
+    "outputs": [
+      "stakeholder map",
+      "influence diagram",
+      "updated contact records"
+    ],
+    "app_cluster": [
+      "linkedin",
+      "notion",
+      "lucidchart",
+      "salesforce"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 30,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "demo_preparation",
+    "label": "Demo Preparation",
+    "description": "Coordinate demo logistics, customize demo flow based on discovery insights, and set up sandbox environments for prospect-specific use cases.",
+    "action_verb": "prepare",
+    "inputs": [
+      "discovery notes",
+      "stakeholder availability",
+      "use case requirements"
+    ],
+    "outputs": [
+      "demo agenda",
+      "customized demo environment",
+      "scheduled demo"
+    ],
+    "app_cluster": [
+      "calendly",
+      "notion",
+      "sandbox"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 50,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "demo_execution",
+    "label": "Demo Execution",
+    "description": "Conduct product demonstrations as interactive workshops, showing specific problem-solving for the prospect's use cases while reading room dynamics.",
+    "action_verb": "present",
+    "inputs": [
+      "demo agenda",
+      "customized demo environment",
+      "prospect context"
+    ],
+    "outputs": [
+      "demo feedback",
+      "stakeholder reactions",
+      "next steps",
+      "demo recording"
+    ],
+    "app_cluster": [
+      "zoom",
+      "gong"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 53,
+      "std_minutes": 8
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "objection_handling",
+    "label": "Objection Handling",
+    "description": "Address prospect concerns about price, timing, or competitive alternatives through written responses, case studies, and financial justification tools.",
+    "action_verb": "respond",
+    "inputs": [
+      "prospect objections",
+      "case studies",
+      "competitive intelligence",
+      "roi calculator"
+    ],
+    "outputs": [
+      "objection responses",
+      "supporting documentation",
+      "revised proposal"
+    ],
+    "app_cluster": [
+      "notion",
+      "google drive",
+      "slack"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 35,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "proposal_creation",
+    "label": "Proposal Creation",
+    "description": "Build comprehensive proposals including pricing tiers, scope of work, timelines, and ROI projections while obtaining necessary approvals for discounts.",
+    "action_verb": "produce",
+    "inputs": [
+      "qualification data",
+      "pricing guidelines",
+      "sow template",
+      "manager approval"
+    ],
+    "outputs": [
+      "formal proposal",
+      "pricing document",
+      "project timeline"
+    ],
+    "app_cluster": [
+      "salesforce cpq",
+      "google docs",
+      "gmail",
+      "slack"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 65,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "contract_negotiation",
+    "label": "Contract Negotiation",
+    "description": "Manage contract negotiations including legal redlines, MSA customizations, and version control while working within time constraints.",
+    "action_verb": "negotiate",
+    "inputs": [
+      "initial proposal",
+      "legal requirements",
+      "prospect terms",
+      "deadline constraints"
+    ],
+    "outputs": [
+      "negotiated contract",
+      "agreed terms",
+      "final pricing"
+    ],
+    "app_cluster": [
+      "email",
+      "google docs"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 90,
+      "std_minutes": 20
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  },
+  {
+    "node_id": "deal_closure_handoff",
+    "label": "Deal Closure and Handoff",
+    "description": "Finalize signed contracts, update CRM systems, and create comprehensive handoff documentation for Customer Success including stakeholder details and commitments.",
+    "action_verb": "handoff",
+    "inputs": [
+      "signed contract",
+      "payment terms",
+      "stakeholder information",
+      "sales commitments"
+    ],
+    "outputs": [
+      "closed opportunity",
+      "handoff documentation",
+      "kickoff meeting"
+    ],
+    "app_cluster": [
+      "docusign",
+      "salesforce",
+      "notion"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 28,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "3fb77285-9287-48a1-b01e-8b69a530583a.txt"
+    ]
+  }
+]

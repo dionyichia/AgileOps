@@ -1,0 +1,2299 @@
+{
+  "metadata": {
+    "states": [
+      "prospect_sourcing",
+      "cold_outreach_drafting",
+      "outreach_activity_logging",
+      "follow_up_sequence_management",
+      "response_triage",
+      "discovery_call_preparation",
+      "discovery_call_execution",
+      "call_debrief_and_crm_update",
+      "stakeholder_mapping",
+      "demo_preparation",
+      "demo_execution",
+      "objection_handling",
+      "proposal_drafting",
+      "contract_negotiation",
+      "deal_closure_and_handoff",
+      "END"
+    ],
+    "state_index": {
+      "prospect_sourcing": 0,
+      "cold_outreach_drafting": 1,
+      "outreach_activity_logging": 2,
+      "follow_up_sequence_management": 3,
+      "response_triage": 4,
+      "discovery_call_preparation": 5,
+      "discovery_call_execution": 6,
+      "call_debrief_and_crm_update": 7,
+      "stakeholder_mapping": 8,
+      "demo_preparation": 9,
+      "demo_execution": 10,
+      "objection_handling": 11,
+      "proposal_drafting": 12,
+      "contract_negotiation": 13,
+      "deal_closure_and_handoff": 14,
+      "END": 15
+    },
+    "n_states": 16,
+    "n_sequences": 20,
+    "n_transitions_observed": 180,
+    "non_zero_edges": 19,
+    "include_retries": false,
+    "note": "P is row-stochastic. Each row sums to 1.0 (or 0 if state never observed as source)."
+  },
+  "count_matrix": [
+    [
+      0,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      14,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      6
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      14,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      14,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      14,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      4
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      7,
+      0,
+      0,
+      0,
+      3
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      7,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      5,
+      0,
+      2
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      5,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      5
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "probability_matrix": [
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.7,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.3
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.7142857142857143,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.2857142857142857
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.7,
+      0.0,
+      0.0,
+      0.0,
+      0.3
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.7142857142857143,
+      0.0,
+      0.2857142857142857
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "node_durations": {
+    "prospect_sourcing": [
+      37.5,
+      30.5,
+      35.6,
+      32.0,
+      28.9,
+      25.6,
+      18.1,
+      29.5,
+      27.9,
+      34.2,
+      36.3,
+      49.5,
+      54.7,
+      37.6,
+      20.0,
+      23.9,
+      35.3,
+      29.1,
+      54.3,
+      33.4
+    ],
+    "cold_outreach_drafting": [
+      21.6,
+      17.8,
+      18.5,
+      27.6,
+      17.3,
+      14.3,
+      18.7,
+      18.4,
+      20.7,
+      23.2,
+      16.2,
+      29.8,
+      24.5,
+      28.2,
+      18.4,
+      20.5,
+      25.8,
+      13.9,
+      23.7,
+      24.3
+    ],
+    "outreach_activity_logging": [
+      8.3,
+      9.9,
+      5.8,
+      7.0,
+      5.0,
+      3.2,
+      8.6,
+      5.6,
+      6.3,
+      7.3,
+      6.9,
+      10.3,
+      8.9,
+      11.4,
+      3.1,
+      6.4,
+      6.9,
+      5.9,
+      8.9,
+      5.5
+    ],
+    "follow_up_sequence_management": [
+      21.6,
+      16.3,
+      13.8,
+      9.2,
+      16.0,
+      12.0,
+      17.2,
+      18.5,
+      19.7,
+      15.2,
+      16.1,
+      11.0,
+      14.8,
+      15.5
+    ],
+    "response_triage": [
+      11.3,
+      12.2,
+      14.5,
+      7.4,
+      13.7,
+      7.2,
+      11.4,
+      19.2,
+      10.3,
+      10.5,
+      8.9,
+      6.4,
+      6.9,
+      12.2
+    ],
+    "discovery_call_preparation": [
+      40.8,
+      34.9,
+      35.9,
+      31.3,
+      33.2,
+      31.1,
+      43.5,
+      45.5,
+      52.8,
+      34.9,
+      29.8,
+      36.0,
+      34.4,
+      53.6
+    ],
+    "discovery_call_execution": [
+      49.6,
+      32.6,
+      38.7,
+      38.1,
+      37.6,
+      36.9,
+      36.7,
+      50.9,
+      37.8,
+      32.4,
+      22.5,
+      35.3,
+      30.1,
+      22.1
+    ],
+    "call_debrief_and_crm_update": [
+      24.3,
+      16.1,
+      12.3,
+      18.7,
+      16.0,
+      24.7,
+      18.3,
+      15.2,
+      19.0,
+      14.2
+    ],
+    "stakeholder_mapping": [
+      32.7,
+      23.4,
+      25.6,
+      25.8,
+      24.5,
+      45.2,
+      25.5,
+      23.6,
+      19.8,
+      25.8
+    ],
+    "demo_preparation": [
+      47.7,
+      51.0,
+      38.1,
+      47.7,
+      44.8,
+      58.6,
+      36.4,
+      41.7,
+      32.4,
+      42.8
+    ],
+    "demo_execution": [
+      48.3,
+      57.9,
+      49.8,
+      54.1,
+      36.0,
+      62.4,
+      56.5,
+      43.8,
+      38.0,
+      50.3
+    ],
+    "objection_handling": [
+      36.2,
+      32.7,
+      14.9,
+      26.4,
+      30.4,
+      32.1,
+      21.1
+    ],
+    "proposal_drafting": [
+      55.4,
+      47.8,
+      52.4,
+      50.0,
+      46.0,
+      52.1,
+      47.3
+    ],
+    "contract_negotiation": [
+      79.4,
+      67.2,
+      67.4,
+      83.3,
+      80.7
+    ],
+    "deal_closure_and_handoff": [
+      24.0,
+      22.6,
+      21.9,
+      24.0,
+      23.1
+    ]
+  },
+  "transition_dwell": {
+    "prospect_sourcing,cold_outreach_drafting": [
+      257340.0,
+      84360.0,
+      178800.0,
+      254640.0,
+      345840.0,
+      346800.0,
+      176460.0,
+      340440.0,
+      256620.0,
+      342000.0,
+      350100.0,
+      351540.0,
+      351780.0,
+      346380.0,
+      349620.0,
+      264120.0,
+      348240.0,
+      175440.0,
+      94320.0,
+      261240.0
+    ],
+    "cold_outreach_drafting,outreach_activity_logging": [
+      85860.0,
+      180240.0,
+      85260.0,
+      268200.0,
+      177600.0,
+      339600.0,
+      262200.0,
+      259320.0,
+      259140.0,
+      177840.0,
+      349020.0,
+      172200.0,
+      342660.0,
+      84420.0,
+      259740.0,
+      342060.0,
+      167640.0,
+      342720.0,
+      169920.0,
+      344160.0
+    ],
+    "outreach_activity_logging,follow_up_sequence_management": [
+      94020.0,
+      171300.0,
+      84660.0,
+      257880.0,
+      95700.0,
+      79740.0,
+      254880.0,
+      336300.0,
+      262320.0,
+      85620.0,
+      259320.0,
+      267840.0,
+      83040.0,
+      85500.0
+    ],
+    "follow_up_sequence_management,response_triage": [
+      339360.0,
+      251040.0,
+      165840.0,
+      167040.0,
+      78600.0,
+      90540.0,
+      260940.0,
+      175320.0,
+      85620.0,
+      81540.0,
+      258960.0,
+      252960.0,
+      171060.0,
+      91680.0
+    ],
+    "response_triage,discovery_call_preparation": [
+      1080.0,
+      1080.0,
+      1140.0,
+      720.0,
+      1260.0,
+      840.0,
+      1080.0,
+      1200.0,
+      780.0,
+      960.0,
+      900.0,
+      480.0,
+      480.0,
+      840.0
+    ],
+    "discovery_call_preparation,discovery_call_execution": [
+      2520.0,
+      2340.0,
+      2160.0,
+      2340.0,
+      2040.0,
+      2040.0,
+      2700.0,
+      3120.0,
+      3480.0,
+      2280.0,
+      1980.0,
+      4500.0,
+      2400.0,
+      7500.0
+    ],
+    "discovery_call_execution,call_debrief_and_crm_update": [
+      3000.0,
+      2760.0,
+      4560.0,
+      2280.0,
+      4680.0,
+      9420.0,
+      3840.0,
+      1560.0,
+      2160.0,
+      2160.0
+    ],
+    "call_debrief_and_crm_update,stakeholder_mapping": [
+      3360.0,
+      960.0,
+      960.0,
+      2520.0,
+      5760.0,
+      1920.0,
+      1440.0,
+      1200.0,
+      2880.0,
+      1200.0
+    ],
+    "stakeholder_mapping,demo_preparation": [
+      2100.0,
+      1860.0,
+      1680.0,
+      1980.0,
+      1920.0,
+      3180.0,
+      1980.0,
+      1620.0,
+      4980.0,
+      1800.0
+    ],
+    "demo_preparation,demo_execution": [
+      4920.0,
+      3480.0,
+      9300.0,
+      8640.0,
+      2760.0,
+      3840.0,
+      2340.0,
+      4560.0,
+      1980.0,
+      2820.0
+    ],
+    "demo_execution,objection_handling": [
+      3240.0,
+      3120.0,
+      3300.0,
+      2160.0,
+      4980.0,
+      2880.0,
+      10260.0
+    ],
+    "objection_handling,proposal_drafting": [
+      2640.0,
+      2100.0,
+      4560.0,
+      2040.0,
+      1920.0,
+      2280.0,
+      1680.0
+    ],
+    "proposal_drafting,contract_negotiation": [
+      153960.0,
+      62820.0,
+      150780.0,
+      333720.0,
+      244440.0
+    ],
+    "contract_negotiation,deal_closure_and_handoff": [
+      90300.0,
+      84540.0,
+      89940.0,
+      342120.0,
+      342420.0
+    ]
+  },
+  "edge_list": [
+    {
+      "source": "prospect_sourcing",
+      "target": "cold_outreach_drafting",
+      "probability": 1.0,
+      "count": 20,
+      "time_stats": {
+        "mean": 273804.0,
+        "median": 302280.0,
+        "std": 87055.9607608807,
+        "p90": 350244.0,
+        "n": 20
+      }
+    },
+    {
+      "source": "cold_outreach_drafting",
+      "target": "outreach_activity_logging",
+      "probability": 1.0,
+      "count": 20,
+      "time_stats": {
+        "mean": 233490.0,
+        "median": 259230.0,
+        "std": 90474.56382873586,
+        "p90": 342864.0,
+        "n": 20
+      }
+    },
+    {
+      "source": "outreach_activity_logging",
+      "target": "follow_up_sequence_management",
+      "probability": 0.7,
+      "count": 14,
+      "time_stats": {
+        "mean": 172722.85714285713,
+        "median": 133500.0,
+        "std": 91456.59137603178,
+        "p90": 266184.0,
+        "n": 14
+      }
+    },
+    {
+      "source": "outreach_activity_logging",
+      "target": "END",
+      "probability": 0.3,
+      "count": 6
+    },
+    {
+      "source": "follow_up_sequence_management",
+      "target": "response_triage",
+      "probability": 1.0,
+      "count": 14,
+      "time_stats": {
+        "mean": 176464.2857142857,
+        "median": 169050.0,
+        "std": 81737.43824101708,
+        "p90": 260346.0,
+        "n": 14
+      }
+    },
+    {
+      "source": "response_triage",
+      "target": "discovery_call_preparation",
+      "probability": 1.0,
+      "count": 14,
+      "time_stats": {
+        "mean": 917.1428571428571,
+        "median": 930.0,
+        "std": 236.14246823924418,
+        "p90": 1182.0,
+        "n": 14
+      }
+    },
+    {
+      "source": "discovery_call_preparation",
+      "target": "discovery_call_execution",
+      "probability": 1.0,
+      "count": 14,
+      "time_stats": {
+        "mean": 2957.1428571428573,
+        "median": 2370.0,
+        "std": 1423.73466915829,
+        "p90": 4194.000000000001,
+        "n": 14
+      }
+    },
+    {
+      "source": "discovery_call_execution",
+      "target": "call_debrief_and_crm_update",
+      "probability": 0.7143,
+      "count": 10,
+      "time_stats": {
+        "mean": 3642.0,
+        "median": 2880.0,
+        "std": 2170.648750949817,
+        "p90": 5153.999999999998,
+        "n": 10
+      }
+    },
+    {
+      "source": "discovery_call_execution",
+      "target": "END",
+      "probability": 0.2857,
+      "count": 4
+    },
+    {
+      "source": "call_debrief_and_crm_update",
+      "target": "stakeholder_mapping",
+      "probability": 1.0,
+      "count": 10,
+      "time_stats": {
+        "mean": 2220.0,
+        "median": 1680.0,
+        "std": 1425.1736736271828,
+        "p90": 3599.999999999999,
+        "n": 10
+      }
+    },
+    {
+      "source": "stakeholder_mapping",
+      "target": "demo_preparation",
+      "probability": 1.0,
+      "count": 10,
+      "time_stats": {
+        "mean": 2310.0,
+        "median": 1950.0,
+        "std": 981.6007334960585,
+        "p90": 3359.9999999999995,
+        "n": 10
+      }
+    },
+    {
+      "source": "demo_preparation",
+      "target": "demo_execution",
+      "probability": 1.0,
+      "count": 10,
+      "time_stats": {
+        "mean": 4464.0,
+        "median": 3660.0,
+        "std": 2422.5738378839974,
+        "p90": 8706.0,
+        "n": 10
+      }
+    },
+    {
+      "source": "demo_execution",
+      "target": "objection_handling",
+      "probability": 0.7,
+      "count": 7,
+      "time_stats": {
+        "mean": 4277.142857142857,
+        "median": 3240.0,
+        "std": 2566.051520948725,
+        "p90": 7092.000000000002,
+        "n": 7
+      }
+    },
+    {
+      "source": "demo_execution",
+      "target": "END",
+      "probability": 0.3,
+      "count": 3
+    },
+    {
+      "source": "objection_handling",
+      "target": "proposal_drafting",
+      "probability": 1.0,
+      "count": 7,
+      "time_stats": {
+        "mean": 2460.0,
+        "median": 2100.0,
+        "std": 900.8567350821423,
+        "p90": 3408.000000000001,
+        "n": 7
+      }
+    },
+    {
+      "source": "proposal_drafting",
+      "target": "contract_negotiation",
+      "probability": 0.7143,
+      "count": 5,
+      "time_stats": {
+        "mean": 189144.0,
+        "median": 153960.0,
+        "std": 92333.4508398771,
+        "p90": 298008.0,
+        "n": 5
+      }
+    },
+    {
+      "source": "proposal_drafting",
+      "target": "END",
+      "probability": 0.2857,
+      "count": 2
+    },
+    {
+      "source": "contract_negotiation",
+      "target": "deal_closure_and_handoff",
+      "probability": 1.0,
+      "count": 5,
+      "time_stats": {
+        "mean": 189864.0,
+        "median": 90300.0,
+        "std": 124455.74596618672,
+        "p90": 342300.0,
+        "n": 5
+      }
+    },
+    {
+      "source": "deal_closure_and_handoff",
+      "target": "END",
+      "probability": 1.0,
+      "count": 5
+    }
+  ],
+  "sequences": [
+    {
+      "deal": "('emp_001', 'deal_a5209e')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-01-08 08:45"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-01-11 08:14"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-01-12 08:05"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-01-13 10:12"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-01-17 08:28"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-01-17 08:46"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-01-17 09:28"
+        },
+        {
+          "node": "call_debrief_and_crm_update",
+          "timestamp": "2024-01-17 10:18"
+        },
+        {
+          "node": "stakeholder_mapping",
+          "timestamp": "2024-01-17 11:14"
+        },
+        {
+          "node": "demo_preparation",
+          "timestamp": "2024-01-17 11:49"
+        },
+        {
+          "node": "demo_execution",
+          "timestamp": "2024-01-17 13:11"
+        },
+        {
+          "node": "objection_handling",
+          "timestamp": "2024-01-17 14:05"
+        },
+        {
+          "node": "proposal_drafting",
+          "timestamp": "2024-01-17 14:49"
+        },
+        {
+          "node": "contract_negotiation",
+          "timestamp": "2024-01-19 09:35"
+        },
+        {
+          "node": "deal_closure_and_handoff",
+          "timestamp": "2024-01-20 10:40"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_001', 'deal_268911')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-01-10 09:26"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-01-11 08:52"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-01-13 10:56"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-01-15 10:31"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-01-18 08:15"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-01-18 08:33"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-01-18 09:12"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_001', 'deal_31788b')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-01-15 08:30"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-01-17 10:10"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-01-18 09:51"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_001', 'deal_e5b4bf')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-01-17 09:34"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-01-20 08:18"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-01-23 10:48"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-01-24 10:19"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-01-26 08:23"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-01-26 08:42"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-01-26 09:18"
+        },
+        {
+          "node": "call_debrief_and_crm_update",
+          "timestamp": "2024-01-26 10:04"
+        },
+        {
+          "node": "stakeholder_mapping",
+          "timestamp": "2024-01-26 10:20"
+        },
+        {
+          "node": "demo_preparation",
+          "timestamp": "2024-01-26 10:51"
+        },
+        {
+          "node": "demo_execution",
+          "timestamp": "2024-01-26 11:49"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_5949e7')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-01-22 08:55"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-01-26 08:59"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-01-28 10:19"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-01-31 09:57"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-02-02 08:21"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-02-02 08:33"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-02-02 09:12"
+        },
+        {
+          "node": "call_debrief_and_crm_update",
+          "timestamp": "2024-02-02 10:28"
+        },
+        {
+          "node": "stakeholder_mapping",
+          "timestamp": "2024-02-02 10:44"
+        },
+        {
+          "node": "demo_preparation",
+          "timestamp": "2024-02-02 11:12"
+        },
+        {
+          "node": "demo_execution",
+          "timestamp": "2024-02-02 13:47"
+        },
+        {
+          "node": "objection_handling",
+          "timestamp": "2024-02-02 14:39"
+        },
+        {
+          "node": "proposal_drafting",
+          "timestamp": "2024-02-02 15:14"
+        },
+        {
+          "node": "contract_negotiation",
+          "timestamp": "2024-02-03 08:41"
+        },
+        {
+          "node": "deal_closure_and_handoff",
+          "timestamp": "2024-02-04 08:10"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_4ea42b')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-01-24 09:32"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-01-28 09:52"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-02-01 08:12"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-02-02 10:47"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-02-03 08:37"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-02-03 08:58"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-02-03 09:32"
+        },
+        {
+          "node": "call_debrief_and_crm_update",
+          "timestamp": "2024-02-03 10:10"
+        },
+        {
+          "node": "stakeholder_mapping",
+          "timestamp": "2024-02-03 10:52"
+        },
+        {
+          "node": "demo_preparation",
+          "timestamp": "2024-02-03 11:25"
+        },
+        {
+          "node": "demo_execution",
+          "timestamp": "2024-02-03 13:49"
+        },
+        {
+          "node": "objection_handling",
+          "timestamp": "2024-02-03 14:44"
+        },
+        {
+          "node": "proposal_drafting",
+          "timestamp": "2024-02-03 16:00"
+        },
+        {
+          "node": "contract_negotiation",
+          "timestamp": "2024-02-05 09:53"
+        },
+        {
+          "node": "deal_closure_and_handoff",
+          "timestamp": "2024-02-06 10:52"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_17f5f6')",
+      "outcome": "no_response",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-01-29 08:40"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-01-31 09:41"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-02-03 10:31"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-02-04 08:40"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-02-05 09:49"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-02-05 10:03"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-02-05 10:37"
+        },
+        {
+          "node": "call_debrief_and_crm_update",
+          "timestamp": "2024-02-05 11:55"
+        },
+        {
+          "node": "stakeholder_mapping",
+          "timestamp": "2024-02-05 13:31"
+        },
+        {
+          "node": "demo_preparation",
+          "timestamp": "2024-02-05 14:03"
+        },
+        {
+          "node": "demo_execution",
+          "timestamp": "2024-02-05 14:49"
+        },
+        {
+          "node": "objection_handling",
+          "timestamp": "2024-02-05 15:25"
+        },
+        {
+          "node": "proposal_drafting",
+          "timestamp": "2024-02-05 15:59"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_1221f0')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-02-01 09:38"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-02-05 08:12"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-02-08 08:14"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_003', 'deal_8e130b')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-02-05 08:50"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-02-08 08:07"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-02-11 08:06"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_003', 'deal_135524')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-02-07 09:33"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-02-11 08:33"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-02-13 09:57"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_003', 'deal_dde623')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-02-12 08:35"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-02-16 09:50"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-02-20 10:47"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-02-23 09:35"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-02-26 10:04"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-02-26 10:22"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-02-26 11:07"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_004', 'deal_4f279b')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-02-14 09:15"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-02-18 10:54"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-02-20 10:44"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-02-24 08:09"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-02-26 08:51"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-02-26 09:11"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-02-26 10:03"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_004', 'deal_da2c6f')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-02-19 08:45"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-02-23 10:28"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-02-27 09:39"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-03-01 10:31"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-03-02 10:18"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-03-02 10:31"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-03-02 11:29"
+        },
+        {
+          "node": "call_debrief_and_crm_update",
+          "timestamp": "2024-03-02 14:06"
+        },
+        {
+          "node": "stakeholder_mapping",
+          "timestamp": "2024-03-02 14:38"
+        },
+        {
+          "node": "demo_preparation",
+          "timestamp": "2024-03-02 15:31"
+        },
+        {
+          "node": "demo_execution",
+          "timestamp": "2024-03-02 16:35"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_004', 'deal_713fda')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-02-21 09:57"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-02-25 10:10"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-02-26 09:37"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_657c52')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-02-26 08:30"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-03-01 09:37"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-03-04 09:46"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-03-05 09:33"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-03-06 08:12"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-03-06 08:28"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-03-06 09:06"
+        },
+        {
+          "node": "call_debrief_and_crm_update",
+          "timestamp": "2024-03-06 10:10"
+        },
+        {
+          "node": "stakeholder_mapping",
+          "timestamp": "2024-03-06 10:34"
+        },
+        {
+          "node": "demo_preparation",
+          "timestamp": "2024-03-06 11:07"
+        },
+        {
+          "node": "demo_execution",
+          "timestamp": "2024-03-06 11:46"
+        },
+        {
+          "node": "objection_handling",
+          "timestamp": "2024-03-06 13:09"
+        },
+        {
+          "node": "proposal_drafting",
+          "timestamp": "2024-03-06 13:41"
+        },
+        {
+          "node": "contract_negotiation",
+          "timestamp": "2024-03-10 10:23"
+        },
+        {
+          "node": "deal_closure_and_handoff",
+          "timestamp": "2024-03-14 09:25"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_8790dd')",
+      "outcome": "no_response",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-02-28 09:29"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-03-02 10:51"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-03-06 09:52"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-03-09 09:54"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-03-12 09:50"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-03-12 10:05"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-03-12 10:38"
+        },
+        {
+          "node": "call_debrief_and_crm_update",
+          "timestamp": "2024-03-12 11:04"
+        },
+        {
+          "node": "stakeholder_mapping",
+          "timestamp": "2024-03-12 11:24"
+        },
+        {
+          "node": "demo_preparation",
+          "timestamp": "2024-03-12 11:51"
+        },
+        {
+          "node": "demo_execution",
+          "timestamp": "2024-03-12 13:07"
+        },
+        {
+          "node": "objection_handling",
+          "timestamp": "2024-03-12 13:55"
+        },
+        {
+          "node": "proposal_drafting",
+          "timestamp": "2024-03-12 14:33"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_c571f3')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-03-04 08:55"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-03-08 09:39"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-03-10 08:13"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-03-13 10:37"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-03-16 08:53"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-03-16 09:01"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-03-16 10:16"
+        },
+        {
+          "node": "call_debrief_and_crm_update",
+          "timestamp": "2024-03-16 10:52"
+        },
+        {
+          "node": "stakeholder_mapping",
+          "timestamp": "2024-03-16 11:40"
+        },
+        {
+          "node": "demo_preparation",
+          "timestamp": "2024-03-16 13:03"
+        },
+        {
+          "node": "demo_execution",
+          "timestamp": "2024-03-16 13:36"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_b917fa')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-03-06 09:40"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-03-08 10:24"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-03-12 09:36"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-03-13 08:40"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-03-15 08:11"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-03-15 08:19"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-03-15 08:59"
+        },
+        {
+          "node": "call_debrief_and_crm_update",
+          "timestamp": "2024-03-15 09:35"
+        },
+        {
+          "node": "stakeholder_mapping",
+          "timestamp": "2024-03-15 09:55"
+        },
+        {
+          "node": "demo_preparation",
+          "timestamp": "2024-03-15 10:25"
+        },
+        {
+          "node": "demo_execution",
+          "timestamp": "2024-03-15 11:12"
+        },
+        {
+          "node": "objection_handling",
+          "timestamp": "2024-03-15 14:03"
+        },
+        {
+          "node": "proposal_drafting",
+          "timestamp": "2024-03-15 14:31"
+        },
+        {
+          "node": "contract_negotiation",
+          "timestamp": "2024-03-18 10:25"
+        },
+        {
+          "node": "deal_closure_and_handoff",
+          "timestamp": "2024-03-22 09:32"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_006', 'deal_0b282e')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-03-11 08:40"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-03-12 10:52"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-03-14 10:04"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_006', 'deal_72cdac')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "prospect_sourcing",
+          "timestamp": "2024-03-13 09:32"
+        },
+        {
+          "node": "cold_outreach_drafting",
+          "timestamp": "2024-03-16 10:06"
+        },
+        {
+          "node": "outreach_activity_logging",
+          "timestamp": "2024-03-20 09:42"
+        },
+        {
+          "node": "follow_up_sequence_management",
+          "timestamp": "2024-03-21 09:27"
+        },
+        {
+          "node": "response_triage",
+          "timestamp": "2024-03-22 10:55"
+        },
+        {
+          "node": "discovery_call_preparation",
+          "timestamp": "2024-03-22 11:09"
+        },
+        {
+          "node": "discovery_call_execution",
+          "timestamp": "2024-03-22 13:14"
+        }
+      ]
+    }
+  ],
+  "top_transitions": [
+    {
+      "from": "prospect_sourcing",
+      "to": "cold_outreach_drafting",
+      "count": 20
+    },
+    {
+      "from": "cold_outreach_drafting",
+      "to": "outreach_activity_logging",
+      "count": 20
+    },
+    {
+      "from": "outreach_activity_logging",
+      "to": "follow_up_sequence_management",
+      "count": 14
+    },
+    {
+      "from": "follow_up_sequence_management",
+      "to": "response_triage",
+      "count": 14
+    },
+    {
+      "from": "response_triage",
+      "to": "discovery_call_preparation",
+      "count": 14
+    },
+    {
+      "from": "discovery_call_preparation",
+      "to": "discovery_call_execution",
+      "count": 14
+    },
+    {
+      "from": "discovery_call_execution",
+      "to": "call_debrief_and_crm_update",
+      "count": 10
+    },
+    {
+      "from": "call_debrief_and_crm_update",
+      "to": "stakeholder_mapping",
+      "count": 10
+    },
+    {
+      "from": "stakeholder_mapping",
+      "to": "demo_preparation",
+      "count": 10
+    },
+    {
+      "from": "demo_preparation",
+      "to": "demo_execution",
+      "count": 10
+    },
+    {
+      "from": "demo_execution",
+      "to": "objection_handling",
+      "count": 7
+    },
+    {
+      "from": "objection_handling",
+      "to": "proposal_drafting",
+      "count": 7
+    },
+    {
+      "from": "proposal_drafting",
+      "to": "contract_negotiation",
+      "count": 5
+    },
+    {
+      "from": "contract_negotiation",
+      "to": "deal_closure_and_handoff",
+      "count": 5
+    }
+  ],
+  "graph": {
+    "prospect_sourcing": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "cold_outreach_drafting": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "outreach_activity_logging": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 0.7,
+        "time_samples": []
+      },
+      {
+        "target": "discovery_call_execution",
+        "probability": 0.3,
+        "time_samples": []
+      }
+    ],
+    "follow_up_sequence_management": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "response_triage": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "discovery_call_preparation": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 1.0,
+        "time_samples": [
+          2520.0,
+          2340.0,
+          2160.0,
+          2340.0,
+          2040.0,
+          2040.0,
+          2700.0,
+          3120.0,
+          3480.0,
+          2280.0,
+          1980.0,
+          4500.0,
+          2400.0,
+          7500.0
+        ]
+      }
+    ],
+    "discovery_call_execution": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 0.7143,
+        "time_samples": []
+      },
+      {
+        "target": "discovery_call_execution",
+        "probability": 0.2857,
+        "time_samples": []
+      }
+    ],
+    "call_debrief_and_crm_update": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "stakeholder_mapping": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "demo_preparation": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "demo_execution": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 0.7,
+        "time_samples": []
+      },
+      {
+        "target": "discovery_call_execution",
+        "probability": 0.3,
+        "time_samples": []
+      }
+    ],
+    "objection_handling": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "proposal_drafting": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 0.7143,
+        "time_samples": []
+      },
+      {
+        "target": "discovery_call_execution",
+        "probability": 0.2857,
+        "time_samples": []
+      }
+    ],
+    "contract_negotiation": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "deal_closure_and_handoff": [
+      {
+        "target": "discovery_call_execution",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "END": []
+  }
+}

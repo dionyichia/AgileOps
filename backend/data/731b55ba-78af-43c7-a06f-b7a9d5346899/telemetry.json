@@ -1,0 +1,4453 @@
+{
+  "metadata": {
+    "generated_at": "2026-04-07T15:17:35.245982",
+    "version": "1.0.0",
+    "description": "Synthetic telemetry for B2B sales pipeline Markov chain modelling. Each event is one node visit. Use (employee_id, deal_id) to reconstruct sequences. next_node field encodes the observed transition.",
+    "schema": {
+      "event_id": "Unique event identifier (UUID prefix)",
+      "timestamp": "Wall-clock start time of the node visit (YYYY-MM-DD HH:MM)",
+      "employee_id": "Rep identifier",
+      "role": "sdr | junior_ae | sales_intern",
+      "deal_id": "Ties events to a single deal thread for sequence reconstruction",
+      "node_id": "Workflow node visited (matches node schema)",
+      "duration_min": "Actual time spent on node (minutes)",
+      "apps_used": "Tools open during this node",
+      "is_pipeline_node": "False for interruptions like standups",
+      "outcome": "completed | closed_won | lost | disqualified | no_response | retry",
+      "next_node": "Observed successor node \u2014 key input for transition matrix",
+      "repeated_node": "True if this visit is a retry of the same node in the same deal"
+    },
+    "employees": [
+      {
+        "id": "emp_001",
+        "role": "sdr",
+        "name": "Jordan Mills",
+        "tenure_months": 4,
+        "performance": "average"
+      },
+      {
+        "id": "emp_002",
+        "role": "sdr",
+        "name": "Casey Rivera",
+        "tenure_months": 11,
+        "performance": "high"
+      },
+      {
+        "id": "emp_003",
+        "role": "sales_intern",
+        "name": "Alex Chen",
+        "tenure_months": 2,
+        "performance": "average"
+      },
+      {
+        "id": "emp_004",
+        "role": "sdr",
+        "name": "Morgan Patel",
+        "tenure_months": 7,
+        "performance": "low"
+      },
+      {
+        "id": "emp_005",
+        "role": "junior_ae",
+        "name": "Taylor Brooks",
+        "tenure_months": 14,
+        "performance": "high"
+      },
+      {
+        "id": "emp_006",
+        "role": "sales_intern",
+        "name": "Sam Nguyen",
+        "tenure_months": 3,
+        "performance": "average"
+      }
+    ],
+    "total_events": 248,
+    "total_deals": 20,
+    "pipeline_nodes": [
+      "prospect_research",
+      "draft_outreach",
+      "send_and_log",
+      "follow_up_sequence",
+      "response_triage",
+      "discovery_call_prep",
+      "discovery_call_execution",
+      "call_debrief_logging",
+      "stakeholder_mapping",
+      "demo_scheduling_and_prep",
+      "demo_delivery",
+      "objection_handling",
+      "proposal_drafting",
+      "contract_negotiation",
+      "deal_closure_and_handoff"
+    ],
+    "deal_outcome_counts": {
+      "won": 5,
+      "lost_early": 6,
+      "lost_post_discovery": 4,
+      "lost_post_demo": 3,
+      "ghosted_after_proposal": 2
+    }
+  },
+  "events": [
+    {
+      "event_id": "d9b6f42c",
+      "timestamp": "2024-01-08 08:45",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "prospect_research",
+      "duration_min": 41.5,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "09cadd7f",
+      "timestamp": "2024-01-10 09:00",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "team_standup",
+      "duration_min": 21.6,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "prospect_research"
+    },
+    {
+      "event_id": "a668e8d1",
+      "timestamp": "2024-01-10 09:24",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "prospect_research",
+      "duration_min": 25.6,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "56a9d8a1",
+      "timestamp": "2024-01-11 08:14",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "draft_outreach",
+      "duration_min": 22.8,
+      "apps_used": [
+        "gmail"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "daa7a693",
+      "timestamp": "2024-01-12 10:27",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "send_and_log",
+      "duration_min": 10.2,
+      "apps_used": [
+        "gmail"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "19cc5df6",
+      "timestamp": "2024-01-13 08:41",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "draft_outreach",
+      "duration_min": 14.1,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "0cc4fd80",
+      "timestamp": "2024-01-13 10:12",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "follow_up_sequence",
+      "duration_min": 32.5,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "97063e1d",
+      "timestamp": "2024-01-15 08:30",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_c3e9c8",
+      "node_id": "prospect_research",
+      "duration_min": 28.5,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "8444f6fc",
+      "timestamp": "2024-01-17 08:16",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "send_and_log",
+      "duration_min": 13.9,
+      "apps_used": [
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "44ba04da",
+      "timestamp": "2024-01-17 08:28",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "response_triage",
+      "duration_min": 12.7,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "7876c471",
+      "timestamp": "2024-01-17 08:48",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "discovery_call_prep",
+      "duration_min": 38.6,
+      "apps_used": [
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": false
+    },
+    {
+      "event_id": "31625455",
+      "timestamp": "2024-01-17 09:15",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "team_standup",
+      "duration_min": 21.0,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "prospect_research"
+    },
+    {
+      "event_id": "bcc04e60",
+      "timestamp": "2024-01-17 09:29",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "discovery_call_execution",
+      "duration_min": 53.8,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": false
+    },
+    {
+      "event_id": "8355e97c",
+      "timestamp": "2024-01-17 09:41",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "prospect_research",
+      "duration_min": 17.9,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "84fb5524",
+      "timestamp": "2024-01-17 10:25",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "call_debrief_logging",
+      "duration_min": 29.1,
+      "apps_used": [
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": true
+    },
+    {
+      "event_id": "aa1689fb",
+      "timestamp": "2024-01-17 10:49",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_c3e9c8",
+      "node_id": "draft_outreach",
+      "duration_min": 48.1,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "b18d1fd9",
+      "timestamp": "2024-01-17 11:01",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "call_debrief_logging",
+      "duration_min": 18.5,
+      "apps_used": [
+        "gong",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": true
+    },
+    {
+      "event_id": "1e296951",
+      "timestamp": "2024-01-17 11:24",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 36.6,
+      "apps_used": [
+        "linkedin",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_scheduling_and_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "b2ab5e7b",
+      "timestamp": "2024-01-17 13:11",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "demo_scheduling_and_prep",
+      "duration_min": 42.3,
+      "apps_used": [
+        "zoom",
+        "salesforce",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_delivery",
+      "repeated_node": false
+    },
+    {
+      "event_id": "c5dfed0e",
+      "timestamp": "2024-01-17 14:00",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "demo_delivery",
+      "duration_min": 46.4,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "objection_handling",
+      "repeated_node": false
+    },
+    {
+      "event_id": "5e0ebf54",
+      "timestamp": "2024-01-17 14:53",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "manager_1on1",
+      "duration_min": 31.9,
+      "apps_used": [
+        "zoom",
+        "notion"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "objection_handling"
+    },
+    {
+      "event_id": "f29a12fe",
+      "timestamp": "2024-01-17 15:27",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "objection_handling",
+      "duration_min": 16.3,
+      "apps_used": [
+        "gmail",
+        "notion",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "proposal_drafting",
+      "repeated_node": false
+    },
+    {
+      "event_id": "cd9f57df",
+      "timestamp": "2024-01-17 15:50",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "proposal_drafting",
+      "duration_min": 36.3,
+      "apps_used": [
+        "google_docs",
+        "salesforce",
+        "notion",
+        "gmail"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "contract_negotiation",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e752a4c7",
+      "timestamp": "2024-01-19 08:29",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "contract_negotiation",
+      "duration_min": 67.9,
+      "apps_used": [
+        "docusign",
+        "gmail",
+        "google_docs",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "deal_closure_and_handoff",
+      "repeated_node": false
+    },
+    {
+      "event_id": "c3c4e29f",
+      "timestamp": "2024-01-20 09:01",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_c3e9c8",
+      "node_id": "team_standup",
+      "duration_min": 19.9,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "send_and_log"
+    },
+    {
+      "event_id": "11ede636",
+      "timestamp": "2024-01-20 09:21",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_c3e9c8",
+      "node_id": "send_and_log",
+      "duration_min": 5.4,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "52e585a8",
+      "timestamp": "2024-01-21 08:59",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "draft_outreach",
+      "duration_min": 14.6,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "3f9ab04b",
+      "timestamp": "2024-01-21 10:20",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_bf8ff2",
+      "node_id": "deal_closure_and_handoff",
+      "duration_min": 19.5,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "slack",
+        "docusign"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "closed_won",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "8cff1670",
+      "timestamp": "2024-01-21 10:25",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "follow_up_sequence",
+      "duration_min": 16.5,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "330c949f",
+      "timestamp": "2024-01-22 08:15",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_c3e9c8",
+      "node_id": "follow_up_sequence",
+      "duration_min": 24.8,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "9fdba840",
+      "timestamp": "2024-01-23 10:19",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "send_and_log",
+      "duration_min": 8.6,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "9c96a7a9",
+      "timestamp": "2024-01-23 10:31",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "response_triage",
+      "duration_min": 14.4,
+      "apps_used": [
+        "gmail",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": true
+    },
+    {
+      "event_id": "8262e823",
+      "timestamp": "2024-01-23 10:51",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "response_triage",
+      "duration_min": 7.6,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "discovery_call_prep",
+      "repeated_node": true
+    },
+    {
+      "event_id": "c7cef90a",
+      "timestamp": "2024-01-23 11:02",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "discovery_call_prep",
+      "duration_min": 34.6,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": true
+    },
+    {
+      "event_id": "088887cc",
+      "timestamp": "2024-01-23 11:44",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "discovery_call_prep",
+      "duration_min": 43.7,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "discovery_call_execution",
+      "repeated_node": true
+    },
+    {
+      "event_id": "499d2cef",
+      "timestamp": "2024-01-23 13:00",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "discovery_call_execution",
+      "duration_min": 26.5,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": true
+    },
+    {
+      "event_id": "c35d11d8",
+      "timestamp": "2024-01-23 13:32",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "discovery_call_execution",
+      "duration_min": 41.8,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "call_debrief_logging",
+      "repeated_node": true
+    },
+    {
+      "event_id": "5f701ebc",
+      "timestamp": "2024-01-23 14:17",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "call_debrief_logging",
+      "duration_min": 17.7,
+      "apps_used": [
+        "gong",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": false
+    },
+    {
+      "event_id": "42088fd7",
+      "timestamp": "2024-01-23 14:42",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_77f354",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 27.0,
+      "apps_used": [
+        "linkedin",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "eda72223",
+      "timestamp": "2024-01-26 08:48",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_c3e9c8",
+      "node_id": "response_triage",
+      "duration_min": 8.3,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "disqualified",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "64eeb38d",
+      "timestamp": "2024-01-26 09:57",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "follow_up_sequence",
+      "duration_min": 24.0,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "d37652ff",
+      "timestamp": "2024-01-28 08:21",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "response_triage",
+      "duration_min": 15.1,
+      "apps_used": [
+        "slack",
+        "gmail"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "aecb1949",
+      "timestamp": "2024-01-28 08:41",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "discovery_call_prep",
+      "duration_min": 40.3,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": true
+    },
+    {
+      "event_id": "708f7768",
+      "timestamp": "2024-01-28 09:22",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "discovery_call_prep",
+      "duration_min": 37.7,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "discovery_call_execution",
+      "repeated_node": true
+    },
+    {
+      "event_id": "eaa72f03",
+      "timestamp": "2024-01-28 10:04",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "discovery_call_execution",
+      "duration_min": 23.2,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": false
+    },
+    {
+      "event_id": "846e8e16",
+      "timestamp": "2024-01-28 10:31",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "call_debrief_logging",
+      "duration_min": 16.9,
+      "apps_used": [
+        "gong",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": false
+    },
+    {
+      "event_id": "ebe00116",
+      "timestamp": "2024-01-28 10:53",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 25.3,
+      "apps_used": [
+        "linkedin",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_scheduling_and_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "bf981265",
+      "timestamp": "2024-01-28 11:21",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "demo_scheduling_and_prep",
+      "duration_min": 73.2,
+      "apps_used": [
+        "salesforce",
+        "zoom",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_delivery",
+      "repeated_node": false
+    },
+    {
+      "event_id": "206455b6",
+      "timestamp": "2024-01-28 13:01",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "demo_delivery",
+      "duration_min": 56.1,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "objection_handling",
+      "repeated_node": false
+    },
+    {
+      "event_id": "06cd48e0",
+      "timestamp": "2024-01-28 13:58",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_1e168d",
+      "node_id": "objection_handling",
+      "duration_min": 17.3,
+      "apps_used": [
+        "gmail",
+        "notion",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "19906e4f",
+      "timestamp": "2024-01-22 08:55",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "prospect_research",
+      "duration_min": 31.3,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "a2c55f6d",
+      "timestamp": "2024-01-24 09:05",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "team_standup",
+      "duration_min": 21.8,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "prospect_research"
+    },
+    {
+      "event_id": "4beadc49",
+      "timestamp": "2024-01-24 09:29",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "team_standup",
+      "duration_min": 18.1,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "draft_outreach"
+    },
+    {
+      "event_id": "3bffb89d",
+      "timestamp": "2024-01-24 09:31",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "prospect_research",
+      "duration_min": 22.4,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "da41d0bf",
+      "timestamp": "2024-01-24 09:49",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "draft_outreach",
+      "duration_min": 14.9,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "b75ffc8a",
+      "timestamp": "2024-01-25 08:29",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "draft_outreach",
+      "duration_min": 22.0,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "6fe76ece",
+      "timestamp": "2024-01-25 08:41",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "send_and_log",
+      "duration_min": 8.1,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "d9f6f61c",
+      "timestamp": "2024-01-26 08:10",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "follow_up_sequence",
+      "duration_min": 21.5,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "b96bf738",
+      "timestamp": "2024-01-26 08:34",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "send_and_log",
+      "duration_min": 11.4,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "a03e0863",
+      "timestamp": "2024-01-29 08:40",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "prospect_research",
+      "duration_min": 23.3,
+      "apps_used": [
+        "linkedin"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "77f26436",
+      "timestamp": "2024-01-29 08:56",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "follow_up_sequence",
+      "duration_min": 14.2,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "785ee189",
+      "timestamp": "2024-01-30 08:10",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "response_triage",
+      "duration_min": 16.7,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "8c1eff05",
+      "timestamp": "2024-01-30 08:34",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "discovery_call_prep",
+      "duration_min": 24.9,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e2153aea",
+      "timestamp": "2024-01-30 09:05",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "discovery_call_execution",
+      "duration_min": 27.3,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": false
+    },
+    {
+      "event_id": "759da155",
+      "timestamp": "2024-01-30 09:40",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "call_debrief_logging",
+      "duration_min": 19.9,
+      "apps_used": [
+        "gong",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": false
+    },
+    {
+      "event_id": "c3b708c0",
+      "timestamp": "2024-01-30 10:06",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 34.3,
+      "apps_used": [
+        "linkedin",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_scheduling_and_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "7c94b80d",
+      "timestamp": "2024-01-30 10:48",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "demo_scheduling_and_prep",
+      "duration_min": 33.7,
+      "apps_used": [
+        "calendly",
+        "zoom",
+        "notion",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_delivery",
+      "repeated_node": false
+    },
+    {
+      "event_id": "7ead53cc",
+      "timestamp": "2024-01-30 11:28",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "demo_delivery",
+      "duration_min": 39.4,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "objection_handling",
+      "repeated_node": true
+    },
+    {
+      "event_id": "f74021e4",
+      "timestamp": "2024-01-30 13:05",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "demo_delivery",
+      "duration_min": 28.3,
+      "apps_used": [
+        "notion",
+        "zoom"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "objection_handling",
+      "repeated_node": true
+    },
+    {
+      "event_id": "7a3a3970",
+      "timestamp": "2024-01-30 13:40",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "internal_meeting",
+      "duration_min": 25.6,
+      "apps_used": [
+        "zoom",
+        "slack",
+        "notion"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "objection_handling"
+    },
+    {
+      "event_id": "e94ea37a",
+      "timestamp": "2024-01-30 14:11",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "objection_handling",
+      "duration_min": 38.8,
+      "apps_used": [
+        "gmail",
+        "notion",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "proposal_drafting",
+      "repeated_node": false
+    },
+    {
+      "event_id": "04a5b137",
+      "timestamp": "2024-01-30 14:51",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "proposal_drafting",
+      "duration_min": 82.3,
+      "apps_used": [
+        "google_docs",
+        "salesforce",
+        "notion",
+        "gmail"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "contract_negotiation",
+      "repeated_node": false
+    },
+    {
+      "event_id": "8f78e486",
+      "timestamp": "2024-01-31 09:01",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "team_standup",
+      "duration_min": 22.6,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "draft_outreach"
+    },
+    {
+      "event_id": "091ce7a8",
+      "timestamp": "2024-01-31 09:25",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "draft_outreach",
+      "duration_min": 19.9,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "ab7a929d",
+      "timestamp": "2024-01-31 09:42",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "contract_negotiation",
+      "duration_min": 69.5,
+      "apps_used": [
+        "docusign",
+        "gmail",
+        "google_docs",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "deal_closure_and_handoff",
+      "repeated_node": false
+    },
+    {
+      "event_id": "96ac29a0",
+      "timestamp": "2024-02-01 09:20",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c442d5",
+      "node_id": "team_standup",
+      "duration_min": 18.3,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "prospect_research"
+    },
+    {
+      "event_id": "2091b33c",
+      "timestamp": "2024-02-01 09:40",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c442d5",
+      "node_id": "prospect_research",
+      "duration_min": 21.3,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "95bed206",
+      "timestamp": "2024-02-02 10:45",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "response_triage",
+      "duration_min": 21.9,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "a2c85879",
+      "timestamp": "2024-02-02 11:15",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "discovery_call_prep",
+      "duration_min": 13.2,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": false
+    },
+    {
+      "event_id": "a5dd68f1",
+      "timestamp": "2024-02-02 11:32",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "discovery_call_execution",
+      "duration_min": 38.6,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": false
+    },
+    {
+      "event_id": "4bd02d6e",
+      "timestamp": "2024-02-02 13:03",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "call_debrief_logging",
+      "duration_min": 18.2,
+      "apps_used": [
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": true
+    },
+    {
+      "event_id": "67c0a588",
+      "timestamp": "2024-02-02 13:23",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "call_debrief_logging",
+      "duration_min": 15.8,
+      "apps_used": [
+        "gong",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": true
+    },
+    {
+      "event_id": "d3e97e7d",
+      "timestamp": "2024-02-02 13:45",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 24.8,
+      "apps_used": [
+        "linkedin",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_scheduling_and_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "eb59d4bb",
+      "timestamp": "2024-02-02 14:14",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "demo_scheduling_and_prep",
+      "duration_min": 19.6,
+      "apps_used": [
+        "salesforce",
+        "zoom",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_delivery",
+      "repeated_node": false
+    },
+    {
+      "event_id": "d5843f98",
+      "timestamp": "2024-02-02 14:33",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "demo_delivery",
+      "duration_min": 39.0,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "objection_handling",
+      "repeated_node": false
+    },
+    {
+      "event_id": "4df24555",
+      "timestamp": "2024-02-02 15:18",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "objection_handling",
+      "duration_min": 32.3,
+      "apps_used": [
+        "gmail",
+        "notion",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "proposal_drafting",
+      "repeated_node": false
+    },
+    {
+      "event_id": "0f1b41c0",
+      "timestamp": "2024-02-02 15:51",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "pipeline_review",
+      "duration_min": 49.8,
+      "apps_used": [
+        "salesforce",
+        "zoom",
+        "notion"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "proposal_drafting"
+    },
+    {
+      "event_id": "36451815",
+      "timestamp": "2024-02-02 16:48",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "proposal_drafting",
+      "duration_min": 43.6,
+      "apps_used": [
+        "google_docs",
+        "salesforce",
+        "notion",
+        "gmail"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "contract_negotiation",
+      "repeated_node": false
+    },
+    {
+      "event_id": "6b9bf99d",
+      "timestamp": "2024-02-03 08:42",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_fc02a0",
+      "node_id": "deal_closure_and_handoff",
+      "duration_min": 32.1,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "slack",
+        "docusign"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "closed_won",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "8a4c3b7e",
+      "timestamp": "2024-02-03 09:27",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c442d5",
+      "node_id": "team_standup",
+      "duration_min": 19.2,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "draft_outreach"
+    },
+    {
+      "event_id": "b68d91f6",
+      "timestamp": "2024-02-03 09:47",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c442d5",
+      "node_id": "draft_outreach",
+      "duration_min": 22.3,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "3bbdf79c",
+      "timestamp": "2024-02-04 10:55",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "send_and_log",
+      "duration_min": 9.2,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "f483ec6a",
+      "timestamp": "2024-02-05 09:08",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "team_standup",
+      "duration_min": 16.0,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "contract_negotiation"
+    },
+    {
+      "event_id": "27ec127a",
+      "timestamp": "2024-02-05 09:24",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "contract_negotiation",
+      "duration_min": 56.0,
+      "apps_used": [
+        "docusign",
+        "gmail",
+        "google_docs",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "deal_closure_and_handoff",
+      "repeated_node": false
+    },
+    {
+      "event_id": "5522d253",
+      "timestamp": "2024-02-06 09:13",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "team_standup",
+      "duration_min": 24.6,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "deal_closure_and_handoff"
+    },
+    {
+      "event_id": "0e1c1ce2",
+      "timestamp": "2024-02-06 09:43",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c7b7fc",
+      "node_id": "deal_closure_and_handoff",
+      "duration_min": 25.2,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "slack",
+        "docusign"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "closed_won",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "900b8505",
+      "timestamp": "2024-02-06 10:06",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "follow_up_sequence",
+      "duration_min": 11.0,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "9159acd9",
+      "timestamp": "2024-02-06 10:54",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c442d5",
+      "node_id": "send_and_log",
+      "duration_min": 13.0,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": true
+    },
+    {
+      "event_id": "8aa8374c",
+      "timestamp": "2024-02-06 11:11",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c442d5",
+      "node_id": "send_and_log",
+      "duration_min": 6.8,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "follow_up_sequence",
+      "repeated_node": true
+    },
+    {
+      "event_id": "8ad8777d",
+      "timestamp": "2024-02-09 10:08",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c442d5",
+      "node_id": "follow_up_sequence",
+      "duration_min": 15.9,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "6b3e4c86",
+      "timestamp": "2024-02-10 08:12",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "response_triage",
+      "duration_min": 9.7,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "436c70dd",
+      "timestamp": "2024-02-10 08:26",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "discovery_call_prep",
+      "duration_min": 29.2,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": false
+    },
+    {
+      "event_id": "d2c89b6a",
+      "timestamp": "2024-02-10 09:01",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "discovery_call_execution",
+      "duration_min": 15.8,
+      "apps_used": [
+        "zoom",
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e3f48069",
+      "timestamp": "2024-02-10 09:20",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "call_debrief_logging",
+      "duration_min": 19.6,
+      "apps_used": [
+        "gong",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": false
+    },
+    {
+      "event_id": "06e5044c",
+      "timestamp": "2024-02-10 09:42",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 26.4,
+      "apps_used": [
+        "linkedin",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_scheduling_and_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "b6c4695b",
+      "timestamp": "2024-02-10 10:16",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "demo_scheduling_and_prep",
+      "duration_min": 40.1,
+      "apps_used": [
+        "calendly",
+        "zoom",
+        "notion",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_delivery",
+      "repeated_node": false
+    },
+    {
+      "event_id": "fe8e198a",
+      "timestamp": "2024-02-10 10:57",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "demo_delivery",
+      "duration_min": 38.8,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "objection_handling",
+      "repeated_node": false
+    },
+    {
+      "event_id": "3a6e5acf",
+      "timestamp": "2024-02-10 11:37",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "objection_handling",
+      "duration_min": 15.9,
+      "apps_used": [
+        "gmail",
+        "notion",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "proposal_drafting",
+      "repeated_node": false
+    },
+    {
+      "event_id": "94fd1b04",
+      "timestamp": "2024-02-10 11:55",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_50f8f7",
+      "node_id": "proposal_drafting",
+      "duration_min": 45.1,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "no_response",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "b683e297",
+      "timestamp": "2024-02-11 10:36",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_c442d5",
+      "node_id": "response_triage",
+      "duration_min": 10.8,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "disqualified",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "519c4046",
+      "timestamp": "2024-02-05 08:50",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_d0743f",
+      "node_id": "prospect_research",
+      "duration_min": 18.1,
+      "apps_used": [
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "ad92212a",
+      "timestamp": "2024-02-07 09:10",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_2f02b9",
+      "node_id": "team_standup",
+      "duration_min": 19.8,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "prospect_research"
+    },
+    {
+      "event_id": "620b7c6c",
+      "timestamp": "2024-02-07 09:33",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_2f02b9",
+      "node_id": "prospect_research",
+      "duration_min": 23.4,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "05225ce2",
+      "timestamp": "2024-02-08 09:28",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_d0743f",
+      "node_id": "team_standup",
+      "duration_min": 19.9,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "draft_outreach"
+    },
+    {
+      "event_id": "d4b80db5",
+      "timestamp": "2024-02-08 09:52",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_d0743f",
+      "node_id": "draft_outreach",
+      "duration_min": 24.5,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "bfa6bab8",
+      "timestamp": "2024-02-10 10:05",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_d0743f",
+      "node_id": "send_and_log",
+      "duration_min": 20.1,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e6acc268",
+      "timestamp": "2024-02-11 08:43",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_d0743f",
+      "node_id": "follow_up_sequence",
+      "duration_min": 16.7,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "13372238",
+      "timestamp": "2024-02-11 09:25",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_2f02b9",
+      "node_id": "team_standup",
+      "duration_min": 25.7,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "draft_outreach"
+    },
+    {
+      "event_id": "71097e3e",
+      "timestamp": "2024-02-11 09:53",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_2f02b9",
+      "node_id": "draft_outreach",
+      "duration_min": 31.8,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "5968e3da",
+      "timestamp": "2024-02-12 08:30",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_d0743f",
+      "node_id": "response_triage",
+      "duration_min": 15.9,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "disqualified",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "3ccf2b29",
+      "timestamp": "2024-02-12 08:35",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_8f671d",
+      "node_id": "prospect_research",
+      "duration_min": 74.2,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "302c3c1f",
+      "timestamp": "2024-02-12 09:14",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_2f02b9",
+      "node_id": "team_standup",
+      "duration_min": 24.0,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "send_and_log"
+    },
+    {
+      "event_id": "68851f6f",
+      "timestamp": "2024-02-12 09:40",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_2f02b9",
+      "node_id": "send_and_log",
+      "duration_min": 5.7,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "0b3f454c",
+      "timestamp": "2024-02-14 08:29",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_2f02b9",
+      "node_id": "follow_up_sequence",
+      "duration_min": 31.1,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": true
+    },
+    {
+      "event_id": "4dac7702",
+      "timestamp": "2024-02-14 09:04",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_2f02b9",
+      "node_id": "follow_up_sequence",
+      "duration_min": 10.4,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "response_triage",
+      "repeated_node": true
+    },
+    {
+      "event_id": "a7543633",
+      "timestamp": "2024-02-14 10:55",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_8f671d",
+      "node_id": "draft_outreach",
+      "duration_min": 16.6,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "aba3bdaf",
+      "timestamp": "2024-02-16 10:17",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_8f671d",
+      "node_id": "send_and_log",
+      "duration_min": 6.5,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "5ee0d07d",
+      "timestamp": "2024-02-18 09:28",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_8f671d",
+      "node_id": "team_standup",
+      "duration_min": 20.5,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence"
+    },
+    {
+      "event_id": "3b5e5fe2",
+      "timestamp": "2024-02-18 09:50",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_8f671d",
+      "node_id": "follow_up_sequence",
+      "duration_min": 14.8,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "aa8bfd0a",
+      "timestamp": "2024-02-18 10:52",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_2f02b9",
+      "node_id": "response_triage",
+      "duration_min": 18.0,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "disqualified",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "a702b94a",
+      "timestamp": "2024-02-21 10:05",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_8f671d",
+      "node_id": "response_triage",
+      "duration_min": 7.2,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": true
+    },
+    {
+      "event_id": "450e6e18",
+      "timestamp": "2024-02-21 10:17",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_8f671d",
+      "node_id": "response_triage",
+      "duration_min": 14.4,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "discovery_call_prep",
+      "repeated_node": true
+    },
+    {
+      "event_id": "af9fd8be",
+      "timestamp": "2024-02-21 10:32",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_8f671d",
+      "node_id": "discovery_call_prep",
+      "duration_min": 28.7,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e19dfe8b",
+      "timestamp": "2024-02-21 11:04",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_8f671d",
+      "node_id": "discovery_call_execution",
+      "duration_min": 42.7,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": false
+    },
+    {
+      "event_id": "b8ef187e",
+      "timestamp": "2024-02-21 11:54",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_8f671d",
+      "node_id": "call_debrief_logging",
+      "duration_min": 15.7,
+      "apps_used": [
+        "gong",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": false
+    },
+    {
+      "event_id": "2d102c06",
+      "timestamp": "2024-02-21 13:12",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_8f671d",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 53.0,
+      "apps_used": [
+        "linkedin",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "bc80f31f",
+      "timestamp": "2024-02-14 09:00",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_e88c1b",
+      "node_id": "team_standup",
+      "duration_min": 16.1,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "prospect_research"
+    },
+    {
+      "event_id": "be87ce06",
+      "timestamp": "2024-02-14 09:22",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_e88c1b",
+      "node_id": "prospect_research",
+      "duration_min": 39.2,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "66e9bd1e",
+      "timestamp": "2024-02-16 09:14",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_e88c1b",
+      "node_id": "team_standup",
+      "duration_min": 24.1,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "draft_outreach"
+    },
+    {
+      "event_id": "80caba73",
+      "timestamp": "2024-02-16 09:40",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_e88c1b",
+      "node_id": "draft_outreach",
+      "duration_min": 18.9,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "d5c746d2",
+      "timestamp": "2024-02-19 08:45",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "prospect_research",
+      "duration_min": 27.8,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "36866c7b",
+      "timestamp": "2024-02-20 10:10",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_e88c1b",
+      "node_id": "send_and_log",
+      "duration_min": 10.9,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "ec543354",
+      "timestamp": "2024-02-21 08:30",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "draft_outreach",
+      "duration_min": 36.5,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "4165c219",
+      "timestamp": "2024-02-21 09:30",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_be1949",
+      "node_id": "team_standup",
+      "duration_min": 23.9,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "prospect_research"
+    },
+    {
+      "event_id": "a633d772",
+      "timestamp": "2024-02-21 09:37",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_e88c1b",
+      "node_id": "follow_up_sequence",
+      "duration_min": 37.4,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "c6ef389e",
+      "timestamp": "2024-02-21 09:55",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_be1949",
+      "node_id": "prospect_research",
+      "duration_min": 65.1,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "2150d2d1",
+      "timestamp": "2024-02-23 09:44",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "send_and_log",
+      "duration_min": 11.2,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e959c8eb",
+      "timestamp": "2024-02-24 08:19",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "follow_up_sequence",
+      "duration_min": 24.8,
+      "apps_used": [
+        "outreach",
+        "gmail"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "35a2b360",
+      "timestamp": "2024-02-25 08:48",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_be1949",
+      "node_id": "draft_outreach",
+      "duration_min": 22.1,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "1a4143bf",
+      "timestamp": "2024-02-25 08:55",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_e88c1b",
+      "node_id": "response_triage",
+      "duration_min": 8.8,
+      "apps_used": [
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e1beb4d0",
+      "timestamp": "2024-02-25 09:05",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_e88c1b",
+      "node_id": "discovery_call_prep",
+      "duration_min": 56.1,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": false
+    },
+    {
+      "event_id": "0669e492",
+      "timestamp": "2024-02-25 10:04",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_e88c1b",
+      "node_id": "discovery_call_execution",
+      "duration_min": 50.1,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e45b41d1",
+      "timestamp": "2024-02-25 10:57",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_e88c1b",
+      "node_id": "call_debrief_logging",
+      "duration_min": 36.5,
+      "apps_used": [
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": false
+    },
+    {
+      "event_id": "b9c89883",
+      "timestamp": "2024-02-25 11:41",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_e88c1b",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 23.8,
+      "apps_used": [
+        "linkedin",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "e27306b4",
+      "timestamp": "2024-02-28 09:45",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "response_triage",
+      "duration_min": 20.3,
+      "apps_used": [
+        "slack",
+        "gmail"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "02ac51b8",
+      "timestamp": "2024-02-28 10:06",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "discovery_call_prep",
+      "duration_min": 41.2,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": false
+    },
+    {
+      "event_id": "2bf416b1",
+      "timestamp": "2024-02-28 10:52",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "discovery_call_execution",
+      "duration_min": 49.8,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": true
+    },
+    {
+      "event_id": "127afdc0",
+      "timestamp": "2024-02-28 11:48",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "discovery_call_execution",
+      "duration_min": 50.4,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "call_debrief_logging",
+      "repeated_node": true
+    },
+    {
+      "event_id": "ae80f35e",
+      "timestamp": "2024-02-28 13:11",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "pipeline_review",
+      "duration_min": 27.9,
+      "apps_used": [
+        "salesforce",
+        "zoom",
+        "notion"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging"
+    },
+    {
+      "event_id": "81b1445f",
+      "timestamp": "2024-02-28 13:41",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "call_debrief_logging",
+      "duration_min": 54.2,
+      "apps_used": [
+        "gong",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": false
+    },
+    {
+      "event_id": "7a3108a2",
+      "timestamp": "2024-02-28 14:37",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 44.6,
+      "apps_used": [
+        "linkedin",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_scheduling_and_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "1efb07a7",
+      "timestamp": "2024-02-28 15:27",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "demo_scheduling_and_prep",
+      "duration_min": 40.7,
+      "apps_used": [
+        "calendly",
+        "zoom",
+        "notion",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_delivery",
+      "repeated_node": false
+    },
+    {
+      "event_id": "2ab947dd",
+      "timestamp": "2024-02-28 16:15",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "demo_delivery",
+      "duration_min": 72.9,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "objection_handling",
+      "repeated_node": false
+    },
+    {
+      "event_id": "76de7c76",
+      "timestamp": "2024-02-29 08:47",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_19604a",
+      "node_id": "objection_handling",
+      "duration_min": 29.6,
+      "apps_used": [
+        "gmail",
+        "notion",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "e64686ae",
+      "timestamp": "2024-02-29 09:01",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_be1949",
+      "node_id": "team_standup",
+      "duration_min": 24.8,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "send_and_log"
+    },
+    {
+      "event_id": "d5116bd7",
+      "timestamp": "2024-02-29 09:29",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_be1949",
+      "node_id": "send_and_log",
+      "duration_min": 11.7,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "30795056",
+      "timestamp": "2024-03-03 09:17",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_be1949",
+      "node_id": "team_standup",
+      "duration_min": 24.1,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence"
+    },
+    {
+      "event_id": "10111e3c",
+      "timestamp": "2024-03-03 09:48",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_be1949",
+      "node_id": "follow_up_sequence",
+      "duration_min": 47.0,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "ce3db74f",
+      "timestamp": "2024-03-05 08:15",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_be1949",
+      "node_id": "response_triage",
+      "duration_min": 15.8,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "disqualified",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "23d97aa1",
+      "timestamp": "2024-02-26 08:30",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "prospect_research",
+      "duration_min": 21.6,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "ce064c68",
+      "timestamp": "2024-02-28 09:00",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "team_standup",
+      "duration_min": 19.6,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "prospect_research"
+    },
+    {
+      "event_id": "57e94c25",
+      "timestamp": "2024-02-28 09:23",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "prospect_research",
+      "duration_min": 20.9,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "3c2db90e",
+      "timestamp": "2024-03-01 09:50",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "draft_outreach",
+      "duration_min": 13.8,
+      "apps_used": [
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "3f6f29c9",
+      "timestamp": "2024-03-03 09:36",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "draft_outreach",
+      "duration_min": 10.9,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "54b457be",
+      "timestamp": "2024-03-03 09:42",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "send_and_log",
+      "duration_min": 4.7,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "8f7eb3bb",
+      "timestamp": "2024-03-04 08:40",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "send_and_log",
+      "duration_min": 5.4,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "90c5bba0",
+      "timestamp": "2024-03-04 08:55",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "prospect_research",
+      "duration_min": 40.6,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "479d6db8",
+      "timestamp": "2024-03-06 08:11",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "follow_up_sequence",
+      "duration_min": 20.1,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e1a62081",
+      "timestamp": "2024-03-06 09:15",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "team_standup",
+      "duration_min": 23.8,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "prospect_research"
+    },
+    {
+      "event_id": "fc2b3a28",
+      "timestamp": "2024-03-06 09:43",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "prospect_research",
+      "duration_min": 21.5,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "dae2f55f",
+      "timestamp": "2024-03-06 09:47",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "follow_up_sequence",
+      "duration_min": 14.0,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "f8db68dc",
+      "timestamp": "2024-03-07 10:16",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "draft_outreach",
+      "duration_min": 28.5,
+      "apps_used": [
+        "gmail"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "d03b0963",
+      "timestamp": "2024-03-08 10:52",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "send_and_log",
+      "duration_min": 3.8,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "5b2785e0",
+      "timestamp": "2024-03-10 08:01",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "draft_outreach",
+      "duration_min": 17.6,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "74d68933",
+      "timestamp": "2024-03-10 09:19",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "team_standup",
+      "duration_min": 21.7,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "response_triage"
+    },
+    {
+      "event_id": "bfe83c12",
+      "timestamp": "2024-03-10 09:33",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "team_standup",
+      "duration_min": 15.3,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence"
+    },
+    {
+      "event_id": "3cf85089",
+      "timestamp": "2024-03-10 09:43",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "response_triage",
+      "duration_min": 12.6,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "1a88826f",
+      "timestamp": "2024-03-10 09:44",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "response_triage",
+      "duration_min": 12.3,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "38c6a062",
+      "timestamp": "2024-03-10 09:53",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "follow_up_sequence",
+      "duration_min": 17.6,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "ecb82441",
+      "timestamp": "2024-03-10 09:57",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "discovery_call_prep",
+      "duration_min": 45.1,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": false
+    },
+    {
+      "event_id": "47480abd",
+      "timestamp": "2024-03-10 09:59",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "discovery_call_prep",
+      "duration_min": 21.5,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": false
+    },
+    {
+      "event_id": "74b08126",
+      "timestamp": "2024-03-10 10:26",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "discovery_call_execution",
+      "duration_min": 32.1,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": false
+    },
+    {
+      "event_id": "40dd1133",
+      "timestamp": "2024-03-10 10:48",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "discovery_call_execution",
+      "duration_min": 30.5,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": false
+    },
+    {
+      "event_id": "f00b2200",
+      "timestamp": "2024-03-10 11:04",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "call_debrief_logging",
+      "duration_min": 20.2,
+      "apps_used": [
+        "gong",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": false
+    },
+    {
+      "event_id": "2c30b05a",
+      "timestamp": "2024-03-10 11:22",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "call_debrief_logging",
+      "duration_min": 29.9,
+      "apps_used": [
+        "gong",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": false
+    },
+    {
+      "event_id": "9e6e7cd6",
+      "timestamp": "2024-03-10 11:29",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 17.4,
+      "apps_used": [
+        "linkedin",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_scheduling_and_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "42dbf45a",
+      "timestamp": "2024-03-10 11:50",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "demo_scheduling_and_prep",
+      "duration_min": 42.3,
+      "apps_used": [
+        "calendly",
+        "zoom",
+        "notion",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_delivery",
+      "repeated_node": false
+    },
+    {
+      "event_id": "28ba4598",
+      "timestamp": "2024-03-10 11:56",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 21.8,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_scheduling_and_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "373440fe",
+      "timestamp": "2024-03-10 13:04",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "internal_meeting",
+      "duration_min": 40.7,
+      "apps_used": [
+        "zoom",
+        "slack",
+        "notion"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "demo_delivery"
+    },
+    {
+      "event_id": "fface9ba",
+      "timestamp": "2024-03-10 13:05",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "demo_scheduling_and_prep",
+      "duration_min": 106.5,
+      "apps_used": [
+        "calendly",
+        "salesforce",
+        "zoom"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_delivery",
+      "repeated_node": false
+    },
+    {
+      "event_id": "91f2f6c4",
+      "timestamp": "2024-03-10 13:51",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "demo_delivery",
+      "duration_min": 27.9,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "objection_handling",
+      "repeated_node": false
+    },
+    {
+      "event_id": "186ae68d",
+      "timestamp": "2024-03-10 14:26",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "objection_handling",
+      "duration_min": 32.3,
+      "apps_used": [
+        "gmail",
+        "notion",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "proposal_drafting",
+      "repeated_node": false
+    },
+    {
+      "event_id": "c51b105d",
+      "timestamp": "2024-03-10 14:57",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "manager_1on1",
+      "duration_min": 35.0,
+      "apps_used": [
+        "zoom",
+        "notion"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "demo_delivery"
+    },
+    {
+      "event_id": "445dc07f",
+      "timestamp": "2024-03-10 15:02",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_b4c5a4",
+      "node_id": "proposal_drafting",
+      "duration_min": 62.9,
+      "apps_used": [
+        "google_docs",
+        "salesforce",
+        "notion",
+        "gmail"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "no_response",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "0561c30b",
+      "timestamp": "2024-03-10 15:33",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "demo_delivery",
+      "duration_min": 31.3,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "objection_handling",
+      "repeated_node": true
+    },
+    {
+      "event_id": "87d085fe",
+      "timestamp": "2024-03-10 16:08",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "demo_delivery",
+      "duration_min": 28.7,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "objection_handling",
+      "repeated_node": true
+    },
+    {
+      "event_id": "8b45c8ab",
+      "timestamp": "2024-03-10 16:45",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "objection_handling",
+      "duration_min": 34.0,
+      "apps_used": [
+        "gmail",
+        "notion",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "proposal_drafting",
+      "repeated_node": false
+    },
+    {
+      "event_id": "40e3bff5",
+      "timestamp": "2024-03-10 17:25",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "proposal_drafting",
+      "duration_min": 48.2,
+      "apps_used": [
+        "google_docs",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "contract_negotiation",
+      "repeated_node": false
+    },
+    {
+      "event_id": "0b16c8f1",
+      "timestamp": "2024-03-11 08:09",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "contract_negotiation",
+      "duration_min": 102.9,
+      "apps_used": [
+        "docusign",
+        "gmail",
+        "google_docs",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "deal_closure_and_handoff",
+      "repeated_node": false
+    },
+    {
+      "event_id": "b91c7e62",
+      "timestamp": "2024-03-12 08:07",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_1dc09e",
+      "node_id": "deal_closure_and_handoff",
+      "duration_min": 26.5,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "slack",
+        "docusign"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "closed_won",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "3db8c973",
+      "timestamp": "2024-03-12 10:10",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "send_and_log",
+      "duration_min": 5.3,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "50cf1483",
+      "timestamp": "2024-03-14 10:52",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "response_triage",
+      "duration_min": 14.0,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "ca874a54",
+      "timestamp": "2024-03-14 11:07",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "discovery_call_prep",
+      "duration_min": 40.4,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": false
+    },
+    {
+      "event_id": "1f29e6c3",
+      "timestamp": "2024-03-14 11:53",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "discovery_call_execution",
+      "duration_min": 68.9,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": false
+    },
+    {
+      "event_id": "89e57f55",
+      "timestamp": "2024-03-14 13:07",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "call_debrief_logging",
+      "duration_min": 21.7,
+      "apps_used": [
+        "gong",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": false
+    },
+    {
+      "event_id": "60fb37c8",
+      "timestamp": "2024-03-14 13:33",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 36.4,
+      "apps_used": [
+        "linkedin",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_scheduling_and_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "44d7c460",
+      "timestamp": "2024-03-14 14:17",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "demo_scheduling_and_prep",
+      "duration_min": 56.4,
+      "apps_used": [
+        "calendly",
+        "zoom",
+        "notion",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_delivery",
+      "repeated_node": false
+    },
+    {
+      "event_id": "d7d46443",
+      "timestamp": "2024-03-14 15:22",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "demo_delivery",
+      "duration_min": 49.4,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "objection_handling",
+      "repeated_node": false
+    },
+    {
+      "event_id": "cf61ab4d",
+      "timestamp": "2024-03-14 16:14",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_25d4d3",
+      "node_id": "objection_handling",
+      "duration_min": 24.7,
+      "apps_used": [
+        "salesforce",
+        "slack",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "a4bf3ec8",
+      "timestamp": "2024-03-16 08:14",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "follow_up_sequence",
+      "duration_min": 14.9,
+      "apps_used": [
+        "outreach",
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "5a8c05d0",
+      "timestamp": "2024-03-20 08:41",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "response_triage",
+      "duration_min": 30.2,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "ed2b2325",
+      "timestamp": "2024-03-20 09:15",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "discovery_call_prep",
+      "duration_min": 17.2,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": false
+    },
+    {
+      "event_id": "aa12fd26",
+      "timestamp": "2024-03-20 09:36",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "discovery_call_execution",
+      "duration_min": 37.3,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "calendly"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": false
+    },
+    {
+      "event_id": "70b5e87a",
+      "timestamp": "2024-03-20 10:21",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "call_debrief_logging",
+      "duration_min": 9.8,
+      "apps_used": [
+        "gong",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": false
+    },
+    {
+      "event_id": "48007154",
+      "timestamp": "2024-03-20 10:34",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 20.2,
+      "apps_used": [
+        "linkedin",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_scheduling_and_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "6a59d9a7",
+      "timestamp": "2024-03-20 11:01",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "demo_scheduling_and_prep",
+      "duration_min": 59.2,
+      "apps_used": [
+        "calendly",
+        "zoom",
+        "notion",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "demo_delivery",
+      "repeated_node": false
+    },
+    {
+      "event_id": "cca11609",
+      "timestamp": "2024-03-20 13:13",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "demo_delivery",
+      "duration_min": 42.4,
+      "apps_used": [
+        "zoom",
+        "gong",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "objection_handling",
+      "repeated_node": false
+    },
+    {
+      "event_id": "b017464a",
+      "timestamp": "2024-03-20 13:55",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "objection_handling",
+      "duration_min": 18.2,
+      "apps_used": [
+        "gmail",
+        "notion",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "proposal_drafting",
+      "repeated_node": false
+    },
+    {
+      "event_id": "3eddab74",
+      "timestamp": "2024-03-20 14:18",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "proposal_drafting",
+      "duration_min": 40.8,
+      "apps_used": [
+        "google_docs",
+        "salesforce",
+        "notion",
+        "gmail"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "contract_negotiation",
+      "repeated_node": false
+    },
+    {
+      "event_id": "13a9fccf",
+      "timestamp": "2024-03-24 09:21",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "team_standup",
+      "duration_min": 23.4,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "contract_negotiation"
+    },
+    {
+      "event_id": "589c959a",
+      "timestamp": "2024-03-24 09:48",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "contract_negotiation",
+      "duration_min": 50.0,
+      "apps_used": [
+        "docusign",
+        "gmail",
+        "google_docs",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "deal_closure_and_handoff",
+      "repeated_node": false
+    },
+    {
+      "event_id": "35cbf3e7",
+      "timestamp": "2024-03-27 08:44",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_3afd65",
+      "node_id": "deal_closure_and_handoff",
+      "duration_min": 24.2,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "slack",
+        "docusign"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "closed_won",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "fab99002",
+      "timestamp": "2024-03-11 08:40",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_e0cc8e",
+      "node_id": "prospect_research",
+      "duration_min": 35.6,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e82dc7f9",
+      "timestamp": "2024-03-13 09:05",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_1b8cd2",
+      "node_id": "team_standup",
+      "duration_min": 16.7,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "prospect_research"
+    },
+    {
+      "event_id": "c9bea756",
+      "timestamp": "2024-03-13 09:26",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_1b8cd2",
+      "node_id": "prospect_research",
+      "duration_min": 46.9,
+      "apps_used": [
+        "linkedin",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "draft_outreach",
+      "repeated_node": false
+    },
+    {
+      "event_id": "d11ead45",
+      "timestamp": "2024-03-15 09:42",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_e0cc8e",
+      "node_id": "draft_outreach",
+      "duration_min": 18.8,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "5f43133f",
+      "timestamp": "2024-03-16 10:54",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_1b8cd2",
+      "node_id": "draft_outreach",
+      "duration_min": 17.8,
+      "apps_used": [
+        "gmail",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "send_and_log",
+      "repeated_node": false
+    },
+    {
+      "event_id": "02d5157f",
+      "timestamp": "2024-03-17 09:02",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_e0cc8e",
+      "node_id": "team_standup",
+      "duration_min": 30.7,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "send_and_log"
+    },
+    {
+      "event_id": "32d7b633",
+      "timestamp": "2024-03-17 09:33",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_e0cc8e",
+      "node_id": "send_and_log",
+      "duration_min": 10.1,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "876038c8",
+      "timestamp": "2024-03-20 10:02",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_1b8cd2",
+      "node_id": "send_and_log",
+      "duration_min": 7.7,
+      "apps_used": [
+        "gmail",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "follow_up_sequence",
+      "repeated_node": false
+    },
+    {
+      "event_id": "eeb3afe6",
+      "timestamp": "2024-03-21 08:33",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_e0cc8e",
+      "node_id": "follow_up_sequence",
+      "duration_min": 8.2,
+      "apps_used": [
+        "outreach",
+        "gmail"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "2a8fc312",
+      "timestamp": "2024-03-23 08:30",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_e0cc8e",
+      "node_id": "response_triage",
+      "duration_min": 15.2,
+      "apps_used": [
+        "gmail",
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "disqualified",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "2b8d6211",
+      "timestamp": "2024-03-23 08:47",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_1b8cd2",
+      "node_id": "follow_up_sequence",
+      "duration_min": 21.9,
+      "apps_used": [
+        "outreach",
+        "salesforce"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "response_triage",
+      "repeated_node": false
+    },
+    {
+      "event_id": "de7e33e4",
+      "timestamp": "2024-03-26 08:02",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_1b8cd2",
+      "node_id": "response_triage",
+      "duration_min": 20.3,
+      "apps_used": [
+        "salesforce",
+        "slack"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_prep",
+      "repeated_node": false
+    },
+    {
+      "event_id": "bd6e278f",
+      "timestamp": "2024-03-26 08:26",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_1b8cd2",
+      "node_id": "discovery_call_prep",
+      "duration_min": 27.4,
+      "apps_used": [
+        "salesforce",
+        "notion",
+        "linkedin",
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "discovery_call_execution",
+      "repeated_node": false
+    },
+    {
+      "event_id": "6a3e3986",
+      "timestamp": "2024-03-26 08:59",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_1b8cd2",
+      "node_id": "discovery_call_execution",
+      "duration_min": 34.7,
+      "apps_used": [
+        "calendly",
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "call_debrief_logging",
+      "repeated_node": false
+    },
+    {
+      "event_id": "95f7e766",
+      "timestamp": "2024-03-26 09:38",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_1b8cd2",
+      "node_id": "call_debrief_logging",
+      "duration_min": 18.5,
+      "apps_used": [
+        "gong",
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "stakeholder_mapping",
+      "repeated_node": false
+    },
+    {
+      "event_id": "1dc5ab69",
+      "timestamp": "2024-03-26 10:04",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_1b8cd2",
+      "node_id": "stakeholder_mapping",
+      "duration_min": 23.6,
+      "apps_used": [
+        "salesforce",
+        "notion"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    }
+  ]
+}
