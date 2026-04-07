@@ -130,6 +130,9 @@ class SimConfig:
         }
     ])
 
+    # ── Tool identity ──────────────────────────────────────────────────────────
+    tool_name: str = "Gong"         # overridden when --tool_features is supplied
+
     # ── Paths ──────────────────────────────────────────────────────────────────
     telemetry_path:   str = "backend/data/transition_matrix.json"
     output_path:      str = "backend/data/monte_carlo_results.json"
@@ -139,6 +142,39 @@ class SimConfig:
 # ═══════════════════════════════════════════════════════════════════════════════
 # 1. LOAD TRANSITION MATRIX
 # ═══════════════════════════════════════════════════════════════════════════════
+
+def load_tool_features(path: str, cfg: "SimConfig") -> None:
+    """
+    Load tool_features_{slug}.json produced by classifier.py and patch cfg
+    in-place with the extracted node_impact, edge_impact, and topology_changes.
+
+    Replaces the hardcoded GONG_* values so sim.py works for any tool.
+    """
+    with open(path) as f:
+        feat = json.load(f)
+
+    cfg.tool_name = feat.get("tool_name", path)
+
+    if "node_impact" in feat:
+        cfg.GONG_NODE_IMPACT = {
+            nid: float(v) for nid, v in feat["node_impact"].items()
+        }
+
+    if "edge_impact" in feat:
+        # classifier stores "src,dst" string keys; SimConfig uses (src, dst) tuples
+        cfg.GONG_EDGE_IMPACT = {
+            tuple(k.split(",", 1)): float(v)
+            for k, v in feat["edge_impact"].items()
+        }
+
+    if "topology_changes" in feat:
+        cfg.GONG_TOPOLOGY = feat["topology_changes"]
+
+    print(f"  Loaded tool features: {cfg.tool_name}  ({path})")
+    print(f"    node_impact entries  : {len(cfg.GONG_NODE_IMPACT)}")
+    print(f"    edge_impact entries  : {len(cfg.GONG_EDGE_IMPACT)}")
+    print(f"    topology changes     : {len(cfg.GONG_TOPOLOGY)}")
+
 
 def load_matrix(path: str) -> dict:
     with open(path) as f:
@@ -534,7 +570,7 @@ def run_weekly_snapshot(
 
 def run_simulation(cfg: SimConfig) -> dict:
     print("\n" + "═"*60)
-    print("  MONTE CARLO SIMULATION — B2B Sales Pipeline")
+    print(f"  MONTE CARLO SIMULATION — {cfg.tool_name} vs Baseline")
     print("═"*60)
     print(f"  n_simulations  : {cfg.n_simulations}")
     print(f"  n_weeks        : {cfg.n_weeks}")
@@ -561,7 +597,7 @@ def run_simulation(cfg: SimConfig) -> dict:
     graph_gong = apply_gong_topology(graph_base, cfg)
 
     print(f"  Baseline graph edges : {sum(len(v) for v in graph_base.values())}")
-    print(f"  Gong graph edges     : {sum(len(v) for v in graph_gong.values())}")
+    print(f"  {cfg.tool_name} graph edges  : {sum(len(v) for v in graph_gong.values())}")
     print("─"*60)
 
     # Run week-by-week
@@ -588,21 +624,21 @@ def run_simulation(cfg: SimConfig) -> dict:
     print(f"  Effective reduction    : {final.effective_reduction_avg}% avg across nodes")
     print(f"\n  ── Latency (calendar time per deal) ─────────────")
     print(f"  Baseline               : {final.baseline_latency_hrs:.1f} hrs")
-    print(f"  With Gong              : {final.gong_latency_hrs:.1f} hrs  (↓{final.latency_delta_pct}%)")
+    print(f"  With {cfg.tool_name:<18s}: {final.gong_latency_hrs:.1f} hrs  (↓{final.latency_delta_pct}%)")
     print(f"  90% CI                 : [{final.ci_latency_gong[0]}, {final.ci_latency_gong[1]}] hrs")
     print(f"\n  ── Active Work Per Deal ─────────────────────────")
     print(f"  Baseline               : {final.baseline_work_min:.1f} min")
-    print(f"  With Gong              : {final.gong_work_min:.1f} min")
+    print(f"  With {cfg.tool_name:<18s}: {final.gong_work_min:.1f} min")
     print(f"  Saved per deal         : {final.work_saved_min:.1f} min  (↓{final.work_saved_pct}%)")
     print(f"  90% CI                 : [{final.ci_work_saved[0]}, {final.ci_work_saved[1]}] min")
     print(f"\n  ── Throughput ───────────────────────────────────")
     print(f"  Baseline               : {final.baseline_throughput:.2f} deals/rep/week")
-    print(f"  With Gong              : {final.gong_throughput:.2f} deals/rep/week  (↑{final.throughput_lift_pct}%)")
+    print(f"  With {cfg.tool_name:<18s}: {final.gong_throughput:.2f} deals/rep/week  (↑{final.throughput_lift_pct}%)")
     print(f"\n  ── Pipeline Velocity (throughput × win rate) ────")
     print(f"  Baseline               : {final.pipeline_velocity_base:.3f}")
-    print(f"  With Gong              : {final.pipeline_velocity_gong:.3f}")
+    print(f"  With {cfg.tool_name:<18s}: {final.pipeline_velocity_gong:.3f}")
     print(f"  Win rate  baseline     : {final.win_rate_baseline}%")
-    print(f"  Win rate  with Gong    : {final.win_rate_gong}%")
+    print(f"  Win rate  with {cfg.tool_name:<12s}: {final.win_rate_gong}%")
     print(f"\n  ── Top Node Savings (min/deal at week {cfg.n_weeks}) ───")
     sorted_savings = sorted(final.node_savings_min.items(), key=lambda x: -x[1])
     for node, saved in sorted_savings[:8]:
@@ -635,9 +671,10 @@ def run_simulation(cfg: SimConfig) -> dict:
             "A11: Topology changes applied structurally before sampling",
             "A12: Win-rate emergent from transition probabilities, not fixed",
         ],
+        "tool_name":        cfg.tool_name,
         "topology_changes": cfg.GONG_TOPOLOGY,
-        "gong_node_impact": cfg.GONG_NODE_IMPACT,
-        "gong_edge_impact": {f"{k[0]},{k[1]}": v for k, v in cfg.GONG_EDGE_IMPACT.items()},
+        "tool_node_impact": cfg.GONG_NODE_IMPACT,
+        "tool_edge_impact": {f"{k[0]},{k[1]}": v for k, v in cfg.GONG_EDGE_IMPACT.items()},
         "weekly_snapshots": [asdict(s) for s in snapshots],
         "summary": {
             "week_0":  asdict(snapshots[0]),
@@ -676,6 +713,9 @@ if __name__ == "__main__":
         help="Week at which 50%% of adopters are on Gong (default: 3.0)")
     parser.add_argument("--telemetry_path", type=str, default="backend/data/transition_matrix.json")
     parser.add_argument("--output_path",    type=str, default="backend/data/monte_carlo_results.json")
+    parser.add_argument("--tool_features",  type=str, default="",
+        help="Path to tool_features_{slug}.json from classifier.py. "
+             "Overrides the built-in Gong impact parameters with the specified tool's values.")
 
     args = parser.parse_args()
 
@@ -689,5 +729,8 @@ if __name__ == "__main__":
         telemetry_path    = args.telemetry_path,
         output_path       = args.output_path,
     )
+
+    if args.tool_features:
+        load_tool_features(args.tool_features, cfg)
 
     run_simulation(cfg)

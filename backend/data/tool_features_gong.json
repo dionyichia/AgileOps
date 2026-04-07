@@ -1,0 +1,236 @@
+{
+  "tool_summary": "Gong is an AI-powered Revenue Intelligence platform that captures and analyzes every customer interaction (calls, emails, meetings) to deliver actionable insights across the sales cycle. It combines conversation intelligence, sales engagement (Gong Engage), AI-powered forecasting, and automated CRM logging to improve win rates, forecast accuracy, and rep productivity. The platform's Revenue Graph unifies all interaction data, enabling AI agents to automate follow-ups, pipeline management, deal summaries, and administrative tasks.",
+  "micro_features": [
+    {
+      "feature_id": "conversation_intelligence",
+      "name": "AI-Powered Conversation Intelligence",
+      "description": "Automatically records, transcribes, and analyzes calls, video meetings, and emails. Surfaces key moments, talk ratios, topics discussed, and competitive mentions.",
+      "affected_nodes": [
+        "discovery_call_execution",
+        "call_debrief_logging",
+        "demo_delivery",
+        "objection_handling"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "AI-powered conversation intelligence — automatic recording, transcription, and analysis of calls, video meetings, and emails"
+    },
+    {
+      "feature_id": "automatic_data_capture",
+      "name": "Automatic CRM Data Capture",
+      "description": "Eliminates manual CRM logging by automatically capturing all interaction data and mapping it to business context in the CRM.",
+      "affected_nodes": [
+        "send_and_log",
+        "call_debrief_logging",
+        "deal_closure_and_handoff"
+      ],
+      "feature_type": "automation",
+      "evidence": "Automatic data capture — eliminates manual CRM logging by auto-capturing all interaction data. Ditch the manual work."
+    },
+    {
+      "feature_id": "gong_engage",
+      "name": "Gong Engage — AI Sales Engagement",
+      "description": "AI-driven sales engagement for prioritizing and personalizing outreach, email sequences, and multi-channel communications.",
+      "affected_nodes": [
+        "draft_outreach",
+        "send_and_log",
+        "follow_up_sequence",
+        "response_triage"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Gong Engage — AI-driven sales engagement for prioritizing and personalizing outreach, email sequences, and multi-channel communications. Send pipeline to the moon with AI keeping communications targeted and efficient."
+    },
+    {
+      "feature_id": "ai_agents_follow_ups",
+      "name": "Gong Agents for Automated Follow-Ups",
+      "description": "Specialized AI agents that automate follow-ups, pipeline edits, deal summaries, and administrative tasks.",
+      "affected_nodes": [
+        "follow_up_sequence",
+        "call_debrief_logging",
+        "objection_handling"
+      ],
+      "feature_type": "automation",
+      "evidence": "Gong Agents automate follow-ups, pipeline edits, enablement triggers, and forecast corrections."
+    },
+    {
+      "feature_id": "deal_pipeline_analytics",
+      "name": "Deal and Pipeline Analytics",
+      "description": "AI-surfaced deal risks, engagement gaps, and recommended next steps. Provides unbiased deal insights for pipeline management.",
+      "affected_nodes": [
+        "response_triage",
+        "stakeholder_mapping",
+        "objection_handling",
+        "proposal_drafting"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "Deal and pipeline analytics — AI-surfaced deal risks, engagement gaps, and recommended next steps."
+    },
+    {
+      "feature_id": "call_prep_insights",
+      "name": "Meeting Prep with AI Insights",
+      "description": "Provides complete customer context from prior interactions, enabling faster and more thorough call and demo preparation.",
+      "affected_nodes": [
+        "discovery_call_prep",
+        "demo_scheduling_and_prep"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "AppsFlyer cuts meeting prep time by 50% with Gong AI. Seamless knowledge transfer — complete customer context for every deal and account."
+    },
+    {
+      "feature_id": "ai_theme_spotter",
+      "name": "AI Theme Spotter",
+      "description": "Automatically identifies recurring themes and trends across customer conversations for competitive intelligence and messaging effectiveness.",
+      "affected_nodes": [
+        "prospect_research",
+        "objection_handling",
+        "discovery_call_prep"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "AI Theme Spotter — automatically identifies recurring themes and trends across customer conversations. Strategic insights — AI analytics for market trends, competitive intelligence, and messaging effectiveness."
+    },
+    {
+      "feature_id": "seamless_handoff",
+      "name": "Seamless Knowledge Transfer and Handoff",
+      "description": "Provides complete customer context for every deal and account, enabling smooth handoffs between sales and CS teams.",
+      "affected_nodes": [
+        "deal_closure_and_handoff",
+        "stakeholder_mapping"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Seamless knowledge transfer — complete customer context for every deal and account, enabling smooth handoffs. No more game of telephone."
+    },
+    {
+      "feature_id": "gong_forecast",
+      "name": "Gong Forecast — AI-Powered Forecasting",
+      "description": "Delivers forecast accuracy with unbiased insights and centralized analytics for pipeline and revenue prediction.",
+      "affected_nodes": [
+        "proposal_drafting",
+        "contract_negotiation"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "Gong Forecast — AI-powered forecasting with unbiased deal insights and centralized analytics. Personio boosts forecast accuracy to within 1%."
+    },
+    {
+      "feature_id": "coaching_scorecards",
+      "name": "Coaching Scorecards and Enablement",
+      "description": "Revenue enablement grounded in real customer interactions, with coaching scorecards to replicate winning techniques and identify skill gaps.",
+      "affected_nodes": [
+        "discovery_call_execution",
+        "demo_delivery",
+        "objection_handling"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "Gong Enable — revenue enablement grounded in real customer interactions, coaching scorecards, and onboarding acceleration. Turn new hires into top performers."
+    },
+    {
+      "feature_id": "meddic_automation",
+      "name": "MEDDIC/MEDDPICC Field Automation",
+      "description": "Automatically populates qualification framework fields from call transcripts, reducing manual qualification data entry.",
+      "affected_nodes": [
+        "call_debrief_logging",
+        "discovery_call_prep"
+      ],
+      "feature_type": "automation",
+      "evidence": "Uber Freight drives standardized MEDDPICC adoption and improves deal outcomes with Gong. Update MEDDIC fields automatically from call analysis."
+    }
+  ],
+  "node_impact": {
+    "prospect_research": 0.2,
+    "draft_outreach": 0.4,
+    "send_and_log": 0.55,
+    "follow_up_sequence": 0.6,
+    "response_triage": 0.35,
+    "discovery_call_prep": 0.5,
+    "discovery_call_execution": 0.08,
+    "call_debrief_logging": 0.75,
+    "stakeholder_mapping": 0.3,
+    "demo_scheduling_and_prep": 0.35,
+    "demo_delivery": 0.07,
+    "objection_handling": 0.3,
+    "proposal_drafting": 0.15,
+    "contract_negotiation": 0.05,
+    "deal_closure_and_handoff": 0.45
+  },
+  "node_impact_reasoning": {
+    "prospect_research": "AI Theme Spotter and Revenue Graph provide competitive and market intelligence that supplements prospect research, but Gong is not primarily a prospecting tool. Moderate assist via interaction history on existing accounts.",
+    "draft_outreach": "Gong Engage provides AI-driven personalization for outreach messages based on prior interaction data and engagement patterns. Strong feature but not the tool's primary focus, so capped at 0.40.",
+    "send_and_log": "Automatic data capture eliminates manual CRM logging, and Gong Engage handles send orchestration. Significant time savings on the logging portion (which is the majority of this 8-min step).",
+    "follow_up_sequence": "Gong Engage manages multi-channel sequences with AI prioritization, and Gong Agents automate follow-ups. Strong automation evidence; BlueGrace Logistics saw significant email response rate increases.",
+    "response_triage": "Gong Engage and AI analytics help classify and prioritize responses. Deal analytics surface hot leads. Medium automation — still requires human judgment for complex routing.",
+    "discovery_call_prep": "AppsFlyer case study shows 50% reduction in meeting prep time. Gong surfaces prior interactions, company context, and competitive insights automatically. MEDDIC prep is accelerated by prior call data.",
+    "discovery_call_execution": "Human-essential node. Gong records and provides real-time guidance cues, but the rep must still execute the conversation. Coaching scorecards improve quality over time but don't reduce active time significantly.",
+    "call_debrief_logging": "Core strength of Gong — automatic transcription, structured summaries, MEDDIC field auto-population, and CRM updates. A Google sales team 'got hours of time back.' This is where Gong delivers maximum automation.",
+    "stakeholder_mapping": "Revenue Graph maps interaction participants and org relationships. AI surfaces who's been engaged and their roles. Helpful but still requires human analysis of power dynamics and political landscape.",
+    "demo_scheduling_and_prep": "Gong provides customer context and pain points from discovery calls to customize demo prep. AppsFlyer's 50% meeting prep reduction applies here too, though demo sandbox setup is unaffected.",
+    "demo_delivery": "Human-essential node. Gong records and analyzes demos but doesn't reduce active delivery time. Coaching insights may improve quality. Capped per calibration rules.",
+    "objection_handling": "AI surfaces competitive mentions, recurring objections, and successful responses from past deals. Theme Spotter identifies patterns. Helps draft responses but human judgment required for nuanced objections.",
+    "proposal_drafting": "Deal analytics and forecast data inform proposals, but Gong is not a CPQ or document generation tool. Minor acceleration through better deal context and pricing insights.",
+    "contract_negotiation": "Minimal direct impact. Gong can surface negotiation patterns from past deals but doesn't automate legal review or redlining. Human-essential node.",
+    "deal_closure_and_handoff": "Seamless knowledge transfer is explicitly highlighted — complete customer context for every deal enables automated handoff documentation. Auto-captured interaction history reduces manual handoff doc creation significantly."
+  },
+  "edge_impact": {
+    "discovery_call_execution,call_debrief_logging": 0.6,
+    "call_debrief_logging,stakeholder_mapping": 0.3,
+    "call_debrief_logging,demo_scheduling_and_prep": 0.25,
+    "discovery_call_prep,discovery_call_execution": 0.2,
+    "demo_delivery,objection_handling": 0.2,
+    "follow_up_sequence,response_triage": 0.25,
+    "response_triage,discovery_call_prep": 0.2,
+    "objection_handling,proposal_drafting": 0.15,
+    "proposal_drafting,contract_negotiation": 0.1,
+    "contract_negotiation,deal_closure_and_handoff": 0.3
+  },
+  "topology_changes": [
+    {
+      "type": "boost_exit",
+      "node": "discovery_call_execution",
+      "delta": 0.08,
+      "reason": "Gong's conversation intelligence and MEDDIC automation provide clearer qualification signals during discovery, enabling reps to disqualify bad-fit deals faster and more confidently."
+    },
+    {
+      "type": "boost_exit",
+      "node": "response_triage",
+      "delta": 0.05,
+      "reason": "AI-powered response classification and deal analytics help identify unqualified or unengaged prospects earlier, improving early-exit accuracy."
+    },
+    {
+      "type": "add_edge",
+      "from": "discovery_call_execution",
+      "to": "proposal_drafting",
+      "probability": 0.1,
+      "reason": "With comprehensive call intelligence and deal analytics, some well-qualified deals with clear requirements can skip extended demo cycles and move directly to proposal, especially for returning buyers or expansion deals."
+    },
+    {
+      "type": "add_edge",
+      "from": "call_debrief_logging",
+      "to": "demo_scheduling_and_prep",
+      "probability": 0.15,
+      "reason": "Automatic debrief generation with AI-populated MEDDIC fields enables immediate transition to demo scheduling without manual stakeholder mapping for simpler deals with known buying committees."
+    }
+  ],
+  "confidence": {
+    "overall": "high",
+    "per_node": {
+      "prospect_research": "medium",
+      "draft_outreach": "medium",
+      "send_and_log": "high",
+      "follow_up_sequence": "high",
+      "response_triage": "medium",
+      "discovery_call_prep": "high",
+      "discovery_call_execution": "high",
+      "call_debrief_logging": "high",
+      "stakeholder_mapping": "medium",
+      "demo_scheduling_and_prep": "medium",
+      "demo_delivery": "high",
+      "objection_handling": "medium",
+      "proposal_drafting": "low",
+      "contract_negotiation": "medium",
+      "deal_closure_and_handoff": "high"
+    },
+    "notes": "Gong has extensive case study evidence with specific ROI metrics (AppsFlyer 50% prep time reduction, Kelly Services 50% faster ramp, Meteomatics 50% shorter sales cycles). Highest confidence for conversation intelligence core (call debrief, call prep, call execution). Lower confidence for Gong Engage features (draft outreach, follow-up) as this is a newer product line with fewer specific benchmarks. Proposal drafting impact is inferred rather than directly evidenced."
+  },
+  "tool_name": "Gong",
+  "tool_slug": "gong",
+  "generated_at": "2026-04-07T08:26:29.667981+00:00",
+  "model": "claude-opus-4-6",
+  "source_count": 9
+}

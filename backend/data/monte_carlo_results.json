@@ -22,6 +22,7 @@
     "A11: Topology changes applied structurally before sampling",
     "A12: Win-rate emergent from transition probabilities, not fixed"
   ],
+  "tool_name": "Gong",
   "topology_changes": [
     {
       "type": "collapse",
@@ -49,7 +50,7 @@
       "reason": "AI signal quality improvement raises P(disqualify) at triage"
     }
   ],
-  "gong_node_impact": {
+  "tool_node_impact": {
     "prospect_research": 0.6,
     "draft_outreach": 0.65,
     "send_and_log": 0.4,
@@ -66,7 +67,7 @@
     "contract_negotiation": 0.1,
     "deal_closure_and_handoff": 0.45
   },
-  "gong_edge_impact": {
+  "tool_edge_impact": {
     "send_and_log,follow_up_sequence": 0.0,
     "follow_up_sequence,response_triage": 0.3,
     "response_triage,discovery_call_prep": 0.25,
