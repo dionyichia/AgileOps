@@ -5,6 +5,9 @@ import DataForm from './pages/unused_DataForm'
 import WorkflowReport from './pages/WorkflowReport'
 import ToolInputForm from './pages/ToolInputForm'
 import SimulationResults from './pages/SimulationResults'
+import SimulationsList from './pages/SimulationsList'
+import ToolDraftsList from './pages/ToolDraftsList'
+import ReportsList from './pages/ReportsList'
 import FinalRecommendation from './pages/FinalRecommendation'
 import TranscriptInput from './pages/TranscriptInput'
 import InternalDashboard from './pages/InternalDashboard'
@@ -22,6 +25,10 @@ export default function App() {
 
         {/* Client workspace — legacy flat routes (no project scope) */}
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/toolinput" element={<ToolInputForm />} />
+        <Route path="/simulations" element={<SimulationsList />} />
+        <Route path="/tool-drafts" element={<ToolDraftsList />} />
+        <Route path="/reports" element={<ReportsList />} />
         <Route path="/simulation" element={<SimulationResults />} />
         <Route path="/recommendation" element={<FinalRecommendation />} />
 

@@ -12,6 +12,12 @@ interface StepLayoutProps {
   showBack?: boolean
   backPath?: string
   hideNextButton?: boolean
+  /** No stepper header, no title strip, no footer — for client /toolinput */
+  compact?: boolean
+  /** When compact: render only title block + children (parent provides chrome, e.g. ClientWorkspaceShell) */
+  nested?: boolean
+  /** No stepper / title strip; keep footer — use under ClientWorkspaceShell on flat client routes */
+  embedded?: boolean
 }
 
 const STEPS = [
@@ -33,11 +39,79 @@ export default function StepLayout({
   showBack = true,
   backPath,
   hideNextButton = false,
+  compact = false,
+  nested = false,
+  embedded = false,
 }: StepLayoutProps) {
   const navigate = useNavigate()
 
   const backPaths = ['/dashboard', '/internal/form', '/internal/workflow-report', '/internal/tool-input', '/simulation']
   const handleBack = () => navigate(backPath ?? backPaths[currentStep - 1] ?? '/dashboard')
+
+  if (compact) {
+    if (nested) {
+      return (
+        <div className="w-full text-black">
+          {(title || subtitle) && (
+            <div className="mx-auto mb-8 max-w-2xl">
+              {title ? (
+                <h1 className="text-[36px] font-bold leading-tight tracking-[-0.04em] text-black">{title}</h1>
+              ) : null}
+              {subtitle ? <p className="mt-1 text-sm text-black/48">{subtitle}</p> : null}
+            </div>
+          )}
+          {children}
+        </div>
+      )
+    }
+    return (
+      <div className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
+        <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8 animate-fade-in">
+          <div className="mb-8 max-w-2xl mx-auto">
+            <h1 className="text-[36px] leading-tight font-bold tracking-[-0.04em] text-black">{title}</h1>
+            {subtitle && <p className="text-black/48 text-sm mt-1">{subtitle}</p>}
+          </div>
+          {children}
+        </main>
+      </div>
+    )
+  }
+
+  if (embedded) {
+    return (
+      <div className="flex min-h-0 w-full flex-1 flex-col bg-[#F7F4FB] text-black">
+        <main className="mx-auto min-h-0 w-full max-w-7xl flex-1 animate-fade-in overflow-auto px-6 py-6">
+          {children}
+        </main>
+        <footer className="sticky bottom-0 border-t border-black/8 bg-white/95 backdrop-blur-sm">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+            {showBack ? (
+              <button
+                onClick={handleBack}
+                className="flex items-center gap-2 text-sm font-medium text-black/50 transition-colors hover:text-black"
+              >
+                <ArrowLeft size={16} />
+                Back
+              </button>
+            ) : (
+              <div />
+            )}
+            {!hideNextButton && (
+              <button
+                onClick={onNext}
+                disabled={nextDisabled}
+                className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:bg-black/10 disabled:text-black/30"
+                style={!nextDisabled ? { background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)', boxShadow: '0 12px 24px rgba(94,20,159,0.14)' } : {}}
+              >
+                {nextLabel}
+                <ArrowRight size={16} />
+              </button>
+            )}
+          </div>
+        </footer>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">

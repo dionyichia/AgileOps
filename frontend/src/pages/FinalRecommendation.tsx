@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { TrendingUp, Users, Building2, CheckCircle2, Download, Star, Loader2, AlertCircle } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { TrendingUp, Users, Building2, CheckCircle2, Download, Star, ChevronLeft } from 'lucide-react'
 import StepLayout from '../components/layout/StepLayout'
+import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
+import { CLIENT_SIMULATIONS_SEED } from '../data/clientSimulations'
 import { PageLoader } from '../components/ui/Skeleton'
 import { recommendationData } from '../data/mockData'
 import { recommendation as recApi, RecommendationData as ApiRecData } from '../api/client'
@@ -23,7 +25,15 @@ function formatDollar(n: number) {
 export default function FinalRecommendation() {
   const { projectId, toolEvalId } = useParams<{ projectId: string; toolEvalId: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const evalParam = searchParams.get('eval')
   const isProjectScoped = !!(projectId && toolEvalId)
+  const isFlatClient = !isProjectScoped
+
+  const simFromEval = useMemo(
+    () => (evalParam ? CLIENT_SIMULATIONS_SEED.find((s) => s.id === evalParam) : undefined),
+    [evalParam],
+  )
   const [adoption, setAdoption] = useState(40) // 10 – 70
   const [apiData, setApiData] = useState<ApiRecData | null>(null)
   const [loading, setLoading] = useState(isProjectScoped)
@@ -66,24 +76,65 @@ export default function FinalRecommendation() {
   const summary = apiData?.summary ?? recommendationData.summary
   const useCases = apiData?.use_cases ?? recommendationData.useCases
 
-  const toolName = apiData?.tool_name ?? (() => {
-    try {
-      return JSON.parse(localStorage.getItem('axisToolInput') ?? '{}').toolName || 'Apollo.io'
-    } catch {
-      return 'Apollo.io'
-    }
-  })()
+  const toolName =
+    apiData?.tool_name ??
+    simFromEval?.toolName ??
+    (() => {
+      try {
+        return JSON.parse(localStorage.getItem('axisToolInput') ?? '{}').toolName || 'Apollo.io'
+      } catch {
+        return 'Apollo.io'
+      }
+    })()
+
+  const dashboardBackPath =
+    evalParam != null && evalParam !== ''
+      ? `/dashboard?tab=${encodeURIComponent(evalParam)}`
+      : '/dashboard'
+
+  const flatShellHeader = (
+    <div className="flex items-start gap-4">
+      <button
+        type="button"
+        onClick={() => navigate(dashboardBackPath)}
+        className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 text-black/70 transition-colors hover:bg-black/[0.03]"
+        aria-label="Back to dashboard"
+      >
+        <ChevronLeft size={20} />
+      </button>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-black md:text-3xl">Final recommendation</h1>
+        <p className="mt-1 text-sm text-black/55">
+          Axis recommendation for <span className="font-semibold text-[#5E149F]">{toolName}</span> · based on your
+          SDR workflow simulation
+        </p>
+      </div>
+    </div>
+  )
 
   if (loading) {
+    if (isFlatClient) {
+      return (
+        <ClientWorkspaceShell headerLeft={flatShellHeader}>
+          <div className="flex flex-1 items-center justify-center bg-[#F7F4FB] py-24">
+            <PageLoader message="Loading recommendation..." />
+          </div>
+        </ClientWorkspaceShell>
+      )
+    }
     return <PageLoader message="Loading recommendation..." />
   }
 
-  return (
+  const layout = (
     <StepLayout
       currentStep={5}
       title="Final Recommendation"
       subtitle={`Axis recommendation for ${toolName} · based on your SDR workflow simulation`}
-      onNext={() => navigate(isProjectScoped ? `/projects/${projectId}/transcripts` : '/dashboard')}
+      embedded={isFlatClient}
+      backPath={isFlatClient ? dashboardBackPath : undefined}
+      onNext={() =>
+        navigate(isProjectScoped ? `/projects/${projectId}/transcripts` : dashboardBackPath)
+      }
       nextLabel="Back to Dashboard"
       nextDisabled={false}
       hideNextButton={false}
@@ -288,7 +339,9 @@ export default function FinalRecommendation() {
               Download Report
             </button>
             <button
-              onClick={() => navigate(isProjectScoped ? `/projects/${projectId}/transcripts` : '/dashboard')}
+              onClick={() =>
+                navigate(isProjectScoped ? `/projects/${projectId}/transcripts` : dashboardBackPath)
+              }
               className="flex items-center gap-2 border border-black/10 hover:border-black/18 text-black/62 hover:text-black font-medium px-5 py-3 rounded-full text-sm transition-colors"
             >
               {isProjectScoped ? 'Back to Project' : 'Back to Dashboard'}
@@ -299,6 +352,16 @@ export default function FinalRecommendation() {
       </div>
     </StepLayout>
   )
+
+  if (isFlatClient) {
+    return (
+      <ClientWorkspaceShell headerLeft={flatShellHeader}>
+        <div className="flex min-h-0 flex-1 flex-col">{layout}</div>
+      </ClientWorkspaceShell>
+    )
+  }
+
+  return layout
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────────

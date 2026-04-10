@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { projects as projectsApi, profiles as profilesApi } from '../api/client'
 import {
@@ -48,6 +48,46 @@ const ROLE_RESPONSIBILITIES: Record<string, string[]> = {
     'Support ticket escalation',
     'Training & product adoption',
   ],
+  'Sales Manager / Director': [
+    'Pipeline reviews & coaching',
+    'Quota planning & forecasting',
+    'Hiring & onboarding reps',
+    'Territory & comp design',
+    'Cross-functional alignment',
+    'Performance reporting',
+  ],
+  'Marketing Manager': [
+    'Campaign planning & execution',
+    'Lead routing & SLAs',
+    'Content & collateral',
+    'Event & webinar programs',
+    'Marketing analytics',
+    'Sales & marketing alignment',
+  ],
+  'Product Manager': [
+    'Roadmap prioritization',
+    'Customer discovery & feedback',
+    'Release coordination',
+    'Stakeholder communication',
+    'Usage analytics',
+    'Beta & launch programs',
+  ],
+  'Software Engineer': [
+    'Feature development',
+    'Code review & quality',
+    'Integrations & APIs',
+    'Incident response',
+    'Technical documentation',
+    'Cross-team support',
+  ],
+  'Data Analyst': [
+    'Reporting & dashboards',
+    'Pipeline & funnel analysis',
+    'Data hygiene & modeling',
+    'Ad hoc analysis',
+    'Experiment analysis',
+    'Tooling & automation',
+  ],
 }
 
 const DEFAULT_RESPONSIBILITIES = [
@@ -57,6 +97,17 @@ const DEFAULT_RESPONSIBILITIES = [
   'Email & communication management',
   'Cross-functional coordination',
 ]
+
+function allResponsibilityOptions(): string[] {
+  const set = new Set<string>()
+  for (const arr of Object.values(ROLE_RESPONSIBILITIES)) {
+    for (const item of arr) set.add(item)
+  }
+  for (const item of DEFAULT_RESPONSIBILITIES) set.add(item)
+  return Array.from(set)
+}
+
+const ALL_RESPONSIBILITY_OPTIONS = allResponsibilityOptions()
 
 const COLORS = {
   white: '#FFFFFF',
@@ -69,25 +120,12 @@ export default function Consultation() {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('')
-  const [loadingResponsibilities, setLoadingResponsibilities] = useState(false)
-  const [responsibilities, setResponsibilities] = useState<string[]>([])
+  const [formStep, setFormStep] = useState<1 | 2>(1)
   const [selectedResponsibilities, setSelectedResponsibilities] = useState<string[]>([])
   const [tools, setTools] = useState('')
   const [description, setDescription] = useState('')
   const [submitting, setSubmitting] = useState(false)
-
-  useEffect(() => {
-    if (!role) return
-    setLoadingResponsibilities(true)
-    setSelectedResponsibilities([])
-    setResponsibilities([])
-    const timer = setTimeout(() => {
-      const options = ROLE_RESPONSIBILITIES[role] ?? DEFAULT_RESPONSIBILITIES
-      setResponsibilities(options)
-      setLoadingResponsibilities(false)
-    }, 700)
-    return () => clearTimeout(timer)
-  }, [role])
+  const [showSubmitThanks, setShowSubmitThanks] = useState(false)
 
   const toggleResponsibility = (responsibility: string) => {
     setSelectedResponsibilities((prev) =>
@@ -97,39 +135,43 @@ export default function Consultation() {
     )
   }
 
-  const canSubmit =
+  const canGoToStep2 =
     firstName.trim().length > 0 &&
     lastName.trim().length > 0 &&
     email.trim().length > 0 &&
-    role &&
-    selectedResponsibilities.length > 0 &&
-    description.trim().length > 0
+    Boolean(role) &&
+    selectedResponsibilities.length > 0
 
-  const handleNext = async () => {
-    // Always persist to localStorage so legacy/demo routes keep working
+  const canSubmit = description.trim().length > 0
+
+  const handleNext = () => {
+    if (!canGoToStep2) return
+    setFormStep(2)
+  }
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return
     localStorage.setItem(
       'axisFormData',
       JSON.stringify({ firstName, lastName, email, role, selectedResponsibilities, tools, description }),
     )
-
     setSubmitting(true)
     try {
       const project = await projectsApi.create({
-        company_name: email,         // best proxy until a company field is added
-        team_name:    `${firstName} ${lastName}`,
+        company_name: email,
+        team_name: `${firstName} ${lastName}`,
         primary_role: role,
-        notes:        description || undefined,
+        notes: description || undefined,
       })
       await profilesApi.upsert(project.id, {
         role,
         selected_responsibilities: selectedResponsibilities,
-        tools:       tools || undefined,
+        tools: tools || undefined,
         description: description || undefined,
       })
-      navigate(`/projects/${project.id}/transcripts`)
+      setShowSubmitThanks(true)
     } catch (err) {
       console.error('Failed to create project via API:', err)
-      // Fallback: continue with the legacy internal flow
       navigate('/internal/workflow-report')
     } finally {
       setSubmitting(false)
@@ -205,120 +247,178 @@ export default function Consultation() {
             </ul>
           </section>
 
-          <section className="bg-white rounded-[28px] p-7 md:p-9 axis-soft-shadow border border-black/5">
+          <section className="flex min-h-[40rem] flex-col bg-white rounded-[28px] p-7 md:p-9 axis-soft-shadow border border-black/5">
             <h1 className="text-center text-[36px] leading-tight font-bold">Book a Consultation</h1>
 
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
-              <input
-                className={inputClass}
-                placeholder="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
-              <input
-                className={inputClass}
-                placeholder="Last Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
-            </div>
-
-            <div className="mt-4">
-              <input
-                className={inputClass}
-                placeholder="Work Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-
-            <div className="mt-4 relative">
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className={`${inputClass} appearance-none pr-12 cursor-pointer`}
-              >
-                <option value="">Your Team Role</option>
-                {ROLES.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-black/45 pointer-events-none" />
-            </div>
-
-            <div className="mt-4">
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Tell us about your workflow, key challenges, and what you want to improve."
-                rows={6}
-                className={`${inputClass} min-h-[170px] resize-none`}
-              />
-            </div>
-
-            <div className="mt-4">
-              <textarea
-                value={tools}
-                onChange={(e) => setTools(e.target.value)}
-                placeholder="Current tools you're using (optional)"
-                rows={4}
-                className={`${inputClass} min-h-[120px] resize-none`}
-              />
-            </div>
-
-            {role && (
-              <div className="mt-5 rounded-[22px] border border-black/6 bg-[#FAFAFA] p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <p className="text-[14px] font-semibold uppercase tracking-[0.16em]" style={{ color: '#5E149F' }}>
-                    Team Responsibilities
-                  </p>
-                  {responsibilities.length > 0 && (
-                    <span className="text-[13px] font-medium text-black/45">
-                      Select all that apply
-                    </span>
-                  )}
+            {formStep === 1 && (
+              <>
+                <div className="mt-8 space-y-4">
+                  <input
+                    className={inputClass}
+                    placeholder="First Name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                  <input
+                    className={inputClass}
+                    placeholder="Last Name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                  <input
+                    className={inputClass}
+                    placeholder="Work Email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-3">
-                  {loadingResponsibilities && (
-                    <p className="text-[15px] text-black/55">Loading recommendations...</p>
-                  )}
-
-                  {!loadingResponsibilities && responsibilities.map((item) => {
-                    const selected = selectedResponsibilities.includes(item)
-                    return (
-                      <button
-                        key={item}
-                        type="button"
-                        onClick={() => toggleResponsibility(item)}
-                        className="rounded-full border px-4 py-2 text-[14px] font-medium transition-colors"
-                        style={{
-                          borderColor: selected ? '#B4308B' : 'rgba(0,0,0,0.08)',
-                          background: selected ? 'rgba(180, 48, 139, 0.10)' : '#FFFFFF',
-                          color: selected ? '#5E149F' : 'rgba(0,0,0,0.72)',
-                        }}
-                      >
+                <div className="mt-4 relative">
+                  <select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    className={`${inputClass} appearance-none pr-12 cursor-pointer`}
+                  >
+                    <option value="">Your Team Role</option>
+                    {ROLES.map((item) => (
+                      <option key={item} value={item}>
                         {item}
-                      </button>
-                    )
-                  })}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-black/45 pointer-events-none" />
                 </div>
-              </div>
+
+                <div className="mt-5 rounded-[22px] border border-black/6 bg-[#FAFAFA] p-5">
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <p className="text-[14px] font-semibold uppercase tracking-[0.16em]" style={{ color: '#5E149F' }}>
+                      Team Responsibilities
+                    </p>
+                    <span className="text-[13px] font-medium text-black/45">
+                      Select as many as apply
+                    </span>
+                  </div>
+
+                  <div
+                    className="mt-4 min-h-[min(42dvh,22rem)] max-h-[min(42dvh,22rem)] overflow-y-auto overflow-x-hidden overscroll-y-contain rounded-xl border border-black/[0.06] bg-white/80 p-3 pr-2 [-webkit-overflow-scrolling:touch] [scrollbar-gutter:stable]"
+                    role="region"
+                    aria-label="Team responsibility options"
+                  >
+                    <div className="flex flex-wrap gap-3">
+                      {ALL_RESPONSIBILITY_OPTIONS.map((item) => {
+                        const selected = selectedResponsibilities.includes(item)
+                        return (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => toggleResponsibility(item)}
+                            className="rounded-full border px-4 py-2 text-[14px] font-medium transition-colors text-left"
+                            style={{
+                              borderColor: selected ? '#B4308B' : 'rgba(0,0,0,0.08)',
+                              background: selected ? 'rgba(180, 48, 139, 0.10)' : '#FFFFFF',
+                              color: selected ? '#5E149F' : 'rgba(0,0,0,0.72)',
+                            }}
+                          >
+                            {item}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-auto flex justify-end pt-8">
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!canGoToStep2}
+                    className="axis-gradient-button rounded-full px-10 py-4 text-[18px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Next
+                  </button>
+                </div>
+              </>
             )}
 
-            <div className="mt-8 flex justify-end">
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={!canSubmit || submitting}
-                className="axis-gradient-button rounded-full px-10 py-4 text-[18px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {submitting ? 'Saving...' : 'Next'}
-              </button>
-            </div>
+            {formStep === 2 && (
+              <>
+                {/*
+                  Match step 1 body height: responsibilities scroll uses min-h-[min(42dvh,22rem)].
+                  Same section pattern as Team Responsibilities (label row + field).
+                */}
+                <div className="mt-8 flex min-h-[min(42dvh,22rem)] w-full flex-col gap-4 *:min-h-0">
+                  <div className="flex min-h-0 flex-1 flex-col rounded-[22px] border border-black/6 bg-[#FAFAFA] p-5">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                      <p
+                        className="text-[14px] font-semibold uppercase tracking-[0.16em]"
+                        style={{ color: '#5E149F' }}
+                        id="consultation-workflow-label"
+                      >
+                        Your workflow
+                      </p>
+                      <span
+                        id="consultation-workflow-prompt"
+                        className="text-[13px] font-medium leading-snug text-black/45 sm:max-w-[55%] sm:text-right"
+                      >
+                        Tell us about your workflow, bottlenecks, and what you&apos;re seeking to improve?
+                      </span>
+                    </div>
+                    <textarea
+                      id="consultation-workflow"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Type your response..."
+                      aria-labelledby="consultation-workflow-label"
+                      aria-describedby="consultation-workflow-prompt"
+                      className={`${inputClass} mt-4 min-h-0 flex-1 resize-none bg-white`}
+                    />
+                  </div>
+
+                  <div className="flex min-h-0 flex-1 flex-col rounded-[22px] border border-black/6 bg-[#FAFAFA] p-5">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                      <p
+                        className="text-[14px] font-semibold uppercase tracking-[0.16em]"
+                        style={{ color: '#5E149F' }}
+                        id="consultation-tools-label"
+                      >
+                        Current tools
+                      </p>
+                      <span id="consultation-tools-prompt" className="text-[13px] font-medium text-black/45 sm:text-right">
+                        Current tools you&apos;re using
+                      </span>
+                    </div>
+                    <textarea
+                      id="consultation-tools"
+                      value={tools}
+                      onChange={(e) => setTools(e.target.value)}
+                      placeholder="e.g. Salesforce, Outreach, Gong..."
+                      aria-labelledby="consultation-tools-label"
+                      aria-describedby="consultation-tools-prompt"
+                      className={`${inputClass} mt-4 min-h-0 flex-1 resize-none bg-white`}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-auto flex flex-col-reverse gap-3 pt-8 sm:flex-row sm:items-center sm:justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setFormStep(1)}
+                    className="rounded-full border border-black/15 px-8 py-3.5 text-[16px] font-semibold text-black/80 transition-colors hover:bg-black/[0.03]"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleSubmit()}
+                    disabled={!canSubmit || submitting}
+                    className="axis-gradient-button rounded-full px-10 py-4 text-[18px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {submitting ? 'Saving…' : 'Submit'}
+                  </button>
+                </div>
+              </>
+            )}
           </section>
           </div>
         </div>
@@ -591,6 +691,48 @@ export default function Consultation() {
           </div>
         </footer>
       </main>
+
+      {showSubmitThanks && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          role="presentation"
+          onClick={() => setShowSubmitThanks(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="consultation-thanks-title"
+            className="max-h-[min(90dvh,640px)] w-full max-w-lg overflow-y-auto rounded-[28px] border border-black/8 bg-white p-8 shadow-[0_24px_80px_rgba(0,0,0,0.18)] md:p-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              id="consultation-thanks-title"
+              className="text-center text-[28px] font-bold leading-tight text-black md:text-[32px]"
+            >
+              You&apos;re all set.
+            </h2>
+            <div className="mt-6 space-y-4 text-center text-[16px] leading-7 text-black/72">
+              <p>
+                Thanks for sharing your workflow details — our team is reviewing your responses and preparing for your
+                consultation.
+              </p>
+              <p>
+                We&apos;ll reach out via email shortly to schedule a time and walk through your current setup,
+                challenges, and opportunities for improvement.
+              </p>
+            </div>
+            <div className="mt-8 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setShowSubmitThanks(false)}
+                className="axis-gradient-button rounded-full px-10 py-3.5 text-[16px] font-bold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

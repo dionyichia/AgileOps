@@ -9,6 +9,8 @@ export default function Login() {
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showForgotModal, setShowForgotModal] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
 
   async function handleSubmit() {
     setError(null)
@@ -20,7 +22,6 @@ export default function Login() {
 
       token.set(result.access_token)
 
-      // Fetch user's projects and redirect to the first one
       const userProjects = await projects.list()
       if (userProjects.length > 0) {
         navigate(`/projects/${userProjects[0].id}/dashboard`)
@@ -100,8 +101,24 @@ export default function Login() {
                   className="w-full h-14 rounded-[14px] border border-black/10 px-5 text-[16px] outline-none focus:border-[#B4308B]"
                 />
 
-                {error && (
-                  <p className="text-[14px] text-red-500">{error}</p>
+                {error && <p className="text-[14px] text-red-500">{error}</p>}
+                {mode === 'login' && (
+                  <div className="flex items-center justify-between pt-1 text-[14px] text-black/48">
+                    <label className="flex items-center gap-3">
+                      <input type="checkbox" defaultChecked className="h-4 w-4 rounded accent-[#7B4CE2]" />
+                      <span>Remember me</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResetEmail('')
+                        setShowForgotModal(true)
+                      }}
+                      className="font-medium text-black/48 transition-colors hover:text-[#5E149F]"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                 )}
 
                 <button
@@ -116,7 +133,15 @@ export default function Login() {
                 <p className="pt-16 text-[14px] text-black/42">
                   {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
                   <button
-                    onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(null) }}
+                    type="button"
+                    onClick={() => {
+                      if (mode === 'login') {
+                        navigate('/get-started')
+                      } else {
+                        setMode('login')
+                        setError(null)
+                      }
+                    }}
                     className="font-semibold text-[#7B4CE2] transition-opacity hover:opacity-70"
                   >
                     {mode === 'login' ? 'Sign Up' : 'Sign In'}
@@ -210,6 +235,60 @@ export default function Login() {
           </div>
         </div>
       </footer>
+
+      {showForgotModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          role="presentation"
+          onClick={() => setShowForgotModal(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="forgot-password-title"
+            className="w-full max-w-md rounded-[28px] border border-black/8 bg-white p-8 shadow-[0_24px_80px_rgba(0,0,0,0.18)] md:p-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="forgot-password-title" className="text-center text-[26px] font-bold leading-tight text-black md:text-[30px]">
+              Reset your password
+            </h2>
+            <p className="mt-5 text-center text-[16px] leading-7 text-black/72">
+              Enter your work email and we&apos;ll send you a secure link to reset your password.
+            </p>
+            <label htmlFor="reset-email" className="sr-only">
+              Work email
+            </label>
+            <input
+              id="reset-email"
+              type="email"
+              autoComplete="email"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              placeholder="Work email"
+              className="mt-6 w-full rounded-[14px] border border-black/10 px-5 py-4 text-[16px] outline-none focus:border-[#B4308B]"
+            />
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setShowForgotModal(false)}
+                className="order-2 rounded-full border border-black/15 px-6 py-3 text-[15px] font-semibold text-black/80 transition-colors hover:bg-black/[0.03] sm:order-1"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!resetEmail.trim()) return
+                  setShowForgotModal(false)
+                }}
+                className="order-1 axis-gradient-button rounded-full px-8 py-3 text-[15px] font-bold text-white sm:order-2"
+              >
+                Reset password
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, useSearchParams } from 'react-router-dom'
 import ReactFlow, {
   useNodesState,
   useEdgesState,
@@ -9,8 +9,10 @@ import ReactFlow, {
   MiniMap,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
-import { TrendingDown, TrendingUp, Minus, DollarSign, Zap, Info } from 'lucide-react'
+import { TrendingDown, TrendingUp, Minus, DollarSign, Zap, Info, ChevronLeft } from 'lucide-react'
 import StepLayout from '../components/layout/StepLayout'
+import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
+import { CLIENT_SIMULATIONS_SEED } from '../data/clientSimulations'
 import { nodeTypes } from '../components/workflow/CustomNodes'
 import { roleStats, toolBuckets, toolTimeMetrics, simulationNodes, simulationEdges } from '../data/mockData'
 import { toolEvals, simulation as simulationApi } from '../api/client'
@@ -38,7 +40,10 @@ export default function SimulationResults() {
   const { projectId, toolEvalId } = useParams<{ projectId: string; toolEvalId: string }>()
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const evalParam = searchParams.get('eval')
   const isProjectScoped = !!(projectId && toolEvalId)
+  const isFlatClient = !isProjectScoped
 
   // Job progress for project-scoped mode (jobId passed via navigation state)
   const passedJobId = (location.state as { jobId?: string } | null)?.jobId ?? null
@@ -62,13 +67,19 @@ export default function SimulationResults() {
   const [nodes, , onNodesChange] = useNodesState(simulationNodes)
   const [edges, , onEdgesChange] = useEdgesState(simulationEdges)
 
-  // Fetch tool name from API when project-scoped
+  // Fetch tool name from API when project-scoped; seed list when ?eval= on flat route
   useEffect(() => {
-    if (!isProjectScoped) return
-    toolEvals.get(projectId!, toolEvalId!)
-      .then((te) => setToolName(te.tool_name))
-      .catch(() => {})
-  }, [projectId, toolEvalId, isProjectScoped])
+    if (isProjectScoped) {
+      toolEvals.get(projectId!, toolEvalId!)
+        .then((te) => setToolName(te.tool_name))
+        .catch(() => {})
+      return
+    }
+    if (evalParam) {
+      const sim = CLIENT_SIMULATIONS_SEED.find((s) => s.id === evalParam)
+      if (sim) setToolName(sim.toolName)
+    }
+  }, [projectId, toolEvalId, isProjectScoped, evalParam])
 
   // Legacy loading sequence (only for flat route)
   useEffect(() => {
@@ -90,6 +101,32 @@ export default function SimulationResults() {
     .filter((m) => m.change === 'decrease')
     .reduce((acc, m) => acc + ((m as any).saved ?? 0), 0)
 
+  const recommendationPath = isProjectScoped
+    ? `/projects/${projectId}/recommendation/${toolEvalId}`
+    : evalParam
+      ? `/recommendation?eval=${encodeURIComponent(evalParam)}`
+      : '/recommendation'
+
+  const flatShellHeader = (
+    <div className="flex items-start gap-4">
+      <button
+        type="button"
+        onClick={() => navigate('/dashboard')}
+        className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 text-black/70 transition-colors hover:bg-black/[0.03]"
+        aria-label="Back to dashboard"
+      >
+        <ChevronLeft size={20} />
+      </button>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-black md:text-3xl">Simulation results</h1>
+        <p className="mt-1 text-sm text-black/55">
+          Impact of <span className="font-semibold text-[#5E149F]">{toolName}</span> on your SDR workflow
+          {done ? ` · ${totalSaved}min/day savings per rep` : ''}
+        </p>
+      </div>
+    </div>
+  )
+
   if (!done) {
     // Project-scoped: use real job progress
     const pct = isProjectScoped
@@ -99,9 +136,11 @@ export default function SimulationResults() {
       ? (jobProgress.job?.current_step ?? 'Starting simulation...')
       : LOADING_STEPS[loadStep].label
 
-    return (
+    const loadingBody = (
       <div
-        className="min-h-screen flex items-center justify-center px-6 py-12"
+        className={`flex flex-1 items-center justify-center px-6 py-12 ${
+          isFlatClient ? '' : 'min-h-screen'
+        }`}
         style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #FCF7FF 100%)' }}
       >
         <div
@@ -113,24 +152,24 @@ export default function SimulationResults() {
           }}
         >
           <div className="flex flex-col items-center text-center">
-            <div className="flex items-center gap-3 mb-8">
+            <div className="mb-8 flex items-center gap-3">
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                className="flex h-10 w-10 items-center justify-center rounded-xl"
                 style={{ background: 'linear-gradient(180deg, #5E149F 0%, #F75A8C 100%)' }}
               >
                 <Zap size={18} className="text-white" fill="white" />
               </div>
-              <span className="font-bold text-black text-[1.75rem] tracking-tight">Axis</span>
+              <span className="text-[1.75rem] font-bold tracking-tight text-black">Axis</span>
             </div>
 
-            <h2 className="text-[2rem] leading-tight font-bold text-black mb-3">Running Simulation</h2>
-            <p className="text-black/56 text-base max-w-xl mb-10">
-              Analyzing how <span className="text-[#5E149F] font-semibold">{toolName}</span> would affect your SDR workflow.
+            <h2 className="mb-3 text-[2rem] font-bold leading-tight text-black">Running Simulation</h2>
+            <p className="mb-10 max-w-xl text-base text-black/56">
+              Analyzing how <span className="font-semibold text-[#5E149F]">{toolName}</span> would affect your SDR workflow.
             </p>
           </div>
 
           <div className="rounded-[24px] border border-black/6 bg-white/80 px-6 py-6">
-            <div className="w-full bg-black/8 rounded-full h-2.5 mb-4 overflow-hidden">
+            <div className="mb-4 h-2.5 w-full overflow-hidden rounded-full bg-black/8">
               <div
                 className="h-2.5 rounded-full transition-all duration-500"
                 aria-hidden="true"
@@ -140,7 +179,7 @@ export default function SimulationResults() {
                 }}
               />
             </div>
-            <div className="flex justify-between text-sm text-black/50 mb-8">
+            <div className="mb-8 flex justify-between text-sm text-black/50">
               <span>{stepLabel}</span>
               <span className="font-semibold text-[#5E149F]">{pct}%</span>
             </div>
@@ -162,11 +201,11 @@ export default function SimulationResults() {
                           : 'bg-black/[0.02] text-black/34'
                     }`}
                   >
-                    <div className={`w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] font-bold ${
+                    <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                       stepDone
                         ? 'bg-[#248F63] text-white'
                         : stepActive
-                          ? 'bg-[#5E149F] text-white animate-pulse-slow'
+                          ? 'animate-pulse-slow bg-[#5E149F] text-white'
                           : 'bg-black/8 text-black/32'
                     }`}>
                       {stepDone ? '✓' : stepActive ? '●' : '○'}
@@ -180,18 +219,32 @@ export default function SimulationResults() {
         </div>
       </div>
     )
+
+    if (isFlatClient) {
+      return (
+        <ClientWorkspaceShell headerLeft={flatShellHeader}>
+          {loadingBody}
+        </ClientWorkspaceShell>
+      )
+    }
+
+    return loadingBody
   }
 
-  return (
+  const resultsLayout = (
     <StepLayout
       currentStep={4}
       title="Simulation Results"
       subtitle={`Impact of adding ${toolName} to your SDR workflow — ${totalSaved}min/day savings per rep`}
-      onNext={() => navigate(
-        isProjectScoped
-          ? `/projects/${projectId}/recommendation/${toolEvalId}`
-          : '/recommendation'
-      )}
+      embedded={isFlatClient}
+      backPath={
+        isFlatClient
+          ? evalParam
+            ? `/simulation?eval=${encodeURIComponent(evalParam)}`
+            : '/simulation'
+          : undefined
+      }
+      onNext={() => navigate(recommendationPath)}
       nextLabel="View Final Recommendation"
     >
       <div className="flex gap-6 h-full">
@@ -383,4 +436,14 @@ export default function SimulationResults() {
       </div>
     </StepLayout>
   )
+
+  if (isFlatClient) {
+    return (
+      <ClientWorkspaceShell headerLeft={flatShellHeader}>
+        <div className="flex min-h-0 flex-1 flex-col">{resultsLayout}</div>
+      </ClientWorkspaceShell>
+    )
+  }
+
+  return resultsLayout
 }

@@ -1,8 +1,10 @@
-import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { Upload, Link2, FileText, Globe, Briefcase, CheckCircle2, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams, useLocation, useSearchParams } from 'react-router-dom'
+import { Upload, Link2, FileText, Globe, Briefcase, CheckCircle2, Loader2, ArrowRight, ChevronLeft } from 'lucide-react'
 import StepLayout from '../components/layout/StepLayout'
+import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
 import { toolEvals, pipeline as pipelineApi, uploads } from '../api/client'
+import { getToolDraft, upsertToolDraft, type ToolDraft, type SerializedFileEntry } from '../lib/toolDraftStorage'
 
 type UseCase = 'adoption' | 'compare'
 
@@ -13,9 +15,21 @@ interface FileEntry {
 
 const emptyFile = (): FileEntry => ({ file: null, link: '' })
 
+function serializeFileEntry(entry: FileEntry): SerializedFileEntry {
+  return { link: entry.link, fileName: entry.file?.name ?? null }
+}
+
+function deserializeFileEntry(saved: SerializedFileEntry): FileEntry {
+  return { link: saved.link, file: null }
+}
+
 export default function ToolInputForm() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const draftParam = searchParams.get('draft')
+  const isClientToolInput = pathname === '/toolinput'
   const [useCase, setUseCase] = useState<UseCase>('adoption')
   const [toolName, setToolName] = useState('')
   const [docs, setDocs] = useState<FileEntry>(emptyFile())
@@ -25,6 +39,19 @@ export default function ToolInputForm() {
   const [pitchDeck, setPitchDeck] = useState<FileEntry>(emptyFile())
   const [submitting, setSubmitting] = useState(false)
 
+  useEffect(() => {
+    if (!isClientToolInput || !draftParam) return
+    const d = getToolDraft(draftParam)
+    if (!d) return
+    setUseCase(d.useCase)
+    setToolName(d.toolName)
+    setWebsite(d.website)
+    setDocs(deserializeFileEntry(d.docs))
+    setApi(deserializeFileEntry(d.api))
+    setCaseStudies(deserializeFileEntry(d.caseStudies))
+    setPitchDeck(deserializeFileEntry(d.pitchDeck))
+  }, [isClientToolInput, draftParam])
+
   const handleFile = (setter: (v: FileEntry) => void, current: FileEntry) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setter({ ...current, file: e.target.files?.[0] ?? null })
@@ -32,6 +59,32 @@ export default function ToolInputForm() {
   const canSubmit = toolName.trim().length > 0 && (
     docs.file || docs.link || api.file || website || caseStudies.file || pitchDeck.file
   ) && !submitting
+
+  const canSaveDraft =
+    isClientToolInput &&
+    !submitting &&
+    (toolName.trim().length > 0 ||
+      website.trim().length > 0 ||
+      Boolean(docs.link || api.link || caseStudies.link || pitchDeck.link) ||
+      Boolean(docs.file || api.file || caseStudies.file || pitchDeck.file))
+
+  const handleSaveDraft = () => {
+    if (!canSaveDraft) return
+    const id = draftParam ?? `draft-${Date.now()}`
+    const draft: ToolDraft = {
+      id,
+      savedAt: new Date().toISOString(),
+      useCase,
+      toolName: toolName.trim(),
+      website: website.trim(),
+      docs: serializeFileEntry(docs),
+      api: serializeFileEntry(api),
+      caseStudies: serializeFileEntry(caseStudies),
+      pitchDeck: serializeFileEntry(pitchDeck),
+    }
+    upsertToolDraft(draft)
+    if (!draftParam) setSearchParams({ draft: id }, { replace: true })
+  }
 
   const handleNext = async () => {
     // Always save to localStorage for legacy route compatibility
@@ -72,17 +125,24 @@ export default function ToolInputForm() {
     }
   }
 
-  return (
+  const layout = (
     <StepLayout
       currentStep={3}
-      title="Tool Input"
-      subtitle="Provide information about the tool you want to analyze. Axis will run a simulation against your workflow."
+      title={isClientToolInput ? '' : 'Tool Input'}
+      subtitle={
+        isClientToolInput
+          ? ''
+          : 'Provide information about the tool you want to analyze. Axis will run a simulation against your workflow.'
+      }
       onNext={handleNext}
       nextDisabled={!canSubmit}
       nextLabel="Run Simulation"
+      compact={isClientToolInput}
+      nested={isClientToolInput}
+      hideNextButton={isClientToolInput}
+      backPath={isClientToolInput ? '/dashboard' : undefined}
     >
-      <div className="max-w-2xl mx-auto space-y-8">
-
+      <div className="mx-auto max-w-2xl space-y-8">
         {/* Use Case */}
         <div>
           <label className="block text-sm font-semibold text-black/42 mb-3">Use Case</label>
@@ -166,9 +226,76 @@ export default function ToolInputForm() {
           <DualInput entry={caseStudies} setter={setCaseStudies} onFile={handleFile(setCaseStudies, caseStudies)} accept=".pdf,.docx" placeholder="Paste link to case study..." />
         </UploadField>
 
+        {isClientToolInput && (
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              type="button"
+              onClick={handleSaveDraft}
+              disabled={!canSaveDraft}
+              className="order-2 inline-flex items-center justify-center rounded-full border border-black/15 bg-white px-6 py-3 text-sm font-semibold text-black/72 transition-colors hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-40 sm:order-1"
+            >
+              Save Draft
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleNext()}
+              disabled={!canSubmit}
+              className="order-1 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:bg-black/10 disabled:text-black/30 sm:order-2"
+              style={
+                canSubmit
+                  ? { background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)', boxShadow: '0 12px 24px rgba(94,20,159,0.14)' }
+                  : undefined
+              }
+            >
+              {submitting ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Running…
+                </>
+              ) : (
+                <>
+                  Run Simulation
+                  <ArrowRight size={16} />
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
       </div>
     </StepLayout>
   )
+
+  if (isClientToolInput) {
+    return (
+      <ClientWorkspaceShell
+        headerLeft={
+          <div className="flex items-start gap-4">
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard')}
+              className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 text-black/70 transition-colors hover:bg-black/[0.03]"
+              aria-label="Back to dashboard"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-black md:text-3xl">Add new tool</h1>
+              <p className="mt-1 text-sm text-black/55">
+                Provide details about the tool. Axis will run a simulation against your workflow.
+              </p>
+            </div>
+          </div>
+        }
+      >
+        <main className="flex-1 bg-[#F7F4FB]">
+          <div className="mx-auto max-w-7xl px-6 py-8 animate-fade-in">{layout}</div>
+        </main>
+      </ClientWorkspaceShell>
+    )
+  }
+
+  return layout
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────

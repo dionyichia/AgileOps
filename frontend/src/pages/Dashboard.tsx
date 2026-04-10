@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useState, useCallback, useRef, useEffect, useMemo, type MouseEvent } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMarkovData } from '../hooks/pullMarkovData'
 import { toolEvals as toolEvalsApi, projects as projectsApi } from '../api/client'
 import type { ToolEvaluation, Project } from '../api/client'
@@ -18,21 +18,21 @@ import {
   Layers,
   Play,
   BarChart3,
-  LayoutDashboard,
-  GitBranch,
-  Wrench,
-  FlaskConical,
-  FileBarChart,
-  LogOut,
   MessageSquare,
   X,
   Send,
   ChevronRight,
   TrendingUp,
+  Plus,
+  LayoutDashboard,
+  Briefcase,
+  FileText,
+  GitBranch,
 } from 'lucide-react'
+import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
 import { nodeTypes } from '../components/workflow/CustomNodes'
-import { roleStats as mockRoleStats, toolBuckets, existingNodes as mockNodes, existingEdges as mockEdges } from '../data/mockData'
-import type { Tool } from '../data/mockData'
+import { roleStats as mockRoleStats, toolBuckets, type Tool } from '../data/mockData'
+import { CLIENT_SIMULATIONS_SEED, type ClientSimulation } from '../data/clientSimulations'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -41,22 +41,6 @@ interface NodeComment {
   text: string
   createdAt: string
 }
-
-interface SimulationRun {
-  id: string
-  toolName: string
-  status: 'completed' | 'running' | 'failed'
-  timeSaved: string
-  date: string
-}
-
-// ── Mock data for new cards ──────────────────────────────────────────────────
-
-const mockSimulations: SimulationRun[] = [
-  { id: 's1', toolName: 'Salesforce', status: 'completed', timeSaved: '4.1 hrs/wk', date: '2026-03-22' },
-  { id: 's2', toolName: 'Outreach', status: 'completed', timeSaved: '2.3 hrs/wk', date: '2026-03-20' },
-  { id: 's3', toolName: 'Gong.io', status: 'completed', timeSaved: '1.8 hrs/wk', date: '2026-03-18' },
-]
 
 const statusBadge: Record<string, string> = {
   completed: 'bg-sea-500/15 text-sea-300',
@@ -72,16 +56,6 @@ const bucketColorMap: Record<string, string> = {
   amber:   'bg-gold-500/15 text-gold-300 border-gold-500/30',
   rose:    'bg-magenta-500/15 text-magenta-200 border-magenta-500/30',
 }
-
-// ── Sidebar nav items ────────────────────────────────────────────────────────
-
-const NAV_ITEMS = [
-  { id: 'overview',    label: 'Overview',     icon: LayoutDashboard },
-  { id: 'workflow',    label: 'Workflow',      icon: GitBranch },
-  { id: 'tools',       label: 'Tools',         icon: Wrench },
-  { id: 'simulations', label: 'Simulations',   icon: FlaskConical },
-  { id: 'reports',     label: 'Reports',       icon: FileBarChart },
-]
 
 const BRAND = {
   shell: '#F7F4FB',
@@ -100,41 +74,94 @@ const BRAND = {
 export default function Dashboard() {
   const navigate = useNavigate()
   const { projectId } = useParams<{ projectId?: string }>()
+  const [searchParams] = useSearchParams()
 
-  // ── API data (project-scoped routes only) ────────────────────────────────
-  const { existingNodes, existingEdges, loading: markovLoading, error: markovError, isRealData, stats: markovStats } = useMarkovData(projectId)
-  const [apiProject, setApiProject]     = useState<Project | null>(null)
+  const { existingNodes, existingEdges, loading: markovLoading, error: markovError, isRealData, stats: markovStats } =
+    useMarkovData(projectId)
+  const [apiProject, setApiProject] = useState<Project | null>(null)
   const [apiToolEvals, setApiToolEvals] = useState<ToolEvaluation[] | null>(null)
 
   useEffect(() => {
     if (!projectId) return
-    projectsApi.get(projectId).then(setApiProject).catch(() => {/* use mock */})
-    toolEvalsApi.list(projectId).then(setApiToolEvals).catch(() => {/* use mock */})
+    projectsApi.get(projectId).then(setApiProject).catch(() => {})
+    toolEvalsApi.list(projectId).then(setApiToolEvals).catch(() => {})
   }, [projectId])
 
-  // Merge API data with mock fallbacks
   const roleStats = apiProject
     ? {
         ...mockRoleStats,
-        company:    apiProject.company_name,
+        company: apiProject.company_name,
         primaryRole: apiProject.primary_role,
-        teamSize:   apiProject.team_size ?? mockRoleStats.numEmployees,
+        teamSize: apiProject.team_size ?? mockRoleStats.numEmployees,
         numEmployees: apiProject.team_size ?? mockRoleStats.numEmployees,
       }
     : mockRoleStats
 
-  const liveSimulations: SimulationRun[] = apiToolEvals
-    ? apiToolEvals.map((e) => ({
-        id:        e.id,
-        toolName:  e.tool_name,
-        status:    'completed' as const,   // ToolEvaluation has no status field; default to completed
+  const liveSimulations: ClientSimulation[] = useMemo(() => {
+    if (projectId && apiToolEvals && apiToolEvals.length > 0) {
+      return apiToolEvals.map((e) => ({
+        id: e.id,
+        toolName: e.tool_name,
+        status: 'completed' as const,
         timeSaved: '—',
-        date:      e.created_at.slice(0, 10),
+        date: e.created_at.slice(0, 10),
       }))
-    : mockSimulations
+    }
+    return CLIENT_SIMULATIONS_SEED
+  }, [projectId, apiToolEvals])
 
-  const [activeNav, setActiveNav] = useState('overview')
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
+  /** Salesforce-style console: baseline workspace vs simulation snapshot tabs */
+  const [activeViewId, setActiveViewId] = useState<string>('baseline')
+  const [openSimTabIds, setOpenSimTabIds] = useState<string[]>(() =>
+    CLIENT_SIMULATIONS_SEED.map((s) => s.id),
+  )
+
+  const projectTabsSeededFor = useRef<string | null>(null)
+  useEffect(() => {
+    if (!projectId || !apiToolEvals?.length) return
+    if (projectTabsSeededFor.current === projectId) return
+    projectTabsSeededFor.current = projectId
+    setOpenSimTabIds(apiToolEvals.map((e) => e.id))
+  }, [projectId, apiToolEvals])
+
+  const activeSimulation = useMemo(
+    () => liveSimulations.find((s) => s.id === activeViewId),
+    [liveSimulations, activeViewId],
+  )
+
+  /** Other runs only: hide the simulation you’re currently viewing in the console */
+  const recentSimulationsForList = useMemo(() => {
+    if (activeViewId === 'baseline') return liveSimulations
+    return liveSimulations.filter((s) => s.id !== activeViewId)
+  }, [activeViewId, liveSimulations])
+
+  const focusSimulationTab = useCallback((simId: string) => {
+    setOpenSimTabIds((prev) => (prev.includes(simId) ? prev : [...prev, simId]))
+    setActiveViewId(simId)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+  const closeSimTab = (e: MouseEvent, id: string) => {
+    e.stopPropagation()
+    setOpenSimTabIds((prev) => prev.filter((x) => x !== id))
+    if (activeViewId === id) setActiveViewId('baseline')
+  }
+
+  /** Deep link / back from recommendation: `?tab=<simulationId>` selects that console tab */
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (!tab) return
+    const valid = liveSimulations.some((s) => s.id === tab)
+    const basePath = projectId ? `/projects/${projectId}/dashboard` : '/dashboard'
+    if (!valid) {
+      navigate(basePath, { replace: true })
+      return
+    }
+    setActiveViewId(tab)
+    setOpenSimTabIds((prev) => (prev.includes(tab) ? prev : [...prev, tab]))
+    navigate(basePath, { replace: true })
+  }, [searchParams, navigate, liveSimulations, projectId])
 
   // ── Comments state ───────────────────────────────────────────────────────
   const [comments, setComments] = useState<Record<string, NodeComment[]>>(() => {
@@ -216,10 +243,6 @@ export default function Dashboard() {
   const avgUtilization = Math.round(allTools.reduce((sum, t) => sum + t.utilization, 0) / allTools.length)
   const totalUnusedFeatures = allTools.reduce((sum, t) => sum + t.features.filter((f) => !f.used).length, 0)
   const selectedToolData = selectedTool ? allTools.find((t) => t.name === selectedTool) : null
-  const totalComments = Object.values(comments).reduce((sum, arr) => sum + arr.length, 0)
-  const allCommentsList = Object.entries(comments).flatMap(([nodeId, cmts]) =>
-    cmts.map((c) => ({ ...c, nodeId })),
-  ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   const taskNodes = existingNodes.filter((n) => n.type === 'taskNode')
   const totalMinutes = taskNodes.reduce((sum, n) => sum + ((n.data as { minutes?: number }).minutes ?? 0), 0)
 
@@ -232,152 +255,173 @@ export default function Dashboard() {
     if (projectId) {
       navigate(`/projects/${projectId}/tool-input`)
     } else {
-      navigate('/simulation')
+      navigate('/toolinput')
     }
-  }
-
-  // ── Scroll to section when nav clicked ───────────────────────────────────
-  const workflowRef = useRef<HTMLDivElement>(null)
-  const toolsRef = useRef<HTMLDivElement>(null)
-  const simulationsRef = useRef<HTMLDivElement>(null)
-
-  const handleNavClick = (id: string) => {
-    setActiveNav(id)
-    const refMap: Record<string, React.RefObject<HTMLDivElement | null>> = {
-      workflow: workflowRef,
-      tools: toolsRef,
-      simulations: simulationsRef,
-    }
-    if (id === 'reports') {
-      navigate('/recommendation')
-      return
-    }
-    refMap[id]?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F4FB] flex">
-
-      {/* ── Left sidebar ───────────────────────────────────────────────────── */}
-      <aside
-        className="w-64 flex-shrink-0 border-r flex flex-col sticky top-0 h-screen bg-white"
-        style={{ borderColor: BRAND.border }}
-      >
-        {/* Logo */}
-        <div className="px-6 py-6">
+    <ClientWorkspaceShell
+      headerLeft={
+        <div className="min-w-0">
           <div className="flex items-center gap-3">
-            <img
-              src="/axis-logo.png"
-              alt="Axis logo"
-              className="h-11 w-11 rounded-2xl object-cover"
-            />
-            <span className="font-bold text-[#111111] text-[28px] tracking-[-0.04em]">Axis</span>
+            <img src="/axis-logo.png" alt="Axis logo" className="h-10 w-10 rounded-2xl object-cover" />
+            <h1 className="text-[42px] leading-none font-bold tracking-[-0.045em] text-black">Your Workflow</h1>
           </div>
+          {activeViewId === 'baseline' ? (
+            <p className="mt-2 text-[20px] leading-snug text-black/88">
+              Your team&apos;s current workflow overview and tool insights
+            </p>
+          ) : (
+            <p className="mt-2 text-[18px] leading-snug text-black/78">
+              <span className="font-semibold text-[#5E149F]">Simulation:</span>{' '}
+              {activeSimulation?.toolName ?? 'Unknown'}{' '}
+              <span className="text-black/45">
+                ·{' '}
+                {activeSimulation &&
+                  new Date(activeSimulation.date).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+              </span>
+              {activeSimulation && (
+                <span className="text-black/45"> · Est. {activeSimulation.timeSaved}</span>
+              )}
+            </p>
+          )}
         </div>
-
-        {/* Nav */}
-        <nav className="flex-1 px-3 space-y-1">
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+      }
+    >
+      <main className="mx-auto w-full max-w-[1480px] flex-1 space-y-5 px-6 py-5 md:px-10 md:py-6">
+        {/* Salesforce-style console tabs: baseline + open simulation views */}
+        <div className="-mx-6 border-t-2 md:-mx-10" style={{ borderColor: BRAND.violet }}>
+          <div
+            className="flex min-h-[44px] overflow-x-auto border-b-2 bg-white"
+            style={{ borderBottomColor: 'rgba(94, 20, 159, 0.22)' }}
+          >
             <button
-              key={id}
-              onClick={() => handleNavClick(id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-[15px] font-semibold transition-colors ${
-                activeNav === id
-                  ? 'text-white'
-                  : 'text-black/58 hover:bg-black/[0.03] hover:text-black/88'
+              type="button"
+              onClick={() => setActiveViewId('baseline')}
+              className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-4 py-2.5 text-[13px] font-semibold transition-colors ${
+                activeViewId === 'baseline'
+                  ? 'bg-[#F4E8FB] text-[#5E149F]'
+                  : 'bg-white text-black/70 hover:bg-black/[0.02]'
               }`}
-              style={activeNav === id ? { background: 'linear-gradient(90deg, #5E149F 0%, #B4308B 50%, #F75A8C 100%)', boxShadow: '0 12px 24px rgba(94,20,159,0.16)' } : {}}
+              style={activeViewId === 'baseline' ? { boxShadow: 'inset 0 -3px 0 0 #5E149F' } : undefined}
             >
-              <Icon size={18} />
-              {label}
+              <LayoutDashboard size={15} className="shrink-0 text-black/50" />
+              <span className="whitespace-nowrap">Workspace</span>
             </button>
-          ))}
-        </nav>
-
-        {/* Bottom */}
-        <div className="px-3 pb-6">
-          <div className="pt-4 mb-3" style={{ borderTop: `1px solid ${BRAND.border}` }}>
-            <div className="flex items-center gap-3 px-3">
-              <div
-                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold"
-                style={{ background: 'linear-gradient(180deg, #5E149F 0%, #F75A8C 100%)' }}
-              >
-                AC
-              </div>
-              <div className="min-w-0">
-                <div className="text-sm font-semibold text-black truncate">Acme Corp</div>
-                <div className="text-xs text-black/42 truncate">{roleStats.teamType} · {roleStats.role.split('(')[0].trim()}</div>
-              </div>
-            </div>
+            {openSimTabIds.map((simId) => {
+              const sim = liveSimulations.find((s) => s.id === simId)
+              if (!sim) return null
+              const active = activeViewId === simId
+              return (
+                <div
+                  key={simId}
+                  className="flex shrink-0 items-stretch border-r border-black/10"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActiveViewId(simId)}
+                    className={`flex items-center gap-1.5 px-3 py-2.5 text-[13px] font-semibold transition-colors ${
+                      active ? 'bg-[#F4E8FB] text-[#5E149F]' : 'bg-white text-black/72 hover:bg-black/[0.02]'
+                    }`}
+                    style={active ? { boxShadow: 'inset 0 -3px 0 0 #5E149F' } : undefined}
+                  >
+                    <Briefcase size={14} className="shrink-0 text-black/45" />
+                    <span className="max-w-[160px] truncate">{sim.toolName}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => closeSimTab(e, simId)}
+                    className="flex items-center px-2 text-black/35 transition-colors hover:bg-black/[0.06] hover:text-black/65"
+                    aria-label={`Close ${sim.toolName} tab`}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              )
+            })}
           </div>
-          <button className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-[15px] font-semibold text-black/46 hover:bg-black/[0.03] hover:text-black/78 transition-colors">
-            <LogOut size={18} />
-            Log out
-          </button>
         </div>
-      </aside>
 
-      {/* ── Main content area ──────────────────────────────────────────────── */}
-      <div className="flex-1 min-w-0 flex flex-col">
-
-        {/* ── Top header ─────────────────────────────────────────────────── */}
-        <header
-          className="border-b bg-white/90 backdrop-blur-sm sticky top-0 z-40 px-8 py-5 flex items-center justify-between"
-          style={{ borderColor: BRAND.border }}
-        >
-          <div>
-            <h1 className="text-[36px] font-bold tracking-[-0.04em] text-black">Dashboard</h1>
-            <p className="text-[14px] text-black/48 mt-1">Your team&apos;s workflow overview and tool insights</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-5 text-[14px] text-black/50 font-medium">
-              <span className="flex items-center gap-1.5">
-                <Users size={14} style={{ color: BRAND.violet }} />
-                {roleStats.numEmployees} reps
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Layers size={14} style={{ color: BRAND.pink }} />
-                {roleStats.avgToolsUsed} tools avg
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Clock size={14} style={{ color: BRAND.coral }} />
-                {roleStats.avgWeeklyHours}h/wk
-              </span>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(94,20,159,0.12)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Workflow Steps</div>
+              <div className="text-2xl font-bold leading-tight text-black">{taskNodes.length}</div>
+              <div className="text-[11px] text-black/42 mt-0.5">{totalMinutes} min total cycle</div>
             </div>
-          </div>
-        </header>
-
-        {/* ── Scrollable content ─────────────────────────────────────────── */}
-        <main className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#F7F4FB]">
-
-          {/* ── Stat cards row ─────────────────────────────────────────── */}
-          <div className="grid grid-cols-4 gap-4">
-            <div className="rounded-[24px] p-5 bg-white border" style={{ borderColor: 'rgba(94,20,159,0.12)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
-              <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: BRAND.violet }}>Workflow Steps</div>
-              <div className="text-3xl font-bold text-black">{taskNodes.length}</div>
-              <div className="text-xs text-black/42 mt-1">{totalMinutes} min total cycle</div>
-            </div>
-            <div className="rounded-[24px] p-5 bg-white border" style={{ borderColor: 'rgba(180,48,139,0.12)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
-              <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: BRAND.orchid }}>Avg Utilization</div>
-              <div className="text-3xl font-bold text-black">{avgUtilization}%</div>
-              <div className="w-full rounded-full h-1.5 mt-2 bg-black/10">
-                <div className="h-1.5 rounded-full" style={{ width: `${avgUtilization}%`, background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }} />
+            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(180,48,139,0.12)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.orchid }}>Avg Utilization</div>
+              <div className="text-2xl font-bold leading-tight text-black">{avgUtilization}%</div>
+              <div className="mt-1.5 h-1 w-full rounded-full bg-black/10">
+                <div className="h-1 rounded-full" style={{ width: `${avgUtilization}%`, background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }} />
               </div>
             </div>
-            <div className="rounded-[24px] p-5 bg-white border" style={{ borderColor: 'rgba(226,64,155,0.14)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
-              <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: BRAND.pink }}>Unused Features</div>
-              <div className="text-3xl font-bold text-black">{totalUnusedFeatures}</div>
-              <div className="text-xs text-black/42 mt-1">across {allTools.length} tools</div>
+            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(226,64,155,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.pink }}>Unused Features</div>
+              <div className="text-2xl font-bold leading-tight text-black">{totalUnusedFeatures}</div>
+              <div className="text-[11px] text-black/42 mt-0.5">across {allTools.length} tools</div>
             </div>
-            <div className="rounded-[24px] p-5 bg-white border" style={{ borderColor: 'rgba(247,90,140,0.14)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
-              <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: BRAND.coral }}>Team Size</div>
-              <div className="text-3xl font-bold text-black">{roleStats.numEmployees}</div>
-              <div className="text-xs text-black/42 mt-1">{roleStats.role.split('(')[0].trim()}s</div>
+            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(247,90,140,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.coral }}>Team Size</div>
+              <div className="text-2xl font-bold leading-tight text-black">{roleStats.numEmployees}</div>
+              <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-black/42">
+                <Users size={11} style={{ color: BRAND.coral }} />
+                <span className="line-clamp-2 leading-snug">{roleStats.role.split('(')[0].trim()}s · Active seats</span>
+              </div>
             </div>
-          </div>
+            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(226,64,155,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.pink }}>Tools Avg</div>
+              <div className="text-2xl font-bold leading-tight text-black">{roleStats.avgToolsUsed}</div>
+              <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-black/42">
+                <Layers size={11} style={{ color: BRAND.pink }} />
+                Per rep
+              </div>
+            </div>
+            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(247,90,140,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.coral }}>Weekly Load</div>
+              <div className="text-2xl font-bold leading-tight text-black">{roleStats.avgWeeklyHours}</div>
+              <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-black/42">
+                <Clock size={11} style={{ color: BRAND.coral }} />
+                Hours / week
+              </div>
+            </div>
+        </div>
 
           {/* ── Workflow map card ───────────────────────────────────────── */}
-          <div ref={workflowRef} className="bg-white border rounded-[24px] overflow-hidden" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-end px-1">
+              <button
+                type="button"
+                onClick={() => {
+                  if (activeViewId === 'baseline') {
+                    navigate(projectId ? `/projects/${projectId}/tool-input` : '/toolinput')
+                  } else {
+                    navigate(
+                      projectId
+                        ? `/projects/${projectId}/recommendation/${activeViewId}`
+                        : `/recommendation?eval=${encodeURIComponent(activeViewId)}`,
+                    )
+                  }
+                }}
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold text-white shadow-[0_10px_28px_rgba(94,20,159,0.28)] transition-transform hover:-translate-y-0.5 axis-gradient-button"
+              >
+                {activeViewId === 'baseline' ? (
+                  <>
+                    <Plus size={16} strokeWidth={2.5} />
+                    Add new tool
+                  </>
+                ) : (
+                  <>
+                    <FileText size={16} strokeWidth={2.5} />
+                    View Report
+                  </>
+                )}
+              </button>
+            </div>
+          <div className="bg-white border rounded-[24px] overflow-hidden" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
             <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
               <div className="flex items-center gap-3">
                 <BarChart3 size={16} style={{ color: BRAND.violet }} />
@@ -529,12 +573,11 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+          </div>
 
-          {/* ── Bottom grid: Tools + Simulations + Feedback ────────────── */}
-          <div className="grid grid-cols-3 gap-4">
-
-            {/* ── Tool Stack card ──────────────────────────────────────── */}
-            <div ref={toolsRef} className="bg-white border rounded-[24px] p-5 max-h-[520px] overflow-y-auto" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+          {/* ── Bottom grid: Tool stack + simulations ───────────────────── */}
+          <div className="grid gap-5 xl:grid-cols-[7fr_3fr]">
+            <div className="bg-white border rounded-[24px] p-5 max-h-[520px] overflow-y-auto" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Tool Stack</h3>
                 <span className="text-xs text-black/38">{avgUtilization}% avg utilization</span>
@@ -651,47 +694,58 @@ export default function Dashboard() {
             </div>
 
             {/* ── Recent Simulations card ──────────────────────────────── */}
-            <div ref={simulationsRef} className="bg-white border rounded-[24px] p-5" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+            <div className="bg-white border rounded-[24px] p-5" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Recent Simulations</h3>
-                <span className="text-xs text-black/38">{liveSimulations.length} runs</span>
+                <span className="text-xs text-black/38">
+                  {recentSimulationsForList.length}{' '}
+                  {recentSimulationsForList.length === 1 ? 'run' : 'runs'}
+                </span>
               </div>
 
               <div className="space-y-2">
-                {liveSimulations.map((sim) => (
-                  <button
-                    key={sim.id}
-                    onClick={() => projectId
-                      ? navigate(`/projects/${projectId}/simulation/${sim.id}`)
-                      : navigate('/simulation')
-                    }
-                    className="w-full flex items-center justify-between bg-[#FBFAFD] border rounded-2xl px-4 py-3 transition-colors group"
-                    style={{ borderColor: BRAND.border }}
-                  >
-                    <div className="text-left">
-                      <div className="text-sm font-medium text-black transition-colors">{sim.toolName}</div>
-                      <div className="text-xs text-black/42 mt-0.5">
-                        {new Date(sim.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </div>
-                    </div>
-                    <div className="text-right flex items-center gap-3">
-                      <div>
-                        <div className="text-sm font-semibold text-sea-300 flex items-center gap-1">
-                          <TrendingUp size={12} />
-                          {sim.timeSaved}
+                {recentSimulationsForList.length === 0 ? (
+                  <p className="rounded-2xl border border-black/8 bg-[#FBFAFD] px-4 py-6 text-center text-xs text-black/45">
+                    No other simulations to show while this tab is open.
+                  </p>
+                ) : (
+                  recentSimulationsForList.map((sim) => (
+                    <button
+                      key={sim.id}
+                      type="button"
+                      onClick={() =>
+                        projectId
+                          ? navigate(`/projects/${projectId}/simulation/${sim.id}`)
+                          : focusSimulationTab(sim.id)
+                      }
+                      className="group flex w-full items-center justify-between rounded-2xl border bg-[#FBFAFD] px-4 py-3 transition-colors hover:border-black/12"
+                      style={{ borderColor: BRAND.border }}
+                    >
+                      <div className="text-left">
+                        <div className="text-sm font-medium text-black transition-colors">{sim.toolName}</div>
+                        <div className="mt-0.5 text-xs text-black/42">
+                          {new Date(sim.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </div>
-                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${statusBadge[sim.status]}`}>
-                          {sim.status}
-                        </span>
                       </div>
-                      <ChevronRight size={14} className="text-black/32" />
-                    </div>
-                  </button>
-                ))}
+                      <div className="flex items-center gap-3 text-right">
+                        <div>
+                          <div className="flex items-center justify-end gap-1 text-sm font-semibold text-sea-300">
+                            <TrendingUp size={12} />
+                            {sim.timeSaved}
+                          </div>
+                          <span className={`mt-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-medium capitalize ${statusBadge[sim.status]}`}>
+                            {sim.status}
+                          </span>
+                        </div>
+                        <ChevronRight size={14} className="text-black/32" />
+                      </div>
+                    </button>
+                  ))
+                )}
               </div>
 
               <button
-                onClick={() => navigate('/simulation')}
+                onClick={() => navigate('/simulations')}
                 className="w-full mt-4 flex items-center justify-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-2xl transition-colors"
                 style={{ color: BRAND.violet, background: 'rgba(94,20,159,0.08)', border: '1px solid rgba(94,20,159,0.14)' }}
               >
@@ -699,47 +753,9 @@ export default function Dashboard() {
                 <ChevronRight size={14} />
               </button>
             </div>
-
-            {/* ── Feedback summary card ────────────────────────────────── */}
-            <div className="bg-white border rounded-[24px] p-5" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Feedback</h3>
-                {totalComments > 0 && (
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ color: BRAND.violet, background: 'rgba(94,20,159,0.08)' }}>
-                    {totalComments} comment{totalComments !== 1 ? 's' : ''}
-                  </span>
-                )}
-              </div>
-
-              {allCommentsList.length === 0 ? (
-                <div className="text-center py-10">
-                  <MessageSquare size={24} className="mx-auto mb-2" style={{ color: BRAND.violet }} />
-                  <p className="text-sm text-black/52">No feedback yet</p>
-                  <p className="text-xs text-black/38 mt-1">Click the comment icon on any workflow step to leave feedback</p>
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                  {allCommentsList.slice(0, 8).map((c) => {
-                    const nodeLabel = existingNodes.find((n) => n.id === c.nodeId)?.data?.label ?? c.nodeId
-                    return (
-                      <div key={c.id} className="bg-[#FBFAFD] border rounded-2xl px-3 py-2.5" style={{ borderColor: BRAND.border }}>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: BRAND.violet }}>{nodeLabel}</span>
-                          <span className="text-[10px] text-black/38">
-                            {new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </span>
-                        </div>
-                        <p className="text-xs text-black/72 leading-relaxed line-clamp-2">{c.text}</p>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
           </div>
 
         </main>
-      </div>
-    </div>
+    </ClientWorkspaceShell>
   )
 }
