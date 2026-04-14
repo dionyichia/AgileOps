@@ -1,0 +1,140 @@
+[
+  {
+    "node_id": "communicate_with_ai_assistants",
+    "label": "Communicate with AI assistants",
+    "description": "Engages in conversations with different AI platforms using varied communication styles - meowing with Chat (likely ChatGPT), woofing with Anthropic (Claude), and splooshing with Gemini. Also uses 'taptap' communication style with Chat.",
+    "action_verb": "converse",
+    "inputs": [
+      "queries or prompts",
+      "communication context"
+    ],
+    "outputs": [
+      "AI responses",
+      "conversational interactions"
+    ],
+    "app_cluster": [
+      "chatgpt",
+      "anthropic",
+      "gemini"
+    ],
+    "duration_distribution": {
+      "type": "lognormal",
+      "mean_minutes": 10,
+      "std_minutes": 8
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "dc8aad30-9ecb-4748-876e-fe3b68cf708c.txt",
+      "7ba4c7b7-bd02-4396-b931-0dc280de09a5.txt"
+    ]
+  },
+  {
+    "node_id": "find_prospects",
+    "label": "Find prospects",
+    "description": "Searches for potential clients or contacts using Google to identify and locate people of interest.",
+    "action_verb": "research",
+    "inputs": [
+      "search criteria",
+      "target prospect profiles"
+    ],
+    "outputs": [
+      "prospect contact information",
+      "lead lists"
+    ],
+    "app_cluster": [
+      "google"
+    ],
+    "duration_distribution": {
+      "type": "lognormal",
+      "mean_minutes": 15,
+      "std_minutes": 10
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "7ba4c7b7-bd02-4396-b931-0dc280de09a5.txt"
+    ]
+  },
+  {
+    "node_id": "call_prospects",
+    "label": "Call prospects",
+    "description": "Makes phone calls to potential clients or contacts using Gong, likely for sales conversations or outreach.",
+    "action_verb": "call",
+    "inputs": [
+      "prospect contact information",
+      "call scripts or talking points"
+    ],
+    "outputs": [
+      "call recordings",
+      "conversation outcomes",
+      "follow-up actions"
+    ],
+    "app_cluster": [
+      "gong"
+    ],
+    "duration_distribution": {
+      "type": "lognormal",
+      "mean_minutes": 20,
+      "std_minutes": 15
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "7ba4c7b7-bd02-4396-b931-0dc280de09a5.txt"
+    ]
+  },
+  {
+    "node_id": "negotiate_with_excel",
+    "label": "Negotiate with Excel",
+    "description": "Conducts negotiations or deals using Excel, likely involving spreadsheet-based calculations, proposals, or contract terms.",
+    "action_verb": "negotiate",
+    "inputs": [
+      "deal parameters",
+      "pricing information",
+      "negotiation points"
+    ],
+    "outputs": [
+      "negotiated terms",
+      "updated proposals",
+      "deal calculations"
+    ],
+    "app_cluster": [
+      "excel"
+    ],
+    "duration_distribution": {
+      "type": "lognormal",
+      "mean_minutes": 30,
+      "std_minutes": 20
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "7ba4c7b7-bd02-4396-b931-0dc280de09a5.txt"
+    ]
+  },
+  {
+    "node_id": "collect_payments",
+    "label": "Collect payments",
+    "description": "Processes and collects money from clients or customers using Stripe payment platform.",
+    "action_verb": "collect",
+    "inputs": [
+      "payment requests",
+      "customer payment information",
+      "invoice details"
+    ],
+    "outputs": [
+      "processed payments",
+      "payment confirmations",
+      "transaction records"
+    ],
+    "app_cluster": [
+      "stripe"
+    ],
+    "duration_distribution": {
+      "type": "lognormal",
+      "mean_minutes": 5,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "high",
+    "sources": [
+      "7ba4c7b7-bd02-4396-b931-0dc280de09a5.txt"
+    ]
+  }
+]

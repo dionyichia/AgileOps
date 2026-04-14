@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { projects as projectsApi, profiles as profilesApi } from '../api/client'
+import { consultation as consultationApi } from '../api/client'
 import {
   CheckCircle2,
   ChevronDown,
@@ -151,19 +151,12 @@ export default function Consultation() {
 
   const handleSubmit = async () => {
     if (!canSubmit) return
-    localStorage.setItem(
-      'axisFormData',
-      JSON.stringify({ firstName, lastName, email, role, selectedResponsibilities, tools, description }),
-    )
     setSubmitting(true)
     try {
-      const project = await projectsApi.create({
-        company_name: email,
-        team_name: `${firstName} ${lastName}`,
-        primary_role: role,
-        notes: description || undefined,
-      })
-      await profilesApi.upsert(project.id, {
+      await consultationApi.submit({
+        first_name: firstName,
+        last_name: lastName,
+        email,
         role,
         selected_responsibilities: selectedResponsibilities,
         tools: tools || undefined,
@@ -171,8 +164,7 @@ export default function Consultation() {
       })
       setShowSubmitThanks(true)
     } catch (err) {
-      console.error('Failed to create project via API:', err)
-      navigate('/internal/workflow-report')
+      console.error('Consultation submit failed:', err)
     } finally {
       setSubmitting(false)
     }
@@ -696,7 +688,7 @@ export default function Consultation() {
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
           role="presentation"
-          onClick={() => setShowSubmitThanks(false)}
+          onClick={() => navigate('/')}
         >
           <div
             role="dialog"
@@ -724,7 +716,7 @@ export default function Consultation() {
             <div className="mt-8 flex justify-center">
               <button
                 type="button"
-                onClick={() => setShowSubmitThanks(false)}
+                onClick={() => navigate('/')}
                 className="axis-gradient-button rounded-full px-10 py-3.5 text-[16px] font-bold"
               >
                 Close

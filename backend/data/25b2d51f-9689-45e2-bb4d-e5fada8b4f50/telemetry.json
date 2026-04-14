@@ -1,0 +1,1507 @@
+{
+  "metadata": {
+    "generated_at": "2026-04-10T16:18:04.118950",
+    "version": "1.0.0",
+    "description": "Synthetic telemetry for B2B sales pipeline Markov chain modelling. Each event is one node visit. Use (employee_id, deal_id) to reconstruct sequences. next_node field encodes the observed transition.",
+    "schema": {
+      "event_id": "Unique event identifier (UUID prefix)",
+      "timestamp": "Wall-clock start time of the node visit (YYYY-MM-DD HH:MM)",
+      "employee_id": "Rep identifier",
+      "role": "sdr | junior_ae | sales_intern",
+      "deal_id": "Ties events to a single deal thread for sequence reconstruction",
+      "node_id": "Workflow node visited (matches node schema)",
+      "duration_min": "Actual time spent on node (minutes)",
+      "apps_used": "Tools open during this node",
+      "is_pipeline_node": "False for interruptions like standups",
+      "outcome": "completed | closed_won | lost | disqualified | no_response | retry",
+      "next_node": "Observed successor node \u2014 key input for transition matrix",
+      "repeated_node": "True if this visit is a retry of the same node in the same deal"
+    },
+    "employees": [
+      {
+        "id": "emp_001",
+        "role": "sdr",
+        "name": "Jordan Mills",
+        "tenure_months": 4,
+        "performance": "average"
+      },
+      {
+        "id": "emp_002",
+        "role": "sdr",
+        "name": "Casey Rivera",
+        "tenure_months": 11,
+        "performance": "high"
+      },
+      {
+        "id": "emp_003",
+        "role": "sales_intern",
+        "name": "Alex Chen",
+        "tenure_months": 2,
+        "performance": "average"
+      },
+      {
+        "id": "emp_004",
+        "role": "sdr",
+        "name": "Morgan Patel",
+        "tenure_months": 7,
+        "performance": "low"
+      },
+      {
+        "id": "emp_005",
+        "role": "junior_ae",
+        "name": "Taylor Brooks",
+        "tenure_months": 14,
+        "performance": "high"
+      },
+      {
+        "id": "emp_006",
+        "role": "sales_intern",
+        "name": "Sam Nguyen",
+        "tenure_months": 3,
+        "performance": "average"
+      }
+    ],
+    "total_events": 89,
+    "total_deals": 20,
+    "pipeline_nodes": [
+      "call_with_gong",
+      "meet_with_google",
+      "mewo_with_chat",
+      "tinkle_with_excel",
+      "tonkle_with_firefox"
+    ],
+    "deal_outcome_counts": {
+      "won": 5,
+      "lost_early": 6,
+      "lost_post_discovery": 4,
+      "lost_post_demo": 3,
+      "ghosted_after_proposal": 2
+    }
+  },
+  "events": [
+    {
+      "event_id": "53434b19",
+      "timestamp": "2024-01-08 08:45",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_55221f",
+      "node_id": "call_with_gong",
+      "duration_min": 38.5,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "59da0c87",
+      "timestamp": "2024-01-09 10:17",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_55221f",
+      "node_id": "meet_with_google",
+      "duration_min": 42.3,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "d0a1f197",
+      "timestamp": "2024-01-10 09:00",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_fb49d6",
+      "node_id": "team_standup",
+      "duration_min": 27.9,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "call_with_gong"
+    },
+    {
+      "event_id": "58fb98f1",
+      "timestamp": "2024-01-10 09:31",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_fb49d6",
+      "node_id": "call_with_gong",
+      "duration_min": 44.0,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "b74eced9",
+      "timestamp": "2024-01-11 10:06",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_55221f",
+      "node_id": "mewo_with_chat",
+      "duration_min": 13.2,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tinkle_with_excel",
+      "repeated_node": false
+    },
+    {
+      "event_id": "69f099e3",
+      "timestamp": "2024-01-11 10:27",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_55221f",
+      "node_id": "tinkle_with_excel",
+      "duration_min": 51.9,
+      "apps_used": [
+        "excel"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tonkle_with_firefox",
+      "repeated_node": true
+    },
+    {
+      "event_id": "3ec4530f",
+      "timestamp": "2024-01-11 11:22",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_55221f",
+      "node_id": "tinkle_with_excel",
+      "duration_min": 22.3,
+      "apps_used": [
+        "excel"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "tonkle_with_firefox",
+      "repeated_node": true
+    },
+    {
+      "event_id": "4027d0bd",
+      "timestamp": "2024-01-11 11:45",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_55221f",
+      "node_id": "tonkle_with_firefox",
+      "duration_min": 13.1,
+      "apps_used": [
+        "firefox"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "closed_won",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "eb5fd59a",
+      "timestamp": "2024-01-12 10:41",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_fb49d6",
+      "node_id": "meet_with_google",
+      "duration_min": 36.5,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "06c04305",
+      "timestamp": "2024-01-12 11:23",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_fb49d6",
+      "node_id": "mewo_with_chat",
+      "duration_min": 12.7,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "dc4e071b",
+      "timestamp": "2024-01-15 08:30",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_2759e5",
+      "node_id": "call_with_gong",
+      "duration_min": 23.8,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e0d6a5d7",
+      "timestamp": "2024-01-16 08:44",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_2759e5",
+      "node_id": "meet_with_google",
+      "duration_min": 36.6,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "disqualified",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "aaa1ea9c",
+      "timestamp": "2024-01-17 09:15",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_ff4c02",
+      "node_id": "team_standup",
+      "duration_min": 21.2,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "call_with_gong"
+    },
+    {
+      "event_id": "235e8290",
+      "timestamp": "2024-01-17 09:37",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_ff4c02",
+      "node_id": "call_with_gong",
+      "duration_min": 11.5,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "81ab499e",
+      "timestamp": "2024-01-18 08:24",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_ff4c02",
+      "node_id": "meet_with_google",
+      "duration_min": 20.9,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "884cc157",
+      "timestamp": "2024-01-21 10:16",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_ff4c02",
+      "node_id": "mewo_with_chat",
+      "duration_min": 7.2,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tinkle_with_excel",
+      "repeated_node": false
+    },
+    {
+      "event_id": "fe97144b",
+      "timestamp": "2024-01-21 10:29",
+      "employee_id": "emp_001",
+      "role": "sdr",
+      "deal_id": "deal_ff4c02",
+      "node_id": "tinkle_with_excel",
+      "duration_min": 15.4,
+      "apps_used": [
+        "excel"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "12e81986",
+      "timestamp": "2024-01-22 08:55",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_7d816d",
+      "node_id": "call_with_gong",
+      "duration_min": 28.1,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "2d26e0bc",
+      "timestamp": "2024-01-24 09:05",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_76f72e",
+      "node_id": "team_standup",
+      "duration_min": 20.3,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "call_with_gong"
+    },
+    {
+      "event_id": "0357337d",
+      "timestamp": "2024-01-24 09:27",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_76f72e",
+      "node_id": "call_with_gong",
+      "duration_min": 11.8,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "a77f8612",
+      "timestamp": "2024-01-26 08:35",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_7d816d",
+      "node_id": "meet_with_google",
+      "duration_min": 24.0,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "d9f214fa",
+      "timestamp": "2024-01-27 09:40",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_76f72e",
+      "node_id": "meet_with_google",
+      "duration_min": 28.3,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "4ed2b00a",
+      "timestamp": "2024-01-29 08:40",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_69e946",
+      "node_id": "call_with_gong",
+      "duration_min": 20.7,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "ac114cc7",
+      "timestamp": "2024-01-29 09:22",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_76f72e",
+      "node_id": "team_standup",
+      "duration_min": 20.6,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat"
+    },
+    {
+      "event_id": "8ecdb0f2",
+      "timestamp": "2024-01-29 09:45",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_76f72e",
+      "node_id": "mewo_with_chat",
+      "duration_min": 3,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tinkle_with_excel",
+      "repeated_node": false
+    },
+    {
+      "event_id": "2c32ee97",
+      "timestamp": "2024-01-29 09:55",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_76f72e",
+      "node_id": "tinkle_with_excel",
+      "duration_min": 24.0,
+      "apps_used": [
+        "excel"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tonkle_with_firefox",
+      "repeated_node": false
+    },
+    {
+      "event_id": "18ed5e86",
+      "timestamp": "2024-01-29 10:12",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_7d816d",
+      "node_id": "mewo_with_chat",
+      "duration_min": 3,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tinkle_with_excel",
+      "repeated_node": false
+    },
+    {
+      "event_id": "90369bbc",
+      "timestamp": "2024-01-29 10:15",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_7d816d",
+      "node_id": "tinkle_with_excel",
+      "duration_min": 40.4,
+      "apps_used": [
+        "excel"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tonkle_with_firefox",
+      "repeated_node": false
+    },
+    {
+      "event_id": "01e6e666",
+      "timestamp": "2024-01-29 10:24",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_76f72e",
+      "node_id": "tonkle_with_firefox",
+      "duration_min": 7.2,
+      "apps_used": [
+        "firefox"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "closed_won",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "0dc792a5",
+      "timestamp": "2024-01-29 10:58",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_7d816d",
+      "node_id": "tonkle_with_firefox",
+      "duration_min": 10.2,
+      "apps_used": [
+        "firefox"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "closed_won",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "f68e33f0",
+      "timestamp": "2024-01-31 09:24",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_69e946",
+      "node_id": "team_standup",
+      "duration_min": 17.0,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "meet_with_google"
+    },
+    {
+      "event_id": "dacd8098",
+      "timestamp": "2024-01-31 09:43",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_69e946",
+      "node_id": "meet_with_google",
+      "duration_min": 82.0,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "7d7a4933",
+      "timestamp": "2024-02-01 09:20",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_48a193",
+      "node_id": "team_standup",
+      "duration_min": 13.9,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "call_with_gong"
+    },
+    {
+      "event_id": "73665540",
+      "timestamp": "2024-02-01 09:36",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_48a193",
+      "node_id": "call_with_gong",
+      "duration_min": 26.6,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "357b373c",
+      "timestamp": "2024-02-02 10:20",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_69e946",
+      "node_id": "mewo_with_chat",
+      "duration_min": 7.9,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tinkle_with_excel",
+      "repeated_node": false
+    },
+    {
+      "event_id": "bee88669",
+      "timestamp": "2024-02-02 10:34",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_69e946",
+      "node_id": "tinkle_with_excel",
+      "duration_min": 12.0,
+      "apps_used": [
+        "excel"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tonkle_with_firefox",
+      "repeated_node": false
+    },
+    {
+      "event_id": "798f4988",
+      "timestamp": "2024-02-02 10:46",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_69e946",
+      "node_id": "tonkle_with_firefox",
+      "duration_min": 18.6,
+      "apps_used": [
+        "firefox"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "no_response",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "d2d78399",
+      "timestamp": "2024-02-04 08:41",
+      "employee_id": "emp_002",
+      "role": "sdr",
+      "deal_id": "deal_48a193",
+      "node_id": "meet_with_google",
+      "duration_min": 15.1,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "disqualified",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "aede55ff",
+      "timestamp": "2024-02-05 08:50",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_9712e5",
+      "node_id": "call_with_gong",
+      "duration_min": 15.4,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "3c3192eb",
+      "timestamp": "2024-02-07 09:08",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_9712e5",
+      "node_id": "team_standup",
+      "duration_min": 21.0,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "meet_with_google"
+    },
+    {
+      "event_id": "f60294d2",
+      "timestamp": "2024-02-07 09:10",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_de288d",
+      "node_id": "team_standup",
+      "duration_min": 20.9,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "call_with_gong"
+    },
+    {
+      "event_id": "52818f6c",
+      "timestamp": "2024-02-07 09:31",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_9712e5",
+      "node_id": "meet_with_google",
+      "duration_min": 62.5,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "disqualified",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "26546214",
+      "timestamp": "2024-02-07 09:35",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_de288d",
+      "node_id": "call_with_gong",
+      "duration_min": 28.3,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "d6dcb9cf",
+      "timestamp": "2024-02-11 09:14",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_de288d",
+      "node_id": "team_standup",
+      "duration_min": 18.5,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "meet_with_google"
+    },
+    {
+      "event_id": "40df58d6",
+      "timestamp": "2024-02-11 09:40",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_de288d",
+      "node_id": "meet_with_google",
+      "duration_min": 23.3,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "disqualified",
+      "next_node": null,
+      "repeated_node": true
+    },
+    {
+      "event_id": "631c4a74",
+      "timestamp": "2024-02-11 10:07",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_de288d",
+      "node_id": "meet_with_google",
+      "duration_min": 32.7,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": null,
+      "repeated_node": true
+    },
+    {
+      "event_id": "8f0d2978",
+      "timestamp": "2024-02-12 08:35",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_7f1d57",
+      "node_id": "call_with_gong",
+      "duration_min": 23.8,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "89c2733b",
+      "timestamp": "2024-02-14 10:10",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_7f1d57",
+      "node_id": "meet_with_google",
+      "duration_min": 72.0,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "3d19bfa7",
+      "timestamp": "2024-02-14 11:29",
+      "employee_id": "emp_003",
+      "role": "sales_intern",
+      "deal_id": "deal_7f1d57",
+      "node_id": "mewo_with_chat",
+      "duration_min": 11.7,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "ed587cf8",
+      "timestamp": "2024-02-14 09:00",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_44fdd3",
+      "node_id": "team_standup",
+      "duration_min": 11.2,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "call_with_gong"
+    },
+    {
+      "event_id": "5d73042a",
+      "timestamp": "2024-02-14 09:14",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_44fdd3",
+      "node_id": "call_with_gong",
+      "duration_min": 44.1,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "c4255af9",
+      "timestamp": "2024-02-17 10:55",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_44fdd3",
+      "node_id": "meet_with_google",
+      "duration_min": 47.4,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e8c77de6",
+      "timestamp": "2024-02-17 11:50",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_44fdd3",
+      "node_id": "mewo_with_chat",
+      "duration_min": 9.1,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "5d91aabe",
+      "timestamp": "2024-02-19 08:45",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_eab6c3",
+      "node_id": "call_with_gong",
+      "duration_min": 50.9,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "797a0fca",
+      "timestamp": "2024-02-21 09:30",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_d81650",
+      "node_id": "team_standup",
+      "duration_min": 18.5,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "call_with_gong"
+    },
+    {
+      "event_id": "c2208606",
+      "timestamp": "2024-02-21 09:49",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_d81650",
+      "node_id": "call_with_gong",
+      "duration_min": 44.3,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "b4b23890",
+      "timestamp": "2024-02-22 08:18",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_eab6c3",
+      "node_id": "meet_with_google",
+      "duration_min": 88.9,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "56ab0319",
+      "timestamp": "2024-02-24 10:32",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_d81650",
+      "node_id": "meet_with_google",
+      "duration_min": 86.8,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "disqualified",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "5e405f0e",
+      "timestamp": "2024-02-26 08:46",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_eab6c3",
+      "node_id": "mewo_with_chat",
+      "duration_min": 17.2,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tinkle_with_excel",
+      "repeated_node": false
+    },
+    {
+      "event_id": "1ccdee8b",
+      "timestamp": "2024-02-26 09:05",
+      "employee_id": "emp_004",
+      "role": "sdr",
+      "deal_id": "deal_eab6c3",
+      "node_id": "tinkle_with_excel",
+      "duration_min": 20.9,
+      "apps_used": [
+        "excel"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "b9ceebf1",
+      "timestamp": "2024-02-26 08:30",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_0fabc4",
+      "node_id": "call_with_gong",
+      "duration_min": 18.9,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "a5715621",
+      "timestamp": "2024-02-27 10:20",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_0fabc4",
+      "node_id": "meet_with_google",
+      "duration_min": 33.1,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "90afb2aa",
+      "timestamp": "2024-02-28 09:00",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_fcf04a",
+      "node_id": "team_standup",
+      "duration_min": 26.8,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "call_with_gong"
+    },
+    {
+      "event_id": "4a731468",
+      "timestamp": "2024-02-28 09:27",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_fcf04a",
+      "node_id": "call_with_gong",
+      "duration_min": 23.2,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "6261f945",
+      "timestamp": "2024-02-28 09:56",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_0fabc4",
+      "node_id": "mewo_with_chat",
+      "duration_min": 3,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tinkle_with_excel",
+      "repeated_node": false
+    },
+    {
+      "event_id": "113831ca",
+      "timestamp": "2024-02-28 10:05",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_0fabc4",
+      "node_id": "tinkle_with_excel",
+      "duration_min": 11.3,
+      "apps_used": [
+        "excel"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tonkle_with_firefox",
+      "repeated_node": false
+    },
+    {
+      "event_id": "8df81541",
+      "timestamp": "2024-02-28 10:18",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_0fabc4",
+      "node_id": "tonkle_with_firefox",
+      "duration_min": 18.5,
+      "apps_used": [
+        "firefox"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "closed_won",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "945fb507",
+      "timestamp": "2024-02-29 10:49",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_fcf04a",
+      "node_id": "meet_with_google",
+      "duration_min": 56.2,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "47f95af3",
+      "timestamp": "2024-03-04 08:55",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_a04a17",
+      "node_id": "call_with_gong",
+      "duration_min": 51.8,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "514393f3",
+      "timestamp": "2024-03-04 10:10",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_fcf04a",
+      "node_id": "mewo_with_chat",
+      "duration_min": 9.8,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tinkle_with_excel",
+      "repeated_node": false
+    },
+    {
+      "event_id": "bc1e7c46",
+      "timestamp": "2024-03-04 10:27",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_fcf04a",
+      "node_id": "tinkle_with_excel",
+      "duration_min": 14.7,
+      "apps_used": [
+        "excel"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tonkle_with_firefox",
+      "repeated_node": false
+    },
+    {
+      "event_id": "154d2693",
+      "timestamp": "2024-03-04 10:43",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_fcf04a",
+      "node_id": "tonkle_with_firefox",
+      "duration_min": 14.9,
+      "apps_used": [
+        "firefox"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "no_response",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "d0983d02",
+      "timestamp": "2024-03-06 09:15",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_e8a5e3",
+      "node_id": "team_standup",
+      "duration_min": 24.1,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "call_with_gong"
+    },
+    {
+      "event_id": "03b863a4",
+      "timestamp": "2024-03-06 09:41",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_e8a5e3",
+      "node_id": "call_with_gong",
+      "duration_min": 25.1,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "daff272e",
+      "timestamp": "2024-03-06 10:19",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_a04a17",
+      "node_id": "meet_with_google",
+      "duration_min": 35.4,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "e360bc5e",
+      "timestamp": "2024-03-08 10:14",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_e8a5e3",
+      "node_id": "meet_with_google",
+      "duration_min": 31.5,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "c249bd99",
+      "timestamp": "2024-03-09 08:04",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_e8a5e3",
+      "node_id": "mewo_with_chat",
+      "duration_min": 8.5,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tinkle_with_excel",
+      "repeated_node": false
+    },
+    {
+      "event_id": "8135a2ce",
+      "timestamp": "2024-03-09 08:19",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_e8a5e3",
+      "node_id": "tinkle_with_excel",
+      "duration_min": 7.7,
+      "apps_used": [
+        "excel"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tonkle_with_firefox",
+      "repeated_node": true
+    },
+    {
+      "event_id": "86f823f5",
+      "timestamp": "2024-03-09 08:29",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_e8a5e3",
+      "node_id": "tinkle_with_excel",
+      "duration_min": 18.0,
+      "apps_used": [
+        "excel"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "retry",
+      "next_node": "tonkle_with_firefox",
+      "repeated_node": true
+    },
+    {
+      "event_id": "e9c04dc2",
+      "timestamp": "2024-03-09 08:52",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_e8a5e3",
+      "node_id": "tonkle_with_firefox",
+      "duration_min": 14.9,
+      "apps_used": [
+        "firefox"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "closed_won",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "2c0cbb96",
+      "timestamp": "2024-03-09 09:57",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_a04a17",
+      "node_id": "mewo_with_chat",
+      "duration_min": 15.8,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "tinkle_with_excel",
+      "repeated_node": false
+    },
+    {
+      "event_id": "75856b5f",
+      "timestamp": "2024-03-09 10:13",
+      "employee_id": "emp_005",
+      "role": "junior_ae",
+      "deal_id": "deal_a04a17",
+      "node_id": "tinkle_with_excel",
+      "duration_min": 5.7,
+      "apps_used": [
+        "excel"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "211a7c3e",
+      "timestamp": "2024-03-11 08:40",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_8c1f84",
+      "node_id": "call_with_gong",
+      "duration_min": 62.8,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "1ec51d7a",
+      "timestamp": "2024-03-13 09:05",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_e4179a",
+      "node_id": "team_standup",
+      "duration_min": 16.0,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "call_with_gong"
+    },
+    {
+      "event_id": "fd55d664",
+      "timestamp": "2024-03-13 09:21",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_e4179a",
+      "node_id": "call_with_gong",
+      "duration_min": 23.3,
+      "apps_used": [
+        "gong"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "meet_with_google",
+      "repeated_node": false
+    },
+    {
+      "event_id": "705b691e",
+      "timestamp": "2024-03-15 08:50",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_8c1f84",
+      "node_id": "meet_with_google",
+      "duration_min": 35.7,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "disqualified",
+      "next_node": null,
+      "repeated_node": false
+    },
+    {
+      "event_id": "ae37d5ed",
+      "timestamp": "2024-03-16 09:26",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_e4179a",
+      "node_id": "team_standup",
+      "duration_min": 24.6,
+      "apps_used": [
+        "zoom",
+        "slack"
+      ],
+      "is_pipeline_node": false,
+      "outcome": "completed",
+      "next_node": "meet_with_google"
+    },
+    {
+      "event_id": "83de4f8d",
+      "timestamp": "2024-03-16 09:54",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_e4179a",
+      "node_id": "meet_with_google",
+      "duration_min": 52.1,
+      "apps_used": [
+        "google"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "completed",
+      "next_node": "mewo_with_chat",
+      "repeated_node": false
+    },
+    {
+      "event_id": "06fc94bf",
+      "timestamp": "2024-03-16 10:52",
+      "employee_id": "emp_006",
+      "role": "sales_intern",
+      "deal_id": "deal_e4179a",
+      "node_id": "mewo_with_chat",
+      "duration_min": 7.4,
+      "apps_used": [
+        "chat"
+      ],
+      "is_pipeline_node": true,
+      "outcome": "lost",
+      "next_node": null,
+      "repeated_node": false
+    }
+  ]
+}

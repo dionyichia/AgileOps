@@ -13,6 +13,8 @@ import TranscriptInput from './pages/TranscriptInput'
 import InternalDashboard from './pages/InternalDashboard'
 import Consultation from './pages/Consultation'
 import Login from './pages/Login'
+import AdminLogin from './pages/AdminLogin'
+import AcceptInvite from './pages/AcceptInvite'
 
 export default function App() {
   return (
@@ -22,6 +24,8 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/get-started" element={<Consultation />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/signup" element={<AcceptInvite />} />
 
         {/* Client workspace — legacy flat routes (no project scope) */}
         <Route path="/dashboard" element={<Dashboard />} />

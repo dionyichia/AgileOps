@@ -1,0 +1,171 @@
+[
+  {
+    "node_id": "call_with_gong",
+    "label": "Call with Gong",
+    "description": "Conduct calls or meetings using Gong platform for communication and potentially call recording or analysis.",
+    "action_verb": "converse",
+    "inputs": [
+      "meeting agenda",
+      "participant information"
+    ],
+    "outputs": [
+      "call recording",
+      "meeting notes",
+      "action items"
+    ],
+    "app_cluster": [
+      "gong"
+    ],
+    "duration_distribution": {
+      "type": "lognormal",
+      "mean_minutes": 30,
+      "std_minutes": 15
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "6e590436-6a76-46c5-8f9b-298e23275652.txt"
+    ]
+  },
+  {
+    "node_id": "meet_with_google",
+    "label": "Meet with Google",
+    "description": "Conduct meetings or collaboration sessions using Google tools or platforms.",
+    "action_verb": "converse",
+    "inputs": [
+      "meeting purpose",
+      "agenda items"
+    ],
+    "outputs": [
+      "meeting outcomes",
+      "shared documents",
+      "decisions"
+    ],
+    "app_cluster": [
+      "google"
+    ],
+    "duration_distribution": {
+      "type": "lognormal",
+      "mean_minutes": 45,
+      "std_minutes": 20
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "6e590436-6a76-46c5-8f9b-298e23275652.txt"
+    ]
+  },
+  {
+    "node_id": "mewo_with_chat",
+    "label": "Chat Communication",
+    "description": "Engage in chat-based communication, messaging activities, and typing with chat platforms.",
+    "action_verb": "converse",
+    "inputs": [
+      "messages",
+      "conversation context"
+    ],
+    "outputs": [
+      "responses",
+      "chat logs",
+      "information exchange",
+      "typed messages"
+    ],
+    "app_cluster": [
+      "chat"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 10,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "6e590436-6a76-46c5-8f9b-298e23275652.txt",
+      "e5022746-1ab1-41a7-b9fe-8a3fed24b72c.txt"
+    ]
+  },
+  {
+    "node_id": "tinkle_with_excel",
+    "label": "Work with Excel",
+    "description": "Perform data manipulation, analysis, spreadsheet tasks, and graph creation using Excel.",
+    "action_verb": "analyze",
+    "inputs": [
+      "data files",
+      "requirements",
+      "formulas"
+    ],
+    "outputs": [
+      "spreadsheets",
+      "reports",
+      "calculations",
+      "graphs"
+    ],
+    "app_cluster": [
+      "excel"
+    ],
+    "duration_distribution": {
+      "type": "lognormal",
+      "mean_minutes": 25,
+      "std_minutes": 12
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "6e590436-6a76-46c5-8f9b-298e23275652.txt",
+      "e5022746-1ab1-41a7-b9fe-8a3fed24b72c.txt"
+    ]
+  },
+  {
+    "node_id": "tonkle_with_firefox",
+    "label": "Browse with Firefox",
+    "description": "Conduct web browsing, research, or online activities using Firefox browser.",
+    "action_verb": "research",
+    "inputs": [
+      "search queries",
+      "websites",
+      "research topics"
+    ],
+    "outputs": [
+      "information",
+      "bookmarks",
+      "downloaded content"
+    ],
+    "app_cluster": [
+      "firefox"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 15,
+      "std_minutes": 8
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "6e590436-6a76-46c5-8f9b-298e23275652.txt"
+    ]
+  },
+  {
+    "node_id": "call_with_phone",
+    "label": "Call with Phone",
+    "description": "Make voice calls or phone communications for business or personal purposes.",
+    "action_verb": "converse",
+    "inputs": [
+      "contact information",
+      "call purpose",
+      "agenda"
+    ],
+    "outputs": [
+      "call notes",
+      "decisions",
+      "follow-up actions"
+    ],
+    "app_cluster": [
+      "phone"
+    ],
+    "duration_distribution": {
+      "type": "lognormal",
+      "mean_minutes": 15,
+      "std_minutes": 8
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "e5022746-1ab1-41a7-b9fe-8a3fed24b72c.txt"
+    ]
+  }
+]

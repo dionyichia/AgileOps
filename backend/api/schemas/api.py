@@ -7,23 +7,24 @@ from pydantic import BaseModel, Field
 
 
 # ── Auth ───────────────────────────────────────────────────────────────────────
-
-class UserCreate(BaseModel):
-    email: str
-    password: str
-
+# Registration and login are handled by Supabase Auth.
+# The backend only needs to represent the decoded identity.
 
 class UserOut(BaseModel):
     id: str
     email: str
-    created_at: datetime
-
-    model_config = {"from_attributes": True}
 
 
-class TokenOut(BaseModel):
-    access_token: str
-    token_type: str
+# ── Consultation (public intake form) ─────────────────────────────────────────
+
+class ConsultationCreate(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    role: str
+    selected_responsibilities: List[str] = Field(default_factory=list)
+    tools: Optional[str] = None
+    description: Optional[str] = None
 
 
 # ── Projects ───────────────────────────────────────────────────────────────────

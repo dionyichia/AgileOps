@@ -8,6 +8,7 @@ from backend.api.deps import engine
 from backend.api.models.db import Base
 from backend.api.routes import (
     auth,
+    consultation,
     jobs,
     markov,
     pipeline,
@@ -43,6 +44,7 @@ app.add_middleware(
 # ── HTTP routes (all under /api prefix) ───────────────────────────────────────
 _api_routers = [
     auth.router,
+    consultation.router,
     projects.router,
     profiles.router,
     transcripts.router,

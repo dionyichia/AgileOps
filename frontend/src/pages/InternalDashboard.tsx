@@ -62,7 +62,7 @@ export default function InternalDashboard() {
   const [runningPipeline, setRunningPipeline] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    projectsApi.list()
+    projectsApi.listAll()
       .then(setProjectsList)
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false))

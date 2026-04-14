@@ -2,9 +2,10 @@ import enum
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, DateTime, Enum, Float, Integer, String, Text
 from sqlalchemy.types import JSON
 from sqlalchemy.orm import DeclarativeBase, relationship
+from sqlalchemy import ForeignKey
 
 
 class Base(DeclarativeBase):
@@ -37,23 +38,14 @@ def _now() -> datetime:
 
 
 # ── Models ─────────────────────────────────────────────────────────────────────
-
-class User(Base):
-    __tablename__ = "users"
-
-    id              = Column(String(36), primary_key=True, default=_uuid)
-    email           = Column(Text, nullable=False, unique=True, index=True)
-    hashed_password = Column(Text, nullable=False)
-    created_at      = Column(DateTime(timezone=True), nullable=False, default=_now)
-
-    projects = relationship("Project", back_populates="owner")
-
+# Note: User auth and profiles now live in Supabase.
+# owner_id stores the Supabase user UUID as a plain string — no local FK.
 
 class Project(Base):
     __tablename__ = "projects"
 
     id           = Column(String(36), primary_key=True, default=_uuid)
-    owner_id     = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)
+    owner_id     = Column(String(36), nullable=True, index=True)  # Supabase auth.users.id
     company_name = Column(Text, nullable=False)
     team_name    = Column(Text, nullable=False)
     primary_role = Column(Text, nullable=False)
@@ -63,13 +55,23 @@ class Project(Base):
     created_at   = Column(DateTime(timezone=True), nullable=False, default=_now)
     updated_at   = Column(DateTime(timezone=True), nullable=False, default=_now, onupdate=_now)
 
-    owner = relationship("User", back_populates="projects")
-
     profile          = relationship("WorkflowProfile",  back_populates="project", uselist=False,  cascade="all, delete-orphan")
     transcripts      = relationship("Transcript",       back_populates="project", cascade="all, delete-orphan")
     jobs             = relationship("Job",              back_populates="project", cascade="all, delete-orphan")
     tool_evaluations = relationship("ToolEvaluation",   back_populates="project", cascade="all, delete-orphan")
     uploads          = relationship("UploadedFile",     back_populates="project", cascade="all, delete-orphan")
+
+
+class PendingInvite(Base):
+    __tablename__ = "pending_invites"
+
+    id         = Column(String(36), primary_key=True, default=_uuid)
+    token      = Column(String(36), unique=True, index=True, default=_uuid)
+    email      = Column(Text, nullable=False)
+    project_id = Column(String(36), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    used_at    = Column(DateTime(timezone=True))
+    created_at = Column(DateTime(timezone=True), nullable=False, default=_now)
 
 
 class WorkflowProfile(Base):

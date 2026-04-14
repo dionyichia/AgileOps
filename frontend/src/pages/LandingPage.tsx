@@ -73,6 +73,12 @@ export default function LandingPage() {
               Client Login
             </button>
             <button
+              onClick={() => navigate('/admin/login')}
+              className="hidden md:inline text-[16px] font-medium transition-opacity hover:opacity-70"
+            >
+              Admin Login
+            </button>
+            <button
               onClick={goToConsultation}
               className="axis-gradient-button rounded-full px-6 py-3 text-[15px] md:text-[16px] font-bold transition-transform hover:-translate-y-0.5"
             >

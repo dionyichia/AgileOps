@@ -269,9 +269,9 @@ output = {
     "graph": {
         src: [
             {
-                "target": dst,
+                "target": edge["target"],
                 "probability": edge["probability"],
-                "time_samples": transition_dwell.get((src,dst), [])
+                "time_samples": transition_dwell.get((src, edge["target"]), [])
             }
             for edge in edge_list if edge["source"] == src
         ]

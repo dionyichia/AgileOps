@@ -1,27 +1,30 @@
 /**
  * Typed API client for the AgileOps backend.
  *
- * All functions target the endpoints defined in the system design plan.
+ * Auth tokens come from Supabase — no manual token storage needed.
  * The Vite dev proxy forwards /api/* to the FastAPI server on :8000.
  */
+
+import { getAccessToken, supabase } from '../lib/supabase'
 
 const BASE = '/api'
 
 // ── Token helpers ──────────────────────────────────────
+// Kept for backward-compat with any legacy code that calls token.clear().
 export const token = {
-  get: (): string | null => localStorage.getItem('access_token'),
-  set: (t: string) => localStorage.setItem('access_token', t),
-  clear: () => localStorage.removeItem('access_token'),
+  get: (): string | null => null,           // use getAccessToken() for async access
+  set: (_t: string) => {},                  // no-op; Supabase manages the session
+  clear: () => supabase.auth.signOut(),
 }
 
-function authHeaders(): Record<string, string> {
-  const t = token.get()
+async function authHeaders(): Promise<Record<string, string>> {
+  const t = await getAccessToken()
   return t ? { Authorization: `Bearer ${t}` } : {}
 }
 
 async function request<T>(path: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...authHeaders(), ...opts?.headers },
+    headers: { 'Content-Type': 'application/json', ...(await authHeaders()), ...opts?.headers },
     ...opts,
   })
   if (!res.ok) {
@@ -123,30 +126,53 @@ export interface Job {
 }
 
 // ── Auth ───────────────────────────────────────────────
-
-export interface AuthToken {
-  access_token: string
-  token_type: string
-}
+// Registration, login, and session management are handled by Supabase Auth.
+// Use the `supabase` client from `src/lib/supabase.ts` directly in pages.
+// The helpers below exist for convenience / legacy call-sites.
 
 export const auth = {
-  register: (email: string, password: string) =>
-    request<AuthToken>('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    }),
   login: (email: string, password: string) =>
-    request<AuthToken>('/auth/login', {
+    supabase.auth.signInWithPassword({ email, password }),
+  register: (email: string, password: string) =>
+    supabase.auth.signUp({ email, password }),
+  resetPassword: (email: string) =>
+    supabase.auth.resetPasswordForEmail(email),
+  logout: () => supabase.auth.signOut(),
+}
+
+// ── Consultation (public — no auth needed) ─────────────
+
+export interface ConsultationPayload {
+  first_name: string
+  last_name: string
+  email: string
+  role: string
+  selected_responsibilities: string[]
+  tools?: string
+  description?: string
+}
+
+export const consultation = {
+  submit: (data: ConsultationPayload) =>
+    request<{ project_id: string }>('/consultation', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(data),
     }),
-  logout: () => token.clear(),
+}
+
+export const invite = {
+  validate: (token: string) =>
+    request<{ email: string; project_id: string }>(`/invite/${token}`),
+  markUsed: (token: string) =>
+    request<{ ok: boolean }>(`/invite/${token}/use`, { method: 'POST' }),
 }
 
 // ── Projects ───────────────────────────────────────────
 
 export const projects = {
   list: () => request<Project[]>('/projects'),
+  listAll: () => request<Project[]>('/admin/projects'),
+  claim: (id: string) => request<Project>(`/projects/${id}/claim`, { method: 'POST' }),
   create: (data: ProjectCreate) =>
     request<Project>('/projects', { method: 'POST', body: JSON.stringify(data) }),
   get: (id: string) => request<Project>(`/projects/${id}`),

@@ -1,0 +1,884 @@
+{
+  "metadata": {
+    "states": [
+      "call_with_gong",
+      "meet_with_google",
+      "mewo_with_chat",
+      "tinkle_with_excel",
+      "tonkle_with_firefox",
+      "END"
+    ],
+    "state_index": {
+      "call_with_gong": 0,
+      "meet_with_google": 1,
+      "mewo_with_chat": 2,
+      "tinkle_with_excel": 3,
+      "tonkle_with_firefox": 4,
+      "END": 5
+    },
+    "n_states": 6,
+    "n_sequences": 20,
+    "n_transitions_observed": 71,
+    "non_zero_edges": 8,
+    "include_retries": false,
+    "note": "P is row-stochastic. Each row sums to 1.0 (or 0 if state never observed as source)."
+  },
+  "count_matrix": [
+    [
+      0,
+      20,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      14,
+      0,
+      0,
+      6
+    ],
+    [
+      0,
+      0,
+      0,
+      10,
+      0,
+      4
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      7,
+      3
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      7
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "probability_matrix": [
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.7,
+      0.0,
+      0.0,
+      0.3
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.7142857142857143,
+      0.0,
+      0.2857142857142857
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.7,
+      0.3
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "node_durations": {
+    "call_with_gong": [
+      38.5,
+      44.0,
+      23.8,
+      11.5,
+      28.1,
+      11.8,
+      20.7,
+      26.6,
+      15.4,
+      28.3,
+      23.8,
+      44.1,
+      50.9,
+      44.3,
+      18.9,
+      23.2,
+      51.8,
+      25.1,
+      62.8,
+      23.3
+    ],
+    "meet_with_google": [
+      42.3,
+      36.5,
+      36.6,
+      20.9,
+      24.0,
+      28.3,
+      82.0,
+      15.1,
+      62.5,
+      23.3,
+      72.0,
+      47.4,
+      88.9,
+      86.8,
+      33.1,
+      56.2,
+      35.4,
+      31.5,
+      35.7,
+      52.1
+    ],
+    "mewo_with_chat": [
+      13.2,
+      12.7,
+      7.2,
+      3,
+      3,
+      7.9,
+      11.7,
+      9.1,
+      17.2,
+      3,
+      9.8,
+      15.8,
+      8.5,
+      7.4
+    ],
+    "tinkle_with_excel": [
+      51.9,
+      15.4,
+      40.4,
+      24.0,
+      12.0,
+      20.9,
+      11.3,
+      14.7,
+      5.7,
+      7.7
+    ],
+    "tonkle_with_firefox": [
+      13.1,
+      10.2,
+      7.2,
+      18.6,
+      18.5,
+      14.9,
+      14.9
+    ]
+  },
+  "transition_dwell": {
+    "call_with_gong,meet_with_google": [
+      91920.0,
+      177000.0,
+      87240.0,
+      82020.0,
+      344400.0,
+      259980.0,
+      176580.0,
+      255900.0,
+      175260.0,
+      345900.0,
+      178500.0,
+      265260.0,
+      257580.0,
+      261780.0,
+      93000.0,
+      91320.0,
+      177840.0,
+      174780.0,
+      346200.0,
+      261180.0
+    ],
+    "meet_with_google,mewo_with_chat": [
+      172140.0,
+      2520.0,
+      265920.0,
+      265020.0,
+      173100.0,
+      175020.0,
+      4740.0,
+      3300.0,
+      347280.0,
+      84960.0,
+      343260.0,
+      257880.0,
+      78600.0,
+      3480.0
+    ],
+    "mewo_with_chat,tinkle_with_excel": [
+      1260.0,
+      780.0,
+      180.0,
+      600.0,
+      840.0,
+      1140.0,
+      540.0,
+      1020.0,
+      960.0,
+      900.0
+    ],
+    "tinkle_with_excel,tonkle_with_firefox": [
+      4680.0,
+      2580.0,
+      1740.0,
+      720.0,
+      780.0,
+      960.0,
+      1980.0
+    ]
+  },
+  "edge_list": [
+    {
+      "source": "call_with_gong",
+      "target": "meet_with_google",
+      "probability": 1.0,
+      "count": 20,
+      "time_stats": {
+        "mean": 205182.0,
+        "median": 178170.0,
+        "std": 86512.05046697252,
+        "p90": 344550.0,
+        "n": 20
+      }
+    },
+    {
+      "source": "meet_with_google",
+      "target": "mewo_with_chat",
+      "probability": 0.7,
+      "count": 14,
+      "time_stats": {
+        "mean": 155515.7142857143,
+        "median": 172620.0,
+        "std": 122755.80106829316,
+        "p90": 320058.00000000006,
+        "n": 14
+      }
+    },
+    {
+      "source": "meet_with_google",
+      "target": "END",
+      "probability": 0.3,
+      "count": 6
+    },
+    {
+      "source": "mewo_with_chat",
+      "target": "tinkle_with_excel",
+      "probability": 0.7143,
+      "count": 10,
+      "time_stats": {
+        "mean": 822.0,
+        "median": 870.0,
+        "std": 300.0599940011997,
+        "p90": 1152.0,
+        "n": 10
+      }
+    },
+    {
+      "source": "mewo_with_chat",
+      "target": "END",
+      "probability": 0.2857,
+      "count": 4
+    },
+    {
+      "source": "tinkle_with_excel",
+      "target": "tonkle_with_firefox",
+      "probability": 0.7,
+      "count": 7,
+      "time_stats": {
+        "mean": 1920.0,
+        "median": 1740.0,
+        "std": 1295.6189916131098,
+        "p90": 3420.000000000001,
+        "n": 7
+      }
+    },
+    {
+      "source": "tinkle_with_excel",
+      "target": "END",
+      "probability": 0.3,
+      "count": 3
+    },
+    {
+      "source": "tonkle_with_firefox",
+      "target": "END",
+      "probability": 1.0,
+      "count": 7
+    }
+  ],
+  "sequences": [
+    {
+      "deal": "('emp_001', 'deal_55221f')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-01-08 08:45"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-01-09 10:17"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-01-11 10:06"
+        },
+        {
+          "node": "tinkle_with_excel",
+          "timestamp": "2024-01-11 10:27"
+        },
+        {
+          "node": "tonkle_with_firefox",
+          "timestamp": "2024-01-11 11:45"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_001', 'deal_fb49d6')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-01-10 09:31"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-01-12 10:41"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-01-12 11:23"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_001', 'deal_2759e5')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-01-15 08:30"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-01-16 08:44"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_001', 'deal_ff4c02')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-01-17 09:37"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-01-18 08:24"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-01-21 10:16"
+        },
+        {
+          "node": "tinkle_with_excel",
+          "timestamp": "2024-01-21 10:29"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_7d816d')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-01-22 08:55"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-01-26 08:35"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-01-29 10:12"
+        },
+        {
+          "node": "tinkle_with_excel",
+          "timestamp": "2024-01-29 10:15"
+        },
+        {
+          "node": "tonkle_with_firefox",
+          "timestamp": "2024-01-29 10:58"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_76f72e')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-01-24 09:27"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-01-27 09:40"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-01-29 09:45"
+        },
+        {
+          "node": "tinkle_with_excel",
+          "timestamp": "2024-01-29 09:55"
+        },
+        {
+          "node": "tonkle_with_firefox",
+          "timestamp": "2024-01-29 10:24"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_69e946')",
+      "outcome": "no_response",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-01-29 08:40"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-01-31 09:43"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-02-02 10:20"
+        },
+        {
+          "node": "tinkle_with_excel",
+          "timestamp": "2024-02-02 10:34"
+        },
+        {
+          "node": "tonkle_with_firefox",
+          "timestamp": "2024-02-02 10:46"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_48a193')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-02-01 09:36"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-02-04 08:41"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_003', 'deal_9712e5')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-02-05 08:50"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-02-07 09:31"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_003', 'deal_de288d')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-02-07 09:35"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-02-11 09:40"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_003', 'deal_7f1d57')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-02-12 08:35"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-02-14 10:10"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-02-14 11:29"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_004', 'deal_44fdd3')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-02-14 09:14"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-02-17 10:55"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-02-17 11:50"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_004', 'deal_eab6c3')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-02-19 08:45"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-02-22 08:18"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-02-26 08:46"
+        },
+        {
+          "node": "tinkle_with_excel",
+          "timestamp": "2024-02-26 09:05"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_004', 'deal_d81650')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-02-21 09:49"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-02-24 10:32"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_0fabc4')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-02-26 08:30"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-02-27 10:20"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-02-28 09:56"
+        },
+        {
+          "node": "tinkle_with_excel",
+          "timestamp": "2024-02-28 10:05"
+        },
+        {
+          "node": "tonkle_with_firefox",
+          "timestamp": "2024-02-28 10:18"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_fcf04a')",
+      "outcome": "no_response",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-02-28 09:27"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-02-29 10:49"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-03-04 10:10"
+        },
+        {
+          "node": "tinkle_with_excel",
+          "timestamp": "2024-03-04 10:27"
+        },
+        {
+          "node": "tonkle_with_firefox",
+          "timestamp": "2024-03-04 10:43"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_a04a17')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-03-04 08:55"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-03-06 10:19"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-03-09 09:57"
+        },
+        {
+          "node": "tinkle_with_excel",
+          "timestamp": "2024-03-09 10:13"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_e8a5e3')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-03-06 09:41"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-03-08 10:14"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-03-09 08:04"
+        },
+        {
+          "node": "tinkle_with_excel",
+          "timestamp": "2024-03-09 08:19"
+        },
+        {
+          "node": "tonkle_with_firefox",
+          "timestamp": "2024-03-09 08:52"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_006', 'deal_8c1f84')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-03-11 08:40"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-03-15 08:50"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_006', 'deal_e4179a')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "call_with_gong",
+          "timestamp": "2024-03-13 09:21"
+        },
+        {
+          "node": "meet_with_google",
+          "timestamp": "2024-03-16 09:54"
+        },
+        {
+          "node": "mewo_with_chat",
+          "timestamp": "2024-03-16 10:52"
+        }
+      ]
+    }
+  ],
+  "top_transitions": [
+    {
+      "from": "call_with_gong",
+      "to": "meet_with_google",
+      "count": 20
+    },
+    {
+      "from": "meet_with_google",
+      "to": "mewo_with_chat",
+      "count": 14
+    },
+    {
+      "from": "mewo_with_chat",
+      "to": "tinkle_with_excel",
+      "count": 10
+    },
+    {
+      "from": "tinkle_with_excel",
+      "to": "tonkle_with_firefox",
+      "count": 7
+    }
+  ],
+  "graph": {
+    "call_with_gong": [
+      {
+        "target": "meet_with_google",
+        "probability": 1.0,
+        "time_samples": [
+          91920.0,
+          177000.0,
+          87240.0,
+          82020.0,
+          344400.0,
+          259980.0,
+          176580.0,
+          255900.0,
+          175260.0,
+          345900.0,
+          178500.0,
+          265260.0,
+          257580.0,
+          261780.0,
+          93000.0,
+          91320.0,
+          177840.0,
+          174780.0,
+          346200.0,
+          261180.0
+        ]
+      }
+    ],
+    "meet_with_google": [
+      {
+        "target": "mewo_with_chat",
+        "probability": 0.7,
+        "time_samples": [
+          172140.0,
+          2520.0,
+          265920.0,
+          265020.0,
+          173100.0,
+          175020.0,
+          4740.0,
+          3300.0,
+          347280.0,
+          84960.0,
+          343260.0,
+          257880.0,
+          78600.0,
+          3480.0
+        ]
+      },
+      {
+        "target": "END",
+        "probability": 0.3,
+        "time_samples": []
+      }
+    ],
+    "mewo_with_chat": [
+      {
+        "target": "tinkle_with_excel",
+        "probability": 0.7143,
+        "time_samples": [
+          1260.0,
+          780.0,
+          180.0,
+          600.0,
+          840.0,
+          1140.0,
+          540.0,
+          1020.0,
+          960.0,
+          900.0
+        ]
+      },
+      {
+        "target": "END",
+        "probability": 0.2857,
+        "time_samples": []
+      }
+    ],
+    "tinkle_with_excel": [
+      {
+        "target": "tonkle_with_firefox",
+        "probability": 0.7,
+        "time_samples": [
+          4680.0,
+          2580.0,
+          1740.0,
+          720.0,
+          780.0,
+          960.0,
+          1980.0
+        ]
+      },
+      {
+        "target": "END",
+        "probability": 0.3,
+        "time_samples": []
+      }
+    ],
+    "tonkle_with_firefox": [
+      {
+        "target": "END",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "END": []
+  }
+}

@@ -1,0 +1,884 @@
+{
+  "metadata": {
+    "states": [
+      "communicate_with_ai_assistants",
+      "find_prospects",
+      "call_prospects",
+      "negotiate_with_excel",
+      "collect_payments",
+      "END"
+    ],
+    "state_index": {
+      "communicate_with_ai_assistants": 0,
+      "find_prospects": 1,
+      "call_prospects": 2,
+      "negotiate_with_excel": 3,
+      "collect_payments": 4,
+      "END": 5
+    },
+    "n_states": 6,
+    "n_sequences": 20,
+    "n_transitions_observed": 71,
+    "non_zero_edges": 8,
+    "include_retries": false,
+    "note": "P is row-stochastic. Each row sums to 1.0 (or 0 if state never observed as source)."
+  },
+  "count_matrix": [
+    [
+      0,
+      20,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      14,
+      0,
+      0,
+      6
+    ],
+    [
+      0,
+      0,
+      0,
+      10,
+      0,
+      4
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      7,
+      3
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      7
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "probability_matrix": [
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.7,
+      0.0,
+      0.0,
+      0.3
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.7142857142857143,
+      0.0,
+      0.2857142857142857
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.7,
+      0.3
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "node_durations": {
+    "communicate_with_ai_assistants": [
+      14.9,
+      35.4,
+      15.4,
+      3,
+      3.9,
+      8.7,
+      35.2,
+      3,
+      18.1,
+      7.9,
+      5.6,
+      3.1,
+      7.3,
+      9.8,
+      17.5,
+      7.6,
+      28.0,
+      8.6,
+      5.2,
+      13.0
+    ],
+    "find_prospects": [
+      13.7,
+      25.0,
+      11.0,
+      4.7,
+      4.7,
+      5.6,
+      5.9,
+      13.7,
+      16.8,
+      5.6,
+      11.0,
+      23.3,
+      28.2,
+      23.4,
+      8.7,
+      23.4,
+      3,
+      3.2,
+      10.7,
+      10.5
+    ],
+    "call_prospects": [
+      32.5,
+      14.1,
+      9.4,
+      48.0,
+      10.2,
+      29.7,
+      44.2,
+      18.7,
+      54.2,
+      7.0,
+      21.0,
+      29.6,
+      13.6,
+      29.4
+    ],
+    "negotiate_with_excel": [
+      82.8,
+      37.0,
+      25.1,
+      19.8,
+      10.6,
+      69.8,
+      10.8,
+      30.5,
+      25.4,
+      30.5
+    ],
+    "collect_payments": [
+      4.3,
+      3,
+      3,
+      4.5,
+      6.5,
+      3.9,
+      3
+    ]
+  },
+  "transition_dwell": {
+    "communicate_with_ai_assistants,find_prospects": [
+      257340.0,
+      342300.0,
+      262740.0,
+      256020.0,
+      91140.0,
+      177720.0,
+      262620.0,
+      348540.0,
+      85800.0,
+      348120.0,
+      265560.0,
+      178140.0,
+      258540.0,
+      82740.0,
+      180000.0,
+      349140.0,
+      264960.0,
+      346560.0,
+      90660.0,
+      81600.0
+    ],
+    "find_prospects,call_prospects": [
+      95580.0,
+      1800.0,
+      88800.0,
+      81660.0,
+      342060.0,
+      255840.0,
+      660.0,
+      1440.0,
+      92760.0,
+      170940.0,
+      165180.0,
+      174480.0,
+      81000.0,
+      840.0
+    ],
+    "call_prospects,negotiate_with_excel": [
+      2040.0,
+      900.0,
+      4140.0,
+      900.0,
+      2160.0,
+      3300.0,
+      540.0,
+      2400.0,
+      2100.0,
+      1200.0
+    ],
+    "negotiate_with_excel,collect_payments": [
+      6300.0,
+      1680.0,
+      1560.0,
+      720.0,
+      1020.0,
+      6240.0,
+      6060.0
+    ]
+  },
+  "edge_list": [
+    {
+      "source": "communicate_with_ai_assistants",
+      "target": "find_prospects",
+      "probability": 1.0,
+      "count": 20,
+      "time_stats": {
+        "mean": 226512.0,
+        "median": 257940.0,
+        "std": 96471.87204569009,
+        "p90": 348162.0,
+        "n": 20
+      }
+    },
+    {
+      "source": "find_prospects",
+      "target": "call_prospects",
+      "probability": 0.7,
+      "count": 14,
+      "time_stats": {
+        "mean": 110931.42857142857,
+        "median": 90780.0,
+        "std": 98556.58062084677,
+        "p90": 231432.0000000001,
+        "n": 14
+      }
+    },
+    {
+      "source": "find_prospects",
+      "target": "END",
+      "probability": 0.3,
+      "count": 6
+    },
+    {
+      "source": "call_prospects",
+      "target": "negotiate_with_excel",
+      "probability": 0.7143,
+      "count": 10,
+      "time_stats": {
+        "mean": 1968.0,
+        "median": 2070.0,
+        "std": 1079.266417526275,
+        "p90": 3383.9999999999995,
+        "n": 10
+      }
+    },
+    {
+      "source": "call_prospects",
+      "target": "END",
+      "probability": 0.2857,
+      "count": 4
+    },
+    {
+      "source": "negotiate_with_excel",
+      "target": "collect_payments",
+      "probability": 0.7,
+      "count": 7,
+      "time_stats": {
+        "mean": 3368.5714285714284,
+        "median": 1680.0,
+        "std": 2470.832298011737,
+        "p90": 6264.0,
+        "n": 7
+      }
+    },
+    {
+      "source": "negotiate_with_excel",
+      "target": "END",
+      "probability": 0.3,
+      "count": 3
+    },
+    {
+      "source": "collect_payments",
+      "target": "END",
+      "probability": 1.0,
+      "count": 7
+    }
+  ],
+  "sequences": [
+    {
+      "deal": "('emp_001', 'deal_f273ea')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-01-08 08:45"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-01-11 08:14"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-01-12 10:47"
+        },
+        {
+          "node": "negotiate_with_excel",
+          "timestamp": "2024-01-12 11:21"
+        },
+        {
+          "node": "collect_payments",
+          "timestamp": "2024-01-12 13:06"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_001', 'deal_8d709a')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-01-10 09:23"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-01-14 08:28"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-01-14 08:58"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_001', 'deal_37b718')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-01-15 08:30"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-01-18 09:29"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_001', 'deal_de51ef')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-01-17 09:39"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-01-20 08:46"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-01-21 09:26"
+        },
+        {
+          "node": "negotiate_with_excel",
+          "timestamp": "2024-01-21 09:41"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_b03cff')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-01-22 08:55"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-01-23 10:14"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-01-24 08:55"
+        },
+        {
+          "node": "negotiate_with_excel",
+          "timestamp": "2024-01-24 10:04"
+        },
+        {
+          "node": "collect_payments",
+          "timestamp": "2024-01-24 10:32"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_e1b305')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-01-24 09:24"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-01-26 10:46"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-01-30 09:47"
+        },
+        {
+          "node": "negotiate_with_excel",
+          "timestamp": "2024-01-30 10:02"
+        },
+        {
+          "node": "collect_payments",
+          "timestamp": "2024-01-30 10:28"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_fd3d4d')",
+      "outcome": "no_response",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-01-29 08:40"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-02-01 09:37"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-02-04 08:41"
+        },
+        {
+          "node": "negotiate_with_excel",
+          "timestamp": "2024-02-04 09:17"
+        },
+        {
+          "node": "collect_payments",
+          "timestamp": "2024-02-04 09:29"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_774ffe')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-02-01 09:36"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-02-05 10:25"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_003', 'deal_9e633d')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-02-05 08:50"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-02-06 08:40"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_003', 'deal_bf4194')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-02-07 09:34"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-02-11 10:16"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_003', 'deal_b63dd7')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-02-12 08:35"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-02-15 10:21"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-02-15 10:32"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_004', 'deal_04ca07')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-02-14 09:29"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-02-16 10:58"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-02-16 11:22"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_004', 'deal_414000')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-02-19 08:45"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-02-22 08:34"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-02-23 10:20"
+        },
+        {
+          "node": "negotiate_with_excel",
+          "timestamp": "2024-02-23 11:15"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_004', 'deal_a3e3f0')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-02-21 09:47"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-02-22 08:46"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_5b8c42')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-02-26 08:30"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-02-28 10:30"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-03-01 09:59"
+        },
+        {
+          "node": "negotiate_with_excel",
+          "timestamp": "2024-03-01 10:08"
+        },
+        {
+          "node": "collect_payments",
+          "timestamp": "2024-03-01 10:25"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_b8bbc9')",
+      "outcome": "no_response",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-02-28 09:29"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-03-03 10:28"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-03-05 08:21"
+        },
+        {
+          "node": "negotiate_with_excel",
+          "timestamp": "2024-03-05 09:01"
+        },
+        {
+          "node": "collect_payments",
+          "timestamp": "2024-03-05 10:45"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_3e7dd4')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-03-04 08:55"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-03-07 10:31"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-03-09 10:59"
+        },
+        {
+          "node": "negotiate_with_excel",
+          "timestamp": "2024-03-09 11:34"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_849a0d')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-03-06 09:39"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-03-10 09:55"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-03-11 08:25"
+        },
+        {
+          "node": "negotiate_with_excel",
+          "timestamp": "2024-03-11 08:45"
+        },
+        {
+          "node": "collect_payments",
+          "timestamp": "2024-03-11 10:26"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_006', 'deal_463632')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-03-11 08:40"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-03-12 09:51"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_006', 'deal_608dc9')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "communicate_with_ai_assistants",
+          "timestamp": "2024-03-13 09:30"
+        },
+        {
+          "node": "find_prospects",
+          "timestamp": "2024-03-14 08:10"
+        },
+        {
+          "node": "call_prospects",
+          "timestamp": "2024-03-14 08:24"
+        }
+      ]
+    }
+  ],
+  "top_transitions": [
+    {
+      "from": "communicate_with_ai_assistants",
+      "to": "find_prospects",
+      "count": 20
+    },
+    {
+      "from": "find_prospects",
+      "to": "call_prospects",
+      "count": 14
+    },
+    {
+      "from": "call_prospects",
+      "to": "negotiate_with_excel",
+      "count": 10
+    },
+    {
+      "from": "negotiate_with_excel",
+      "to": "collect_payments",
+      "count": 7
+    }
+  ],
+  "graph": {
+    "communicate_with_ai_assistants": [
+      {
+        "target": "find_prospects",
+        "probability": 1.0,
+        "time_samples": [
+          257340.0,
+          342300.0,
+          262740.0,
+          256020.0,
+          91140.0,
+          177720.0,
+          262620.0,
+          348540.0,
+          85800.0,
+          348120.0,
+          265560.0,
+          178140.0,
+          258540.0,
+          82740.0,
+          180000.0,
+          349140.0,
+          264960.0,
+          346560.0,
+          90660.0,
+          81600.0
+        ]
+      }
+    ],
+    "find_prospects": [
+      {
+        "target": "call_prospects",
+        "probability": 0.7,
+        "time_samples": [
+          95580.0,
+          1800.0,
+          88800.0,
+          81660.0,
+          342060.0,
+          255840.0,
+          660.0,
+          1440.0,
+          92760.0,
+          170940.0,
+          165180.0,
+          174480.0,
+          81000.0,
+          840.0
+        ]
+      },
+      {
+        "target": "END",
+        "probability": 0.3,
+        "time_samples": []
+      }
+    ],
+    "call_prospects": [
+      {
+        "target": "negotiate_with_excel",
+        "probability": 0.7143,
+        "time_samples": [
+          2040.0,
+          900.0,
+          4140.0,
+          900.0,
+          2160.0,
+          3300.0,
+          540.0,
+          2400.0,
+          2100.0,
+          1200.0
+        ]
+      },
+      {
+        "target": "END",
+        "probability": 0.2857,
+        "time_samples": []
+      }
+    ],
+    "negotiate_with_excel": [
+      {
+        "target": "collect_payments",
+        "probability": 0.7,
+        "time_samples": [
+          6300.0,
+          1680.0,
+          1560.0,
+          720.0,
+          1020.0,
+          6240.0,
+          6060.0
+        ]
+      },
+      {
+        "target": "END",
+        "probability": 0.3,
+        "time_samples": []
+      }
+    ],
+    "collect_payments": [
+      {
+        "target": "END",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "END": []
+  }
+}
