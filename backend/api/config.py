@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 
 _BASE_DIR = Path(__file__).resolve().parent.parent  # backend/
 
-# Load .env from the project root (AgileOps/.env)
-load_dotenv(_BASE_DIR.parent / ".env")
+# Load .env from the backend directory (AgileOps/backend/.env)
+load_dotenv(_BASE_DIR / ".env")
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
