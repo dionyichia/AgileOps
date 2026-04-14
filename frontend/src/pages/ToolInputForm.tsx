@@ -110,10 +110,8 @@ export default function ToolInputForm() {
           await Promise.all(fileUploads)
         }
 
-        const { job_id } = await pipelineApi.simulate(projectId, toolEval.id)
-        navigate(`/projects/${projectId}/simulation/${toolEval.id}`, {
-          state: { jobId: job_id },
-        })
+        await pipelineApi.simulate(projectId, toolEval.id)
+        navigate(`/projects/${projectId}/dashboard?tab=${toolEval.id}`)
       } catch (err) {
         console.error('Failed to create tool evaluation:', err)
         navigate('/simulation')

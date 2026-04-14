@@ -12,6 +12,7 @@ Design notes:
 
 import asyncio
 import logging
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,13 +20,18 @@ from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.deps import async_session
-from backend.api.models.db import Job, JobStatus, JobType, SimulationResult, Transcript
+from backend.api.models.db import Job, JobStatus, JobType, SimulationResult, Transcript, ToolEvaluation
 from backend.api.services import data_io, ws_manager
 
 logger = logging.getLogger(__name__)
 
 # Project root — scripts are invoked relative to this
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _slugify(text: str) -> str:
+    """Convert a tool name to a safe file-system slug, e.g. 'Gong AI' → 'gong_ai'."""
+    return re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
 
 
 # ── Job creation ───────────────────────────────────────────────────────────────
@@ -211,7 +217,7 @@ async def run_simulation_job(
     sim_kwargs: dict,
 ) -> None:
     """
-    Run sim.py only (assumes transition_matrix.json already exists).
+    Run parser_scraper → classifier → sim.py for a single ToolEvaluation.
     Stores a SimulationResult row on completion.
     Runs as a FastAPI BackgroundTask.
     """
@@ -224,30 +230,72 @@ async def run_simulation_job(
     transition_path = data_dir / "transition_matrix.json"
     simulation_path = data_dir / "monte_carlo_results.json"
 
-    try:
-        await _progress(job_id, 10, "Starting simulation")
+    # Prefer project-local all_tasks.json; fall back to repo-level default
+    tasks_path = data_dir / "all_tasks.json"
+    if not tasks_path.exists():
+        tasks_path = _PROJECT_ROOT / "backend" / "data" / "all_tasks.json"
 
+    try:
+        # ── Fetch tool metadata from DB ──────────────────────────────────────
+        async with async_session() as db:
+            from sqlalchemy import select
+            row = await db.execute(
+                select(ToolEvaluation).where(ToolEvaluation.id == tool_evaluation_id)
+            )
+            tool_eval = row.scalar_one_or_none()
+            if tool_eval is None:
+                raise RuntimeError(f"ToolEvaluation {tool_evaluation_id} not found")
+            tool_name   = tool_eval.tool_name
+            website_url = tool_eval.website_url or ""
+
+        slug          = _slugify(tool_name)
+        scraped_path  = data_dir / f"scraped_{slug}.json"
+        features_path = data_dir / f"tool_features_{slug}.json"
+
+        # ── Step 1: Scrape tool website ──────────────────────────────────────
+        await _progress(job_id, 5, "Scraping tool website")
+        rc, _, stderr = await _run_script([
+            "backend/scripts/parser_scraper.py",
+            "--tool",   tool_name,
+            "--url",    website_url,
+            "--output", str(scraped_path),
+        ])
+        if rc != 0:
+            raise RuntimeError(f"parser_scraper.py failed: {stderr}")
+
+        # ── Step 2: Classify tool impact ─────────────────────────────────────
+        await _progress(job_id, 35, "Classifying tool impact")
+        rc, _, stderr = await _run_script([
+            "backend/scripts/classifier.py",
+            "--scraped", str(scraped_path),
+            "--tasks",   str(tasks_path),
+            "--output",  str(features_path),
+        ])
+        if rc != 0:
+            raise RuntimeError(f"classifier.py failed: {stderr}")
+
+        # ── Step 3: Run Monte Carlo simulation ───────────────────────────────
+        await _progress(job_id, 60, "Running Monte Carlo simulation")
         cmd = [
             "backend/scripts/sim.py",
             "--telemetry_path", str(transition_path),
             "--output_path",    str(simulation_path),
+            "--tool_features",  str(features_path),
         ]
         for key, value in sim_kwargs.items():
             cmd += [f"--{key}", str(value)]
-
-        await _progress(job_id, 30, "Running Monte Carlo simulation")
         rc, _, stderr = await _run_script(cmd)
         if rc != 0:
             raise RuntimeError(f"sim.py failed: {stderr}")
 
+        # ── Step 4: Store results ────────────────────────────────────────────
         await _progress(job_id, 85, "Storing results")
 
-        results = data_io.read_simulation_results(project_id)
-        work_saved     = float(results.get("summary", {}).get("work_saved_pct_p50", 0.0))
+        results         = data_io.read_simulation_results(project_id)
+        work_saved      = float(results.get("summary", {}).get("work_saved_pct_p50", 0.0))
         throughput_lift = float(results.get("summary", {}).get("throughput_lift_pct_p50", 0.0))
 
         async with async_session() as db:
-            # Upsert: replace any existing result for this tool eval
             from sqlalchemy import select
             existing = await db.execute(
                 select(SimulationResult).where(

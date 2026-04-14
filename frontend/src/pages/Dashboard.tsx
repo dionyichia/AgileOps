@@ -152,6 +152,9 @@ export default function Dashboard() {
   useEffect(() => {
     const tab = searchParams.get('tab')
     if (!tab) return
+    // Wait for API data before validating — avoids stripping ?tab= before the new
+    // tool eval appears in liveSimulations (which falls back to seed while loading)
+    if (projectId && apiToolEvals === null) return
     const valid = liveSimulations.some((s) => s.id === tab)
     const basePath = projectId ? `/projects/${projectId}/dashboard` : '/dashboard'
     if (!valid) {
@@ -161,7 +164,7 @@ export default function Dashboard() {
     setActiveViewId(tab)
     setOpenSimTabIds((prev) => (prev.includes(tab) ? prev : [...prev, tab]))
     navigate(basePath, { replace: true })
-  }, [searchParams, navigate, liveSimulations, projectId])
+  }, [searchParams, navigate, liveSimulations, projectId, apiToolEvals])
 
   // ── Comments state ───────────────────────────────────────────────────────
   const [comments, setComments] = useState<Record<string, NodeComment[]>>(() => {

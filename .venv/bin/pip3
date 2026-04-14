@@ -1,4 +1,6 @@
-#!/Users/Dion/sch_repo/AgileOps/.venv/bin/python3.11
+#!/bin/sh
+'''exec' "/Users/sricharan/Charan/Berkeley/Y3S2/PM Project/AgileOps/.venv/bin/python3" "$0" "$@"
+' '''
 # -*- coding: utf-8 -*-
 import re
 import sys
