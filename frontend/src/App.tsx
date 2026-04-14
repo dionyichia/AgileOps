@@ -15,6 +15,7 @@ import Consultation from './pages/Consultation'
 import Login from './pages/Login'
 import AdminLogin from './pages/AdminLogin'
 import AcceptInvite from './pages/AcceptInvite'
+import AdminRoute from './components/AdminRoute'
 
 export default function App() {
   return (
@@ -36,16 +37,16 @@ export default function App() {
         <Route path="/simulation" element={<SimulationResults />} />
         <Route path="/recommendation" element={<FinalRecommendation />} />
 
-        {/* Internal tools hub */}
-        <Route path="/internal" element={<InternalDashboard />} />
-        {/* Internal step routes — legacy, replaced by project-scoped flow */}
-        <Route path="/internal/form" element={<DataForm />} />
-        <Route path="/internal/workflow-report" element={<WorkflowReport />} />
-        <Route path="/internal/tool-input" element={<ToolInputForm />} />
+        {/* Internal tools hub — admin only */}
+        <Route path="/internal" element={<AdminRoute><InternalDashboard /></AdminRoute>} />
+        <Route path="/internal/form" element={<AdminRoute><DataForm /></AdminRoute>} />
+        <Route path="/internal/workflow-report" element={<AdminRoute><WorkflowReport /></AdminRoute>} />
+        <Route path="/internal/tool-input" element={<AdminRoute><ToolInputForm /></AdminRoute>} />
 
         {/* Project-scoped routes (production) */}
         <Route path="/projects/:projectId/dashboard" element={<Dashboard />} />
-        <Route path="/projects/:projectId/transcripts" element={<TranscriptInput />} />
+        {/* Transcript upload — admin only */}
+        <Route path="/projects/:projectId/transcripts" element={<AdminRoute><TranscriptInput /></AdminRoute>} />
         <Route path="/projects/:projectId/workflow-report" element={<WorkflowReport />} />
         <Route path="/projects/:projectId/tool-input" element={<ToolInputForm />} />
         <Route path="/projects/:projectId/simulation/:toolEvalId" element={<SimulationResults />} />

@@ -154,7 +154,7 @@ export interface ConsultationPayload {
 
 export const consultation = {
   submit: (data: ConsultationPayload) =>
-    request<{ project_id: string }>('/consultation', {
+    request<{ project_id: string; invite_token: string }>('/consultation', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -209,6 +209,11 @@ export const transcripts = {
 
 export const tasks = {
   get: (projectId: string) => request<TaskNode[]>(`/projects/${projectId}/tasks`),
+  update: (projectId: string, nodes: TaskNode[]) =>
+    request<TaskNode[]>(`/projects/${projectId}/tasks`, {
+      method: 'PUT',
+      body: JSON.stringify(nodes),
+    }),
   reset: (projectId: string) =>
     request<void>(`/projects/${projectId}/tasks/reset`, { method: 'POST' }),
 }

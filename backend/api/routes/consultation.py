@@ -90,7 +90,7 @@ async def submit_consultation(
     signup_url = f"{SITE_URL}/signup?token={invite.token}"
     await _send_invite_email(body.email, body.first_name, signup_url)
 
-    return {"project_id": project.id}
+    return {"project_id": project.id, "invite_token": invite.token}
 
 
 @router.get("/invite/{token}")

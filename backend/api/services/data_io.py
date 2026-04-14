@@ -57,9 +57,27 @@ def read_tasks_json(project_id: str) -> list[dict]:
     return _read_json(path)
 
 
+def write_tasks_json(project_id: str, tasks: list[dict]) -> None:
+    """Write all_tasks.json for a project, replacing existing content."""
+    path = project_data_dir(project_id) / "all_tasks.json"
+    _write_json(path, tasks)
+
+
 def clear_tasks_json(project_id: str) -> None:
     """Delete all_tasks.json for a project (if it exists)."""
     path = project_data_dir(project_id) / "all_tasks.json"
+    if path.exists():
+        path.unlink()
+
+
+def clear_telemetry_json(project_id: str) -> None:
+    """Delete telemetry.json for a project (if it exists).
+
+    Called after all_tasks.json is edited so the stale synthetic log
+    is removed. The pipeline will regenerate it from the updated
+    all_tasks.json on the next run.
+    """
+    path = project_data_dir(project_id) / "telemetry.json"
     if path.exists():
         path.unlink()
 
