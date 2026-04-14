@@ -1,5 +1,5 @@
 import { Handle, Position } from 'reactflow'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, Pencil } from 'lucide-react'
 
 interface TaskNodeData {
   label: string
@@ -9,6 +9,8 @@ interface TaskNodeData {
   isNew?: boolean
   commentCount?: number
   onComment?: (nodeId: string) => void
+  onEdit?: (nodeId: string) => void
+  editMode?: boolean
   nodeId?: string
 }
 
@@ -54,23 +56,37 @@ export function TaskNode({ data }: { data: TaskNodeData }) {
 
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="font-semibold text-[#111111] text-sm leading-snug">{data.label}</div>
-        {data.onComment && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              data.onComment!(data.nodeId!)
-            }}
-            className="relative flex-shrink-0 p-1.5 rounded-full hover:bg-black/[0.05] transition-colors group"
-            title="Leave feedback"
-          >
-            <MessageSquare size={14} className={`${data.commentCount ? 'text-[#F75A8C]' : 'text-black/30 group-hover:text-black/55'}`} />
-            {!!data.commentCount && (
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#F75A8C] text-[8px] font-bold text-white flex items-center justify-center">
-                {data.commentCount}
-              </span>
-            )}
-          </button>
-        )}
+        <div className="flex items-center gap-0.5 flex-shrink-0">
+          {data.editMode && data.onEdit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                data.onEdit!(data.nodeId!)
+              }}
+              className="p-1.5 rounded-full hover:bg-[#F4E8FB] transition-colors group"
+              title="Edit step"
+            >
+              <Pencil size={13} className="text-[#5E149F]/50 group-hover:text-[#5E149F]" />
+            </button>
+          )}
+          {!data.editMode && data.onComment && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                data.onComment!(data.nodeId!)
+              }}
+              className="relative p-1.5 rounded-full hover:bg-black/[0.05] transition-colors group"
+              title="Leave feedback"
+            >
+              <MessageSquare size={14} className={`${data.commentCount ? 'text-[#F75A8C]' : 'text-black/30 group-hover:text-black/55'}`} />
+              {!!data.commentCount && (
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#F75A8C] text-[8px] font-bold text-white flex items-center justify-center">
+                  {data.commentCount}
+                </span>
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-1 mb-2">

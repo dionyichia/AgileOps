@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,6 +26,23 @@ async def get_tasks(project_id: str, db: AsyncSession = Depends(get_db)):
     """
     await _get_project_or_404(project_id, db)
     return data_io.read_tasks_json(project_id)
+
+
+@router.put("/projects/{project_id}/tasks", response_model=list[TaskNodeOut])
+async def update_tasks(
+    project_id: str,
+    tasks: List[TaskNodeOut],
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Replace all_tasks.json with the provided task list.
+    Accepts the full list of task nodes (same shape as GET response).
+    """
+    await _get_project_or_404(project_id, db)
+    raw = [t.model_dump() for t in tasks]
+    data_io.write_tasks_json(project_id, raw)
+    data_io.clear_telemetry_json(project_id)
+    return raw
 
 
 @router.post("/projects/{project_id}/tasks/reset", status_code=204)

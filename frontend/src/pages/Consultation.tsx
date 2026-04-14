@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { consultation as consultationApi } from '../api/client'
 import {
@@ -10,7 +10,25 @@ import {
   BarChart3,
   Search,
   Target,
+  ArrowLeft,
+  Calendar,
 } from 'lucide-react'
+
+// ── Calendly global type ────────────────────────────────────────────────────
+declare global {
+  interface Window {
+    Calendly?: {
+      initInlineWidget: (opts: {
+        url: string
+        parentElement: HTMLElement
+        prefill?: Record<string, string>
+        utm?: Record<string, string>
+      }) => void
+    }
+  }
+}
+
+const CALENDLY_URL = import.meta.env.VITE_CALENDLY_URL as string
 
 const ROLES = [
   'Sales Development Representative (SDR)',
@@ -114,8 +132,43 @@ const COLORS = {
   violet: '#5E149F',
 }
 
+type Stage = 'form' | 'booking' | 'success'
+
+// ── Calendly script loader (idempotent) ─────────────────────────────────────
+function loadCalendlyAssets(): Promise<void> {
+  return new Promise((resolve) => {
+    // Inject CSS once
+    if (!document.querySelector('link[data-calendly-css]')) {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = 'https://assets.calendly.com/assets/external/widget.css'
+      link.setAttribute('data-calendly-css', '1')
+      document.head.appendChild(link)
+    }
+
+    // If script already loaded resolve immediately
+    if (window.Calendly) { resolve(); return }
+
+    // If script tag already injected, wait for it
+    const existing = document.querySelector('script[data-calendly-js]')
+    if (existing) {
+      existing.addEventListener('load', () => resolve())
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = 'https://assets.calendly.com/assets/external/widget.js'
+    script.async = true
+    script.setAttribute('data-calendly-js', '1')
+    script.onload = () => resolve()
+    document.head.appendChild(script)
+  })
+}
+
 export default function Consultation() {
   const navigate = useNavigate()
+
+  // ── Form state ─────────────────────────────────────────────────────────────
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
@@ -125,8 +178,52 @@ export default function Consultation() {
   const [tools, setTools] = useState('')
   const [description, setDescription] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [showSubmitThanks, setShowSubmitThanks] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
+  // ── Stage: 'form' | 'booking' | 'success' ─────────────────────────────────
+  const [stage, setStage] = useState<Stage>('form')
+  const [booked, setBooked] = useState(false) // drives success animation timing
+  const [inviteToken, setInviteToken] = useState('')
+  const [calendlyReady, setCalendlyReady] = useState(false)
+
+  // ── Calendly container ref (must be empty — Calendly injects iframe here) ──
+  const calendlyContainerRef = useRef<HTMLDivElement>(null)
+
+  // ── Load + init Calendly when booking stage mounts ─────────────────────────
+  useEffect(() => {
+    if (stage !== 'booking') return
+    setCalendlyReady(false)
+
+    loadCalendlyAssets().then(() => {
+      if (!calendlyContainerRef.current || !window.Calendly) return
+      window.Calendly.initInlineWidget({
+        url: `${CALENDLY_URL}?hide_gdpr_banner=1`,
+        parentElement: calendlyContainerRef.current,
+        prefill: {
+          name: `${firstName} ${lastName}`.trim(),
+          email,
+        },
+      })
+      // Give Calendly's iframe a moment to paint before hiding the loader
+      setTimeout(() => setCalendlyReady(true), 1800)
+    })
+  }, [stage]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Listen for Calendly booking confirmation ───────────────────────────────
+  useEffect(() => {
+    function handleMessage(e: MessageEvent) {
+      if (e.origin !== 'https://calendly.com') return
+      if ((e.data as { event?: string })?.event === 'calendly.event_scheduled') {
+        setBooked(true)
+        // Small delay so the widget doesn't flash away instantly
+        setTimeout(() => setStage('success'), 400)
+      }
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
+
+  // ── Form helpers ───────────────────────────────────────────────────────────
   const toggleResponsibility = (responsibility: string) => {
     setSelectedResponsibilities((prev) =>
       prev.includes(responsibility)
@@ -144,16 +241,14 @@ export default function Consultation() {
 
   const canSubmit = description.trim().length > 0
 
-  const handleNext = () => {
-    if (!canGoToStep2) return
-    setFormStep(2)
-  }
+  const handleNext = () => { if (canGoToStep2) setFormStep(2) }
 
   const handleSubmit = async () => {
     if (!canSubmit) return
     setSubmitting(true)
+    setSubmitError(null)
     try {
-      await consultationApi.submit({
+      const result = await consultationApi.submit({
         first_name: firstName,
         last_name: lastName,
         email,
@@ -162,9 +257,11 @@ export default function Consultation() {
         tools: tools || undefined,
         description: description || undefined,
       })
-      setShowSubmitThanks(true)
+      setInviteToken(result.invite_token)
+      setStage('booking')
     } catch (err) {
       console.error('Consultation submit failed:', err)
+      setSubmitError('Something went wrong. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -173,6 +270,233 @@ export default function Consultation() {
   const inputClass =
     'w-full rounded-[18px] border border-black/10 bg-[#F6F6F6] px-5 py-4 text-[15px] text-black outline-none transition-colors placeholder:text-black/35 focus:border-[#B4308B]'
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // STAGE: BOOKING — full-width Calendly widget
+  // ══════════════════════════════════════════════════════════════════════════
+  if (stage === 'booking') {
+    return (
+      <div className="min-h-screen bg-white text-black flex flex-col">
+        {/* Header */}
+        <header className="border-b border-black/5 bg-white sticky top-0 z-20">
+          <div className="max-w-7xl mx-auto px-6 md:px-10 py-5 flex items-center justify-between">
+            <button onClick={() => navigate('/')} className="flex items-center">
+              <img src="/axis-logo.png" alt="Axis logo" className="h-11 w-11 rounded-2xl object-cover" />
+            </button>
+            <button
+              onClick={() => setStage('form')}
+              className="flex items-center gap-2 text-[15px] font-medium text-black/55 transition-opacity hover:opacity-70"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+          </div>
+        </header>
+
+        {/* Body */}
+        <main className="flex-1 px-6 md:px-10 pt-10 pb-16">
+          <div className="max-w-7xl mx-auto grid gap-10 lg:grid-cols-[1fr_1.5fr] items-start">
+
+            {/* Left — copy */}
+            <div className="pt-4 lg:pt-8 lg:sticky lg:top-28">
+              <div
+                className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[13px] font-semibold text-white"
+                style={{ background: 'linear-gradient(90deg, #5E149F, #B4308B)' }}
+              >
+                <Calendar size={13} />
+                Step 3 of 3
+              </div>
+
+              <h2 className="mt-5 text-[36px] md:text-[44px] leading-[1.05] font-bold tracking-[-0.03em] text-black">
+                Book your<br />consultation call.
+              </h2>
+
+              <p className="mt-5 text-[17px] leading-[1.65] text-black/64">
+                Pick a time that works for you. On the call we'll walk through your workflow, confirm your current setup, and explain what comes next.
+              </p>
+
+              <ul className="mt-8 space-y-3">
+                {[
+                  '30-minute video call',
+                  "We'll review your workflow submission beforehand",
+                  "You'll get your recommendation report within 48h",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span
+                      className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white"
+                      style={{ background: 'linear-gradient(180deg, #B4308B 0%, #F75A8C 100%)' }}
+                    >
+                      <CheckCircle2 size={12} />
+                    </span>
+                    <span className="text-[15px] text-black/70">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Right — Calendly widget */}
+            <div
+              className="relative rounded-[24px] border border-black/6 overflow-hidden"
+              style={{ minWidth: '320px', height: '700px', boxShadow: '0 18px 50px rgba(15,23,42,0.08), 0 4px 14px rgba(15,23,42,0.04)' }}
+            >
+              {/* Loading overlay — fades out once Calendly iframe paints */}
+              {!calendlyReady && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white">
+                  <div
+                    className="h-7 w-7 animate-spin rounded-full border-2 border-black/10"
+                    style={{ borderTopColor: '#B4308B' }}
+                  />
+                  <span className="text-[14px] text-black/35">Loading calendar…</span>
+                </div>
+              )}
+              {/* Empty container — Calendly appends its iframe here */}
+              <div ref={calendlyContainerRef} style={{ width: '100%', height: '100%' }} />
+            </div>
+
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // STAGE: SUCCESS — animated confirmation
+  // ══════════════════════════════════════════════════════════════════════════
+  if (stage === 'success') {
+    return (
+      <div className="min-h-screen bg-white text-black flex flex-col">
+        <header className="border-b border-black/5 bg-white">
+          <div className="max-w-7xl mx-auto px-6 md:px-10 py-5 flex items-center">
+            <button onClick={() => navigate('/')} className="flex items-center">
+              <img src="/axis-logo.png" alt="Axis logo" className="h-11 w-11 rounded-2xl object-cover" />
+            </button>
+          </div>
+        </header>
+
+        <main className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center">
+          {/* Animated ring + checkmark */}
+          <div
+            className="relative flex items-center justify-center"
+            style={{ width: 100, height: 100 }}
+          >
+            {/* Outer pulsing ring */}
+            <span
+              className="absolute inset-0 rounded-full animate-ping opacity-20"
+              style={{ background: 'linear-gradient(135deg, #5E149F, #F75A8C)' }}
+            />
+            {/* Inner gradient circle */}
+            <span
+              className="flex h-[100px] w-[100px] items-center justify-center rounded-full text-white"
+              style={{
+                background: 'linear-gradient(135deg, #5E149F 0%, #B4308B 50%, #F75A8C 100%)',
+                boxShadow: '0 16px 40px rgba(94,20,159,0.30), 0 6px 16px rgba(247,90,140,0.20)',
+              }}
+            >
+              {/* Checkmark SVG */}
+              <svg
+                width="44"
+                height="44"
+                viewBox="0 0 44 44"
+                fill="none"
+                className="success-check"
+                style={{ strokeDasharray: 60, strokeDashoffset: booked ? 0 : 60, transition: 'stroke-dashoffset 0.55s ease 0.1s' }}
+              >
+                <polyline
+                  points="8,22 18,32 36,14"
+                  stroke="white"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+              </svg>
+            </span>
+          </div>
+
+          {/* Text */}
+          <h1
+            className="mt-9 text-[38px] md:text-[50px] font-bold leading-[1.05] tracking-[-0.03em] text-black"
+            style={{ animation: 'fadeSlideUp 0.5s ease 0.25s both' }}
+          >
+            You're all booked!
+          </h1>
+
+          <p
+            className="mt-5 max-w-md text-[18px] leading-[1.65] text-black/60"
+            style={{ animation: 'fadeSlideUp 0.5s ease 0.38s both' }}
+          >
+            A calendar invite is on its way to <strong className="text-black">{email}</strong>. We'll review your workflow submission before the call so we can hit the ground running.
+          </p>
+
+          <div
+            className="mt-10 flex flex-col sm:flex-row items-center gap-3"
+            style={{ animation: 'fadeSlideUp 0.5s ease 0.5s both' }}
+          >
+            {inviteToken ? (
+              <button
+                onClick={() => navigate(`/signup?token=${inviteToken}`)}
+                className="axis-gradient-button rounded-full px-8 py-3.5 text-[16px] font-bold"
+              >
+                Create your account →
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/login')}
+                className="axis-gradient-button rounded-full px-8 py-3.5 text-[16px] font-bold"
+              >
+                Log in to your workspace
+              </button>
+            )}
+            <button
+              onClick={() => navigate('/')}
+              className="rounded-full border border-black/15 px-8 py-3.5 text-[16px] font-semibold text-black/70 transition-colors hover:bg-black/[0.03]"
+            >
+              Back to home
+            </button>
+          </div>
+
+          {/* What happens next */}
+          <div
+            className="mt-14 max-w-lg rounded-[22px] border border-black/6 bg-[#FAFAFA] px-7 py-6 text-left"
+            style={{ animation: 'fadeSlideUp 0.5s ease 0.6s both' }}
+          >
+            <p className="text-[13px] font-semibold uppercase tracking-[0.16em]" style={{ color: COLORS.violet }}>
+              What happens next
+            </p>
+            <ol className="mt-4 space-y-3">
+              {[
+                "You'll receive a calendar invite confirmation.",
+                'We review your workflow submission before the call.',
+                'On the call, we walk through your setup and goals.',
+                'Within 48h, your recommendation report is ready.',
+              ].map((step, i) => (
+                <li key={i} className="flex items-start gap-3 text-[15px] text-black/70">
+                  <span
+                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+                    style={{ background: 'linear-gradient(135deg, #5E149F, #B4308B)' }}
+                  >
+                    {i + 1}
+                  </span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </main>
+
+        {/* Keyframe styles */}
+        <style>{`
+          @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
+      </div>
+    )
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // STAGE: FORM — original two-step form (unchanged)
+  // ══════════════════════════════════════════════════════════════════════════
   return (
     <div className="min-h-screen bg-white text-black">
       <header className="border-b border-black/5 bg-white">
@@ -341,10 +665,6 @@ export default function Consultation() {
 
             {formStep === 2 && (
               <>
-                {/*
-                  Match step 1 body height: responsibilities scroll uses min-h-[min(42dvh,22rem)].
-                  Same section pattern as Team Responsibilities (label row + field).
-                */}
                 <div className="mt-8 flex min-h-[min(42dvh,22rem)] w-full flex-col gap-4 *:min-h-0">
                   <div className="flex min-h-0 flex-1 flex-col rounded-[22px] border border-black/6 bg-[#FAFAFA] p-5">
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
@@ -398,6 +718,10 @@ export default function Consultation() {
                   </div>
                 </div>
 
+                {submitError && (
+                  <p className="mt-3 text-[14px] text-red-500">{submitError}</p>
+                )}
+
                 <div className="mt-auto flex flex-col-reverse gap-3 pt-8 sm:flex-row sm:items-center sm:justify-between">
                   <button
                     type="button"
@@ -412,7 +736,7 @@ export default function Consultation() {
                     disabled={!canSubmit || submitting}
                     className="axis-gradient-button rounded-full px-10 py-4 text-[18px] font-bold disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {submitting ? 'Saving…' : 'Submit'}
+                    {submitting ? 'Saving…' : 'Next: Book Your Call'}
                   </button>
                 </div>
               </>
@@ -464,7 +788,7 @@ export default function Consultation() {
                 {
                   step: '01',
                   title: 'Understand Your Workflow',
-                  body: 'We collect data on your team’s roles, tasks, and tool usage.',
+                  body: "We collect data on your team's roles, tasks, and tool usage.",
                 },
                 {
                   step: '02',
@@ -689,48 +1013,6 @@ export default function Consultation() {
           </div>
         </footer>
       </main>
-
-      {showSubmitThanks && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-          role="presentation"
-          onClick={() => navigate('/')}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="consultation-thanks-title"
-            className="max-h-[min(90dvh,640px)] w-full max-w-lg overflow-y-auto rounded-[28px] border border-black/8 bg-white p-8 shadow-[0_24px_80px_rgba(0,0,0,0.18)] md:p-10"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2
-              id="consultation-thanks-title"
-              className="text-center text-[28px] font-bold leading-tight text-black md:text-[32px]"
-            >
-              You&apos;re all set.
-            </h2>
-            <div className="mt-6 space-y-4 text-center text-[16px] leading-7 text-black/72">
-              <p>
-                Thanks for sharing your workflow details — our team is reviewing your responses and preparing for your
-                consultation.
-              </p>
-              <p>
-                We&apos;ll reach out via email shortly to schedule a time and walk through your current setup,
-                challenges, and opportunities for improvement.
-              </p>
-            </div>
-            <div className="mt-8 flex justify-center">
-              <button
-                type="button"
-                onClick={() => navigate('/')}
-                className="axis-gradient-button rounded-full px-10 py-3.5 text-[16px] font-bold"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

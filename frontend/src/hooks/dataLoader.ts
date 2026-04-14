@@ -16,6 +16,15 @@
 import type { Node, Edge } from 'reactflow'
 import type { TransitionMatrixJSON } from '../schema'
 
+// Minimal shape of an all_tasks.json node we care about for display
+interface AllTasksNode {
+  node_id: string
+  label: string
+  app_cluster: string[]
+  duration_distribution: { mean_minutes: number }
+  automatable_fraction: string
+}
+
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const STATIC_DATA_URL = '/data/transition_matrix.json'
@@ -152,7 +161,7 @@ interface BuiltNodes {
   positions: Record<string, { x: number; y: number }>
 }
 
-function buildNodes(data: TransitionMatrixJSON): BuiltNodes {
+function buildNodes(data: TransitionMatrixJSON, tasksLookup?: Record<string, AllTasksNode>): BuiltNodes {
   const { states } = data.metadata
 
   // Identify pure pipeline nodes (exclude END and any known terminal labels)
@@ -197,15 +206,24 @@ function buildNodes(data: TransitionMatrixJSON): BuiltNodes {
         ? durationSamples.reduce((a, b) => a + b, 0) / durationSamples.length
         : 0
 
+    // Overlay metadata from all_tasks.json if available, otherwise fall back
+    // to transition-matrix derived values + hardcoded enrichment.
+    const task = tasksLookup?.[id]
+    const label      = task?.label ?? formatLabel(id)
+    const tools      = task?.app_cluster?.length ? task.app_cluster : (TOOL_ENRICHMENT[id] ?? [])
+    const minutes    = task ? Math.round(task.duration_distribution.mean_minutes) : Math.round(avgMin)
+    const automatable = (task?.automatable_fraction as 'high' | 'medium' | 'low' | undefined)
+                        ?? inferAutomatable(avgMin)
+
     nodes.push({
       id,
       type: 'taskNode',
       position: pos,
       data: {
-        label: formatLabel(id),
-        tools: TOOL_ENRICHMENT[id] ?? [],
-        minutes: Math.round(avgMin),
-        automatable: inferAutomatable(avgMin),
+        label,
+        tools,
+        minutes,
+        automatable,
         durationSamples,
       },
     })
@@ -355,11 +373,24 @@ export async function loadMarkovData(projectId?: string): Promise<LoadedMarkovDa
   const url = getDataUrl(projectId)
   if (_cache[url]) return _cache[url]
 
-  const res = await fetch(url)
+  // Fetch transition matrix (required) and all_tasks metadata (optional, project-only)
+  const markovFetch = fetch(url)
+  const tasksFetch = projectId
+    ? fetch(`/api/projects/${projectId}/tasks`).then((r) => r.ok ? r.json() as Promise<AllTasksNode[]> : []).catch(() => [])
+    : Promise.resolve([])
+
+  const [res, tasksRaw] = await Promise.all([markovFetch, tasksFetch])
   if (!res.ok) throw new Error(`Failed to fetch markov data: ${res.statusText}`)
 
   const data: TransitionMatrixJSON = await res.json()
-  const { nodes, finalNodeId } = buildNodes(data)
+
+  // Build lookup: node_id → task metadata (only when we have real task data)
+  const tasksLookup: Record<string, AllTasksNode> | undefined =
+    tasksRaw.length > 0
+      ? Object.fromEntries((tasksRaw as AllTasksNode[]).map((t) => [t.node_id, t]))
+      : undefined
+
+  const { nodes, finalNodeId } = buildNodes(data, tasksLookup)
   const edges = buildEdges(data, finalNodeId)
 
   const result: LoadedMarkovData = {

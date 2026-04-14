@@ -28,10 +28,12 @@ interface UseMarkovDataResult {
 }
 
 /**
- * @param projectId  When provided, fetches from /api/projects/{id}/markov.
- *                   When omitted, fetches the static JSON from /public/data/.
+ * @param projectId   When provided, fetches from /api/projects/{id}/markov.
+ *                    When omitted, fetches the static JSON from /public/data/.
+ * @param refreshKey  Increment this to bust the cache and force a re-fetch
+ *                    (e.g., after saving node edits).
  */
-export function useMarkovData(projectId?: string): UseMarkovDataResult {
+export function useMarkovData(projectId?: string, refreshKey?: number): UseMarkovDataResult {
   const [existingNodes, setNodes] = useState<Node[]>(fallbackNodes)
   const [existingEdges, setEdges] = useState<Edge[]>(fallbackEdges)
   const [loading, setLoading] = useState(true)
@@ -66,7 +68,7 @@ export function useMarkovData(projectId?: string): UseMarkovDataResult {
 
     load()
     return () => { cancelled = true }
-  }, [projectId])
+  }, [projectId, refreshKey])
 
   return { existingNodes, existingEdges, loading, error, isRealData, stats }
 }
