@@ -200,6 +200,12 @@ export default function Consultation() {
             >
               Client Login
             </button>
+            <button
+              onClick={() => navigate('/admin/login')}
+              className="hidden md:inline text-[15px] font-medium text-black/45 transition-opacity hover:opacity-70"
+            >
+              Admin Login
+            </button>
             <button className="axis-gradient-button rounded-full px-6 py-3 text-[16px] font-bold">
               Get Started
             </button>

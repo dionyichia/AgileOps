@@ -111,17 +111,17 @@ export default function ToolInputForm() {
         }
 
         const { job_id } = await pipelineApi.simulate(projectId, toolEval.id)
-        navigate(`/projects/${projectId}/simulation/${toolEval.id}`, {
-          state: { jobId: job_id },
+        navigate(`/projects/${projectId}/dashboard`, {
+          state: { openTab: toolEval.id, jobId: job_id },
         })
       } catch (err) {
         console.error('Failed to create tool evaluation:', err)
-        navigate('/simulation')
+        navigate(`/projects/${projectId}/dashboard`)
       } finally {
         setSubmitting(false)
       }
     } else {
-      navigate('/simulation')
+      navigate('/dashboard')
     }
   }
 

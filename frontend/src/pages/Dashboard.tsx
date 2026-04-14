@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo, type MouseEvent } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom'
 import { useMarkovData } from '../hooks/pullMarkovData'
 import { toolEvals as toolEvalsApi, projects as projectsApi } from '../api/client'
 import type { ToolEvaluation, Project } from '../api/client'
@@ -75,6 +75,7 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const { projectId } = useParams<{ projectId?: string }>()
   const [searchParams] = useSearchParams()
+  const location = useLocation()
 
   const { existingNodes, existingEdges, loading: markovLoading, error: markovError, isRealData, stats: markovStats } =
     useMarkovData(projectId)
@@ -122,8 +123,24 @@ export default function Dashboard() {
     if (!projectId || !apiToolEvals?.length) return
     if (projectTabsSeededFor.current === projectId) return
     projectTabsSeededFor.current = projectId
-    setOpenSimTabIds(apiToolEvals.map((e) => e.id))
+    const apiIds = apiToolEvals.map((e) => e.id)
+    setOpenSimTabIds((prev) => {
+      // Merge: keep any IDs already open (e.g. from navigation state), add API-sourced ones
+      const extra = prev.filter((id) => !apiIds.includes(id))
+      return [...apiIds, ...extra]
+    })
   }, [projectId, apiToolEvals])
+
+  /** On arrival from ToolInputForm: open and focus the newly-created simulation tab */
+  useEffect(() => {
+    const openTab = (location.state as { openTab?: string } | null)?.openTab
+    if (!openTab) return
+    setOpenSimTabIds((prev) => (prev.includes(openTab) ? prev : [...prev, openTab]))
+    setActiveViewId(openTab)
+    // Clear state so a refresh doesn't re-trigger
+    navigate(location.pathname, { replace: true, state: {} })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const activeSimulation = useMemo(
     () => liveSimulations.find((s) => s.id === activeViewId),
