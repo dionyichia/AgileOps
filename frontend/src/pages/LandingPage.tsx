@@ -619,7 +619,7 @@ export default function LandingPage() {
 
             {/* Foreground content */}
             <motion.div
-              className="relative z-20 max-w-5xl mx-auto text-center px-6 md:px-10 pt-24 md:pt-32 pb-56 md:pb-28"
+              className="relative z-20 max-w-5xl mx-auto text-center px-6 md:px-10 pt-32 md:pt-32 pb-56 md:pb-28"
               style={{ y: headlineY }}
             >
               {/* Headline — word-by-word TextGenerateEffect */}
