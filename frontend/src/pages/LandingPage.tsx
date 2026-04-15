@@ -619,7 +619,7 @@ export default function LandingPage() {
 
             {/* Foreground content */}
             <motion.div
-              className="relative z-20 max-w-5xl mx-auto text-center px-6 md:px-10 pt-32 pb-28"
+              className="relative z-20 max-w-5xl mx-auto text-center px-6 md:px-10 pt-32 pb-52 md:pb-28"
               style={{ y: headlineY }}
             >
               {/* Headline — word-by-word TextGenerateEffect */}
@@ -691,7 +691,7 @@ export default function LandingPage() {
               </motion.div>
 
               {/* Social proof stat chips */}
-              <div className="mt-16 flex flex-wrap items-center justify-center gap-3">
+              <div className="mt-12 md:mt-16 flex flex-wrap items-center justify-center gap-3">
                 {statChips.map((text, i) => (
                   <motion.span
                     key={text}
@@ -711,7 +711,7 @@ export default function LandingPage() {
             </motion.div>
 
             {/* Trusted By marquee */}
-            <div className="absolute bottom-32 inset-x-0 z-20 flex flex-col items-center gap-4">
+            <div className="absolute bottom-20 md:bottom-32 inset-x-0 z-20 flex flex-col items-center gap-3 md:gap-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
                 Trusted By
               </p>
@@ -730,7 +730,7 @@ export default function LandingPage() {
                       key={i}
                       src="/berkeley-logo.png"
                       alt="Berkeley"
-                      className="h-24 w-auto opacity-40 grayscale mx-16 flex-shrink-0"
+                      className="h-12 md:h-24 w-auto opacity-40 grayscale mx-8 md:mx-16 flex-shrink-0"
                     />
                   ))}
                 </div>
@@ -739,7 +739,7 @@ export default function LandingPage() {
 
             {/* Scroll down indicator */}
             <motion.div
-              className="absolute bottom-8 inset-x-0 z-20 flex flex-col items-center gap-1 pointer-events-none"
+              className="absolute bottom-4 md:bottom-8 inset-x-0 z-20 flex flex-col items-center gap-1 pointer-events-none"
               style={{ opacity: scrollIndicatorOpacity }}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
