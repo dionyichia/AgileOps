@@ -1,13 +1,21 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY in environment.')
+  console.error(
+    '[AgileOps] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY.\n' +
+    'Create frontend/.env with your Supabase project credentials.'
+  )
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Use placeholder values so createClient does not throw on missing env vars.
+// Auth calls will fail gracefully rather than crashing the module at load time.
+export const supabase = createClient(
+  supabaseUrl ?? 'https://placeholder.supabase.co',
+  supabaseAnonKey ?? 'placeholder-anon-key'
+)
 
 /** Return the current session's access token (Supabase JWT). */
 export async function getAccessToken(): Promise<string | null> {

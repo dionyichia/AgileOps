@@ -21,6 +21,8 @@ Thumbs.db
 # Env
 .env
 .env.local
+frontend/.env
+frontend/.env.local
 
 # Data (dev database)
 backend/data/agileops.db

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import ReactFlow, {
   useNodesState,
@@ -11,29 +11,13 @@ import ReactFlow, {
   Connection,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
-import { Users, Clock, Plus, Layers, AlertCircle } from 'lucide-react'
+import { Users, AlertCircle, Plus } from 'lucide-react'
 import StepLayout from '../components/layout/StepLayout'
 import { SkeletonCard, PageLoader } from '../components/ui/Skeleton'
 import { nodeTypes } from '../components/workflow/CustomNodes'
-// import { roleStats, toolBuckets, existingNodes, existingEdges } from '../data/mockData'
-import { roleStats, toolBuckets } from '../data/mockData'
+import { projects as projectsApi, tasks as tasksApi, type Project, type TaskNode } from '../api/client'
+import { useMarkovData } from '../hooks/pullMarkovData'
 
- import { useMarkovData } from '../hooks/pullMarkovData'
-
-const bucketColorMap: Record<string, string> = {
-  indigo:  'bg-[#F4E8FB] text-[#5E149F] border-[#5E149F]/20',
-  violet:  'bg-[#FCEAF4] text-[#B4308B] border-[#B4308B]/20',
-  cyan:    'bg-[#F2EEFF] text-[#5E149F] border-[#5E149F]/16',
-  emerald: 'bg-[#EEF8F4] text-[#248F63] border-[#248F63]/18',
-  amber:   'bg-[#FFF5DF] text-[#C98400] border-[#C98400]/18',
-  rose:    'bg-[#FFE9EF] text-[#E2409B] border-[#E2409B]/20',
-}
-
-const intensityDot: Record<string, string> = {
-  High:   'bg-[#248F63]',
-  Medium: 'bg-[#C98400]',
-  Low:    'bg-[#F75A8C]',
-}
 
 export default function WorkflowReport() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -43,6 +27,32 @@ export default function WorkflowReport() {
   const [nodes, setNodes, onNodesChange] = useNodesState(existingNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(existingEdges)
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
+
+  // Project + task data from API
+  const [project, setProject] = useState<Project | null>(null)
+  const [taskNodes, setTaskNodes] = useState<TaskNode[]>([])
+
+  useEffect(() => {
+    if (!projectId) return
+    projectsApi.get(projectId).then(setProject).catch(() => {})
+    tasksApi.get(projectId).then(setTaskNodes).catch(() => {})
+  }, [projectId])
+
+  // Derive tool list from task app_cluster
+  const derivedToolList = useMemo(() => {
+    if (taskNodes.length === 0) return []
+    const map: Record<string, { minutes: number; count: number }> = {}
+    for (const task of taskNodes) {
+      for (const tool of task.app_cluster) {
+        if (!map[tool]) map[tool] = { minutes: 0, count: 0 }
+        map[tool].minutes += task.duration_distribution.mean_minutes
+        map[tool].count++
+      }
+    }
+    return Object.entries(map)
+      .map(([name, { minutes, count }]) => ({ name, weeklyHrs: +(minutes / 60 / 5).toFixed(1), count }))
+      .sort((a, b) => b.weeklyHrs - a.weeklyHrs)
+  }, [taskNodes])
 
   if (loading && projectId) {
     return (
@@ -117,10 +127,6 @@ export default function WorkflowReport() {
     setNodes((nds) => [...nds, newNode])
   }
 
-  // All tools flat for the popular-tools table
-  const allTools = toolBuckets.flatMap((b) => b.tools)
-  const topTools = [...allTools].sort((a, b) => b.hoursPerWeek - a.hoursPerWeek).slice(0, 6)
-
   useEffect(() => {
     if (existingNodes.length) {
       setNodes(existingNodes)
@@ -152,27 +158,16 @@ export default function WorkflowReport() {
             style={{ borderColor: 'rgba(94,20,159,0.10)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
           >
             <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-4">Role Stats</h3>
-
             <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-black/46">Type of team</span>
-                <span className="text-xs font-semibold text-[#5E149F] bg-[#F4E8FB] px-2 py-0.5 rounded-full">{roleStats.teamType}</span>
-              </div>
               <div className="flex justify-between items-start">
                 <span className="text-xs text-black/46">Role</span>
-                <span className="text-xs font-medium text-black/78 text-right max-w-[160px] leading-snug">{roleStats.role}</span>
+                <span className="text-xs font-medium text-black/78 text-right max-w-[160px] leading-snug">
+                  {project?.primary_role ?? '—'}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-black/46 flex items-center gap-1"><Users size={11} /> Employees</span>
-                <span className="text-sm font-bold text-black">{roleStats.numEmployees}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-black/46 flex items-center gap-1"><Layers size={11} /> Avg tools used</span>
-                <span className="text-sm font-bold text-black">{roleStats.avgToolsUsed}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-black/46 flex items-center gap-1"><Clock size={11} /> Avg weekly hrs</span>
-                <span className="text-sm font-bold text-black">{roleStats.avgWeeklyHours}h</span>
+                <span className="text-sm font-bold text-black">{project?.team_size ?? '—'}</span>
               </div>
             </div>
           </div>
@@ -183,61 +178,23 @@ export default function WorkflowReport() {
             style={{ borderColor: 'rgba(94,20,159,0.10)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
           >
             <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-4">Tool Stack</h3>
-            <div className="space-y-4">
-              {toolBuckets.map((bucket) => (
-                <div key={bucket.category}>
-                  <span className={`text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded border ${bucketColorMap[bucket.color]}`}>
-                    {bucket.category}
-                  </span>
-                  <div className="mt-2 space-y-1.5 pl-1">
-                    {bucket.tools.map((tool) => (
-                      <button
-                        key={tool.name}
-                        onClick={() => setSelectedTool(tool.name === selectedTool ? null : tool.name)}
-                        className={`w-full flex items-center justify-between text-xs px-2 py-1.5 rounded-lg transition-all ${
-                          selectedTool === tool.name
-                            ? 'bg-[#F4E8FB] text-[#5E149F]'
-                            : 'text-black/70 hover:bg-black/[0.03]'
-                        }`}
-                      >
-                        <span className="font-medium">{tool.name}</span>
-                        <span className="text-black/34">{tool.pctUsers}%</span>
-                      </button>
-                    ))}
-                  </div>
+            {derivedToolList.length > 0 ? (
+              <div className="space-y-1.5">
+                <div className="grid grid-cols-2 gap-1 text-[10px] text-black/34 font-semibold uppercase tracking-wide pb-1 border-b border-black/8">
+                  <span>Tool</span>
+                  <span className="text-right">Est. hrs/wk</span>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Popular tools table */}
-          <div
-            className="bg-white border rounded-[24px] p-5"
-            style={{ borderColor: 'rgba(94,20,159,0.10)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
-          >
-            <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3">Popular Tools</h3>
-            <div className="space-y-1">
-              <div className="grid grid-cols-3 gap-1 text-[10px] text-black/34 font-semibold uppercase tracking-wide pb-1 border-b border-black/8">
-                <span>Tool</span>
-                <span className="text-center">% using</span>
-                <span className="text-right">Intensity</span>
+                {derivedToolList.map((tool) => (
+                  <div key={tool.name} className="grid grid-cols-2 gap-1 text-xs py-1.5 border-b border-black/6">
+                    <span className="text-black/78 font-medium truncate">{tool.name}</span>
+                    <span className="text-right text-black/42">{tool.weeklyHrs}h</span>
+                  </div>
+                ))}
+                <p className="text-[10px] text-black/34 mt-2">Derived from extracted workflow tasks</p>
               </div>
-              {topTools.map((tool) => (
-                <div key={tool.name} className="grid grid-cols-3 gap-1 text-xs py-1.5 border-b border-black/6">
-                  <span className="text-black/78 font-medium truncate">{tool.name}</span>
-                  <div className="flex items-center justify-center">
-                    <div className="w-full max-w-[50px] bg-black/8 rounded-full h-1">
-                      <div className="h-1 rounded-full" style={{ width: `${tool.pctUsers}%`, background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }} />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-end gap-1">
-                    <div className={`w-1.5 h-1.5 rounded-full ${intensityDot[tool.intensity]}`} />
-                    <span className="text-black/42 text-[10px]">{tool.intensity}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <p className="text-[10px] text-black/34 mt-2">Total time/wk shown as intensity</p>
+            ) : (
+              <p className="text-xs text-black/38">Run the pipeline to populate your tool stack.</p>
+            )}
           </div>
         </div>
 

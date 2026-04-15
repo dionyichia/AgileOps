@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useLocation, useSearchParams } from 'react-router-dom'
 import ReactFlow, {
   useNodesState,
@@ -14,9 +14,25 @@ import StepLayout from '../components/layout/StepLayout'
 import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
 import { CLIENT_SIMULATIONS_SEED } from '../data/clientSimulations'
 import { nodeTypes } from '../components/workflow/CustomNodes'
-import { roleStats, toolBuckets, toolTimeMetrics, simulationNodes, simulationEdges } from '../data/mockData'
-import { toolEvals, simulation as simulationApi } from '../api/client'
+import { toolTimeMetrics, simulationNodes, simulationEdges } from '../data/mockData'
+import {
+  toolEvals,
+  simulation as simulationApi,
+  recommendation as recApi,
+  projects as projectsApi,
+  tasks as tasksApi,
+  type Project,
+  type RecommendationData,
+  type SimulationData,
+  type TaskNode,
+} from '../api/client'
 import { useJobProgress } from '../hooks/useJobProgress'
+
+function formatDollar(n: number) {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000)     return `$${(n / 1_000).toFixed(0)}K`
+  return `$${n}`
+}
 
 const LOADING_STEPS = [
   { label: 'Parsing tool documentation…',    pct: 15 },
@@ -27,14 +43,6 @@ const LOADING_STEPS = [
   { label: 'Generating workflow diff…',        pct: 100 },
 ]
 
-const bucketColorMap: Record<string, string> = {
-  indigo:  'bg-[#F4E8FB] text-[#5E149F] border-[#5E149F]/20',
-  violet:  'bg-[#FCEAF4] text-[#B4308B] border-[#B4308B]/20',
-  cyan:    'bg-[#F2EEFF] text-[#5E149F] border-[#5E149F]/16',
-  emerald: 'bg-[#EEF8F4] text-[#248F63] border-[#248F63]/18',
-  amber:   'bg-[#FFF5DF] text-[#C98400] border-[#C98400]/18',
-  rose:    'bg-[#FFE9EF] text-[#E2409B] border-[#E2409B]/20',
-}
 
 export default function SimulationResults() {
   const { projectId, toolEvalId } = useParams<{ projectId: string; toolEvalId: string }>()
@@ -58,28 +66,74 @@ export default function SimulationResults() {
   // Tool name — from API or localStorage
   const [toolName, setToolName] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('axisToolInput') ?? '{}').toolName || 'Apollo.io'
+      return JSON.parse(localStorage.getItem('axisToolInput') ?? '{}').toolName || ''
     } catch {
-      return 'Apollo.io'
+      return ''
     }
   })
+
+  // Project-scoped API data
+  const [project, setProject] = useState<Project | null>(null)
+  const [recData, setRecData] = useState<RecommendationData | null>(null)
+  const [simData, setSimData] = useState<SimulationData | null>(null)
+  const [taskNodes, setTaskNodes] = useState<TaskNode[]>([])
 
   const [nodes, , onNodesChange] = useNodesState(simulationNodes)
   const [edges, , onEdgesChange] = useEdgesState(simulationEdges)
 
-  // Fetch tool name from API when project-scoped; seed list when ?eval= on flat route
+  // Fetch all project data when project-scoped
   useEffect(() => {
-    if (isProjectScoped) {
-      toolEvals.get(projectId!, toolEvalId!)
-        .then((te) => setToolName(te.tool_name))
-        .catch(() => {})
+    if (!isProjectScoped) {
+      if (evalParam) {
+        const sim = CLIENT_SIMULATIONS_SEED.find((s) => s.id === evalParam)
+        if (sim) setToolName(sim.toolName)
+      }
       return
     }
-    if (evalParam) {
-      const sim = CLIENT_SIMULATIONS_SEED.find((s) => s.id === evalParam)
-      if (sim) setToolName(sim.toolName)
-    }
+    toolEvals.get(projectId!, toolEvalId!).then((te) => setToolName(te.tool_name)).catch(() => {})
+    projectsApi.get(projectId!).then(setProject).catch(() => {})
+    recApi.get(projectId!, toolEvalId!).then(setRecData).catch(() => {})
+    simulationApi.get(projectId!, toolEvalId!).then(setSimData).catch(() => {})
+    tasksApi.get(projectId!).then(setTaskNodes).catch(() => {})
   }, [projectId, toolEvalId, isProjectScoped, evalParam])
+
+  // Derive time metrics from task nodes + simulation node savings
+  const derivedTimeMetrics = useMemo(() => {
+    if (!isProjectScoped || taskNodes.length === 0) return null
+    const results = simData?.results_json as Record<string, unknown> | undefined
+    const summary = results?.summary as Record<string, unknown> | undefined
+    const savings = (summary?.node_savings_min ?? {}) as Record<string, number>
+    return taskNodes
+      .filter((t) => savings[t.node_id] != null)
+      .map((t) => ({
+        tool: t.label,
+        before: `${Math.round(t.duration_distribution.mean_minutes)}m/day`,
+        after: `${Math.max(0, Math.round(t.duration_distribution.mean_minutes - savings[t.node_id]))}m/day`,
+        saved: Math.round(savings[t.node_id]),
+        change: 'decrease' as const,
+        note: t.description,
+      }))
+      .sort((a, b) => b.saved - a.saved)
+      .slice(0, 5)
+  }, [isProjectScoped, taskNodes, simData])
+
+  // Derive tool list from task app_cluster entries
+  const derivedToolList = useMemo(() => {
+    if (!isProjectScoped || taskNodes.length === 0) return null
+    const map: Record<string, { minutes: number; count: number }> = {}
+    for (const task of taskNodes) {
+      for (const tool of task.app_cluster) {
+        if (!map[tool]) map[tool] = { minutes: 0, count: 0 }
+        map[tool].minutes += task.duration_distribution.mean_minutes
+        map[tool].count++
+      }
+    }
+    return Object.entries(map)
+      .map(([name, { minutes, count }]) => ({ name, weeklyHrs: +(minutes / 60 / 5).toFixed(1), count }))
+      .sort((a, b) => b.weeklyHrs - a.weeklyHrs)
+  }, [isProjectScoped, taskNodes])
+
+  const timeMetrics = derivedTimeMetrics ?? toolTimeMetrics
 
   // Legacy loading sequence (only for flat route)
   useEffect(() => {
@@ -97,7 +151,7 @@ export default function SimulationResults() {
     ? jobProgress.isDone || jobProgress.isFailed || !jobId
     : legacyDone
 
-  const totalSaved = toolTimeMetrics
+  const totalSaved = timeMetrics
     .filter((m) => m.change === 'decrease')
     .reduce((acc, m) => acc + ((m as any).saved ?? 0), 0)
 
@@ -120,7 +174,8 @@ export default function SimulationResults() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-black md:text-3xl">Simulation results</h1>
         <p className="mt-1 text-sm text-black/55">
-          Impact of <span className="font-semibold text-[#5E149F]">{toolName}</span> on your SDR workflow
+          Impact of <span className="font-semibold text-[#5E149F]">{toolName}</span> on your{' '}
+          {project?.primary_role ?? 'sales'} workflow
           {done ? ` · ${totalSaved}min/day savings per rep` : ''}
         </p>
       </div>
@@ -164,7 +219,8 @@ export default function SimulationResults() {
 
             <h2 className="mb-3 text-[2rem] font-bold leading-tight text-black">Running Simulation</h2>
             <p className="mb-10 max-w-xl text-base text-black/56">
-              Analyzing how <span className="font-semibold text-[#5E149F]">{toolName}</span> would affect your SDR workflow.
+              Analyzing how <span className="font-semibold text-[#5E149F]">{toolName}</span> would affect your{' '}
+              {project?.primary_role ?? 'sales'} workflow.
             </p>
           </div>
 
@@ -235,7 +291,7 @@ export default function SimulationResults() {
     <StepLayout
       currentStep={4}
       title="Simulation Results"
-      subtitle={`Impact of adding ${toolName} to your SDR workflow — ${totalSaved}min/day savings per rep`}
+      subtitle={`Impact of adding ${toolName} to your ${project?.primary_role ?? 'sales'} workflow — ${totalSaved}min/day savings per rep`}
       embedded={isFlatClient}
       backPath={
         isFlatClient
@@ -259,41 +315,36 @@ export default function SimulationResults() {
           >
             <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3">Role Stats</h3>
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between"><span className="text-black/46">Team</span><span className="text-black font-medium">{roleStats.teamType}</span></div>
-              <div className="flex justify-between"><span className="text-black/46">Role</span><span className="text-black/78 text-right max-w-[150px] leading-snug">SDR</span></div>
-              <div className="flex justify-between"><span className="text-black/46">Employees</span><span className="text-black font-bold">{roleStats.numEmployees}</span></div>
+              <div className="flex justify-between"><span className="text-black/46">Role</span><span className="text-black/78 text-right max-w-[150px] leading-snug">{project?.primary_role ?? '—'}</span></div>
+              <div className="flex justify-between"><span className="text-black/46">Employees</span><span className="text-black font-bold">{project?.team_size ?? '—'}</span></div>
             </div>
 
             <div className="border-t border-black/8 mt-3 pt-3">
               <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3">Tool Stack (Updated)</h3>
-              <div className="space-y-3">
-                {toolBuckets.map((b) => (
-                  <div key={b.category}>
-                    <span className={`text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded border ${bucketColorMap[b.color]}`}>
-                      {b.category}
-                    </span>
-                    <div className="mt-1.5 pl-1 space-y-1">
-                      {b.tools.map((t) => (
-                        <div key={t.name} className="text-xs text-black/56 flex items-center gap-1">
-                          <span className="w-1 h-1 rounded-full bg-black/22" />
-                          {t.name}
-                        </div>
-                      ))}
+              <div className="space-y-1.5">
+                {/* Existing tools from task data */}
+                {derivedToolList ? (
+                  derivedToolList.map((t) => (
+                    <div key={t.name} className="text-xs text-black/56 flex items-center justify-between">
+                      <span className="flex items-center gap-1">
+                        <span className="w-1 h-1 rounded-full bg-black/22" />
+                        {t.name}
+                      </span>
+                      <span className="text-black/38">{t.weeklyHrs}h/wk</span>
                     </div>
-                  </div>
-                ))}
-                {/* New tool */}
-                <div>
-                  <span className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded border bg-[#FCEAF4] text-[#B4308B] border-[#B4308B]/20">
-                    NEW · Sales Engagement
-                  </span>
-                  <div className="mt-1.5 pl-1">
+                  ))
+                ) : (
+                  <p className="text-xs text-black/38">Run pipeline to populate tool stack.</p>
+                )}
+                {/* New tool being evaluated */}
+                {toolName && (
+                  <div className="mt-2 pt-2 border-t border-black/6">
                     <div className="text-xs text-[#5E149F] flex items-center gap-1 font-semibold">
                       <Zap size={10} className="text-[#F75A8C]" />
-                      {toolName}
+                      {toolName} <span className="text-[10px] font-normal text-[#B4308B]">NEW</span>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -305,7 +356,7 @@ export default function SimulationResults() {
           >
             <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3">Estimated Time Impact</h3>
             <div className="space-y-3">
-              {toolTimeMetrics.map((m) => (
+              {timeMetrics.map((m) => (
                 <div key={m.tool} className="relative">
                   <div className="flex items-start justify-between gap-2">
                     <span className="text-xs text-black/78 font-medium leading-snug">{m.tool}</span>
@@ -371,23 +422,32 @@ export default function SimulationResults() {
             <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3 flex items-center gap-1.5">
               <DollarSign size={11} /> Cost Estimation
             </h3>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-black/46">Annual license ({toolName})</span>
-                <span className="text-black font-medium">$8,400</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-black/46">Est. value of time saved</span>
-                <span className="text-[#248F63] font-semibold">$56,000/yr</span>
-              </div>
-              <div className="flex justify-between border-t border-black/8 pt-2 mt-2">
-                <span className="text-black/78 font-semibold">Net ROI</span>
-                <span className="text-[#248F63] font-bold text-sm">6.7× </span>
-              </div>
-            </div>
-            <div className="mt-3 text-[10px] text-black/34">
-              Based on 24 SDRs @ $60k avg salary + {totalSaved}min/day savings
-            </div>
+            {recData ? (() => {
+              const toolCost = recData.company_impact.tool_cost
+              const revenueP70 = recData.company_impact.revenue_impact.p70
+              const roi = toolCost > 0 ? (revenueP70 / toolCost).toFixed(1) + '×' : '—'
+              return (
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-black/46">Annual license ({toolName})</span>
+                    <span className="text-black font-medium">{formatDollar(toolCost)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-black/46">Est. revenue impact</span>
+                    <span className="text-[#248F63] font-semibold">{formatDollar(revenueP70)}/yr</span>
+                  </div>
+                  <div className="flex justify-between border-t border-black/8 pt-2 mt-2">
+                    <span className="text-black/78 font-semibold">Net ROI</span>
+                    <span className="text-[#248F63] font-bold text-sm">{roi}</span>
+                  </div>
+                  <div className="mt-3 text-[10px] text-black/34">
+                    Based on {project?.team_size ?? '—'} {project?.primary_role ?? 'reps'} · {totalSaved}min/day savings
+                  </div>
+                </div>
+              )
+            })() : (
+              <p className="text-xs text-black/38">Cost data unavailable.</p>
+            )}
           </div>
         </div>
 

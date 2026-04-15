@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { supabase, getUserRole } from '../lib/supabase'
 import { projects } from '../api/client'
 
 export default function Login() {
@@ -26,11 +26,17 @@ export default function Login() {
         if (authError) throw new Error(authError.message)
       }
 
+      const role = await getUserRole()
+      if (role === 'admin') {
+        navigate('/internal')
+        return
+      }
+
       const userProjects = await projects.list()
       if (userProjects.length > 0) {
         navigate(`/projects/${userProjects[0].id}/dashboard`)
       } else {
-        navigate('/internal')
+        navigate('/dashboard')
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong')

@@ -525,7 +525,7 @@ export default function Consultation() {
               Client Login
             </button>
             <button
-              onClick={() => navigate('/admin/login')}
+              onClick={() => navigate('/internal/login')}
               className="hidden md:inline text-[15px] font-medium text-black/45 transition-opacity hover:opacity-70"
             >
               Admin Login

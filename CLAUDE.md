@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AgileOps is a B2B SaaS sales workflow simulation platform. The real-world pipeline is fully human-driven: intake form → interview call → paste transcript → LLM extracts tasks into `all_tasks.json` → downstream scripts generate synthetic telemetry, build Markov transition matrices, and run Monte Carlo simulations to model tool impact. Results are presented through a React frontend with a guided 5-step UX flow.
+AgileOps is a B2B SaaS sales workflow simulation platform. The real-world pipeline is fully human-driven: intake form → interview call → paste transcript → LLM extracts tasks into `all_tasks.json` → downstream scripts generate synthetic telemetry, build Markov transition matrices, and run Monte Carlo simulations to model tool impact. Results are presented through a React frontend.
 
 ## Commands
 
@@ -99,12 +99,14 @@ React 18 + TypeScript SPA built with Vite. Uses Tailwind CSS with custom color p
 `/recommendation` (FinalRecommendation) — ROI readout and recommendation.
 
 *Internal tools (our side — not client-facing):*
+`/internal/login` (InternalLogin) — staff login, uses Supabase auth, requires `user_profiles.role === 'admin'`
+`/internal` (InternalDashboard) — ops hub: lists all client projects, links to transcript/pipeline steps. Admin-only via `AdminRoute`.
 `/internal/form` (DataForm) → `/internal/workflow-report` (WorkflowReport) → `/internal/tool-input` (ToolInputForm)
 
 *Project-scoped routes (production API-driven):*
 `/projects/:projectId/transcripts` (TranscriptInput) → `/projects/:projectId/workflow-report` → `/projects/:projectId/tool-input` → `/projects/:projectId/simulation/:toolEvalId` → `/projects/:projectId/recommendation/:toolEvalId`
 
-- `StepLayout` wraps internal step pages with a progress indicator and navigation
+- `StepLayout` wraps internal step pages with an Axis logo header and Back/Next footer nav. The step-progress indicator (numbered circles) has been removed — only the navigation chrome remains.
 - `CustomNodes.tsx` defines ReactFlow node rendering for the pipeline visualization
 - All pages are dual-mode: project-scoped routes use API data, legacy/internal routes use localStorage + mock data
 
@@ -131,10 +133,10 @@ React 18 + TypeScript SPA built with Vite. Uses Tailwind CSS with custom color p
 - Backend pipeline scripts are functional (transcript → tasks, synthetic data → Markov → simulation)
 - FastAPI server fully implemented: all 28 endpoints live, all routers registered
 - Database: SQLite for dev (auto-created), PostgreSQL-ready via `DATABASE_URL` env var. All tables: `users`, `projects`, `workflow_profiles`, `transcripts`, `jobs`, `tool_evaluations`, `uploaded_files`, `simulation_results`
-- **Auth:** JWT-based (HS256) with `/api/auth/register` and `/api/auth/login`. `SECRET_KEY` is a dev placeholder — set via env var before prod.
+- **Auth:** Supabase Auth handles all login/session management. `user_profiles.role` (`'admin'` | `'client'`) controls access. `AdminRoute` component gates all `/internal/*` routes — redirects non-admins to `/login`. Client login at `/login` routes admins to `/internal`, clients to their project dashboard (or `/dashboard` if no projects yet). `/admin/login` has been removed — staff use `/internal/login`.
 - **Pipeline integration complete:** transcript → tasks, full pipeline run, and simulation-only run all work end-to-end via async background jobs with WebSocket progress streaming
 - **Public landing page** at `/` with gold full-screen hero, intake form (popup modal + inline), "we'll be in touch" confirmation
-- **Client Dashboard** at `/dashboard` — workspace with editable workflow map + tool stack sidebar. Not a wizard.
+- **Client Dashboard** at `/dashboard` — workspace with editable workflow map + derived tool stack from task data. Not a wizard.
 - **Frontend is fully wired for production:**
   - All pages are dual-mode: project-scoped routes use API data, legacy flat routes use localStorage + mock data
   - WorkflowReport: loading skeletons + error state with retry when fetching from API
@@ -145,3 +147,45 @@ React 18 + TypeScript SPA built with Vite. Uses Tailwind CSS with custom color p
 - Job progress: WebSocket-first with automatic HTTP polling fallback
 - Vite dev proxy configured: `/api/*` → `localhost:8000`, `/ws/*` → WebSocket
 - No tests — `classifier.py` and `parser_scraper.py` are stubs
+
+### Environment Variables
+
+**`frontend/.env`** — browser-only, must be prefixed `VITE_`:
+```
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=...
+```
+
+**Root `.env`** — backend secrets, never sent to the browser:
+```
+ANTHROPIC_API_KEY=...
+SUPABASE_URL=...
+SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_KEY=...
+RESEND_API_KEY=...
+RESEND_FROM="Axis <you@yourdomain.com>"
+SITE_URL=...
+```
+
+Both files are gitignored. Load the root `.env` before starting the backend:
+```bash
+set -a && source .env && set +a
+PYTHONPATH=. .venv/bin/uvicorn backend.api.main:app --port 8000
+```
+
+### Frontend Data Model Notes
+
+All business values (team size, role name, cost, ROI, learning rate) are fetched from the API on project-scoped routes — never hardcoded. Key data flows:
+
+- `Project.team_size` + `Project.primary_role` → used on SimulationResults, FinalRecommendation, WorkflowReport, Dashboard headers
+- `RecommendationData.company_impact.tool_cost` + `revenue_impact` → cost/ROI display on SimulationResults
+- `RecommendationData.employee_impact.learning_weeks` → displayed on FinalRecommendation (not hardcoded)
+- `RecommendationData.confidence_score` is returned as float `[0.1–0.95]`; frontend multiplies by 100 for display
+- Tool stack on Dashboard/WorkflowReport/SimulationResults is derived from `TaskNode.app_cluster[]` — grouped by tool name, summing `mean_minutes` for estimated hrs/week
+- Time impact panel on SimulationResults is derived from task `mean_minutes` + simulation `node_savings_min` from the final week snapshot
+
+**Known backend gaps (no API field yet):**
+- Average salary — frontend does not use salary arithmetic; revenue impact comes from `RecommendationData.company_impact.revenue_impact`
+- Tool utilisation % and feature-level data — not stored; tool stack shows name + estimated hrs/week only
+- `avgToolsUsed`, `avgWeeklyHours` — removed from UI until backend exposes these
+- Simulation weekly-snapshot keys use tool-name prefixes (`gong_latency_hrs` etc.) — backend naming bug, avoid relying on these fields directly; use top-level `final_work_saved_pct` / `final_throughput_lift_pct` instead

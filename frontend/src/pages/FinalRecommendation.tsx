@@ -6,7 +6,7 @@ import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
 import { CLIENT_SIMULATIONS_SEED } from '../data/clientSimulations'
 import { PageLoader } from '../components/ui/Skeleton'
 import { recommendationData } from '../data/mockData'
-import { recommendation as recApi, RecommendationData as ApiRecData } from '../api/client'
+import { recommendation as recApi, projects as projectsApi, RecommendationData as ApiRecData, type Project } from '../api/client'
 
 function lerp(a: number, b: number, t: number) {
   return Math.round(a + (b - a) * t)
@@ -36,16 +36,17 @@ export default function FinalRecommendation() {
   )
   const [adoption, setAdoption] = useState(40) // 10 – 70
   const [apiData, setApiData] = useState<ApiRecData | null>(null)
+  const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(isProjectScoped)
 
   // Fetch from API when project-scoped
   useEffect(() => {
     if (!isProjectScoped) return
     setLoading(true)
-    recApi.get(projectId!, toolEvalId!)
-      .then(setApiData)
-      .catch(() => {}) // fall back to mock data
-      .finally(() => setLoading(false))
+    Promise.all([
+      recApi.get(projectId!, toolEvalId!).then(setApiData).catch(() => {}),
+      projectsApi.get(projectId!).then(setProject).catch(() => {}),
+    ]).finally(() => setLoading(false))
   }, [projectId, toolEvalId, isProjectScoped])
 
   const t = (adoption - 10) / (70 - 10) // 0 → 1
@@ -72,7 +73,10 @@ export default function FinalRecommendation() {
   const revenue     = lerp (ci.revenueImpact.p10,  ci.revenueImpact.p70, t)
   const netRevenue  = revenue - ci.toolCost
 
-  const conf = apiData?.confidence_score ?? recommendationData.confidenceScore
+  // Backend returns confidence_score as float [0.1–0.95]; convert to integer percentage
+  const conf = apiData
+    ? Math.round(apiData.confidence_score * 100)
+    : recommendationData.confidenceScore
   const summary = apiData?.summary ?? recommendationData.summary
   const useCases = apiData?.use_cases ?? recommendationData.useCases
 
@@ -105,8 +109,8 @@ export default function FinalRecommendation() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-black md:text-3xl">Final recommendation</h1>
         <p className="mt-1 text-sm text-black/55">
-          Axis recommendation for <span className="font-semibold text-[#5E149F]">{toolName}</span> · based on your
-          SDR workflow simulation
+          Axis recommendation for <span className="font-semibold text-[#5E149F]">{toolName}</span> · based on your{' '}
+          {project?.primary_role ?? 'sales'} workflow simulation
         </p>
       </div>
     </div>
@@ -129,7 +133,7 @@ export default function FinalRecommendation() {
     <StepLayout
       currentStep={5}
       title="Final Recommendation"
-      subtitle={`Axis recommendation for ${toolName} · based on your SDR workflow simulation`}
+      subtitle={`Axis recommendation for ${toolName} · based on your ${project?.primary_role ?? 'sales'} workflow simulation`}
       embedded={isFlatClient}
       backPath={isFlatClient ? dashboardBackPath : undefined}
       onNext={() =>
@@ -154,7 +158,7 @@ export default function FinalRecommendation() {
             <div>
               <div className="text-xs font-bold tracking-widest uppercase mb-1 text-[#5E149F]">Recommendation</div>
               <h2 className="text-xl font-bold text-black">
-                Adopt <span className="text-[#B4308B]">{toolName}</span> for your SDR team
+                Adopt <span className="text-[#B4308B]">{toolName}</span> for your {project?.primary_role ?? 'sales'} team
               </h2>
             </div>
             <ConfidenceBadge score={conf} />
@@ -220,7 +224,7 @@ export default function FinalRecommendation() {
               </div>
               <div className="space-y-4">
                 <Metric
-                  label="Time saved per SDR"
+                  label={`Time saved per ${project?.primary_role ?? 'rep'}`}
                   value={`${timeSaved}h/week`}
                   sub={`${(timeSaved * 52).toFixed(0)}h/year · ~${(timeSaved * 52 * 60 / 8 / 250).toFixed(1)} workdays/yr`}
                   color="emerald"
@@ -233,7 +237,7 @@ export default function FinalRecommendation() {
                 />
                 <Metric
                   label="Learning rate"
-                  value="3–4 weeks"
+                  value={apiData?.employee_impact?.learning_weeks ?? "2–4 weeks"}
                   sub="Time to full feature adoption (peer benchmark)"
                   color="amber"
                 />
@@ -269,7 +273,9 @@ export default function FinalRecommendation() {
                 <Metric
                   label="Tool cost (annual)"
                   value={formatDollar(ci.toolCost)}
-                  sub="Est. license for 24 SDRs"
+                  sub={project
+                    ? `Est. license for ${project.team_size ?? '?'} ${project.primary_role ?? 'reps'}s`
+                    : 'Est. annual license cost'}
                   color="slate"
                 />
               </div>
@@ -319,13 +325,14 @@ export default function FinalRecommendation() {
         >
           <h3 className="text-sm font-bold text-black mb-3">Summary & Integration Plan</h3>
           <div className="text-sm text-black/60 leading-relaxed mb-5">
-            At <strong className="text-[#5E149F]">{adoption}% adoption</strong>, integrating {toolName} into your SDR workflow
-            is projected to save <strong className="text-[#B4308B]">{timeSaved} hours/rep/week</strong> and increase qualified
+            At <strong className="text-[#5E149F]">{adoption}% adoption</strong>, integrating {toolName} into your{' '}
+            {project?.primary_role ?? 'sales'} workflow is projected to save{' '}
+            <strong className="text-[#B4308B]">{timeSaved} hours/rep/week</strong> and increase qualified
             pipeline by <strong className="text-[#F75A8C]">{throughput}%</strong> — generating an estimated{' '}
             <strong className="text-[#5E149F]">{formatDollar(netRevenue)}</strong> in net annual value against a{' '}
             {formatDollar(ci.toolCost)} license cost.
             <br /><br />
-            Recommended rollout: Start with a 5-rep pilot cohort for 4 weeks, measure reply rate and prospects-per-rep,
+            Recommended rollout: Start with a pilot cohort for 4 weeks, measure reply rate and prospects-per-rep,
             then expand to the full team with a structured onboarding session.
           </div>
 

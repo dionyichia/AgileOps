@@ -73,7 +73,7 @@ export default function LandingPage() {
               Client Login
             </button>
             <button
-              onClick={() => navigate('/admin/login')}
+              onClick={() => navigate('/internal/login')}
               className="hidden md:inline text-[16px] font-medium transition-opacity hover:opacity-70"
             >
               Admin Login

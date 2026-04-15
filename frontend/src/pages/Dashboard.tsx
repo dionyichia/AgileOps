@@ -16,9 +16,6 @@ import ReactFlow, {
 import 'reactflow/dist/style.css'
 import {
   Users,
-  Clock,
-  Layers,
-  Play,
   BarChart3,
   MessageSquare,
   X,
@@ -34,10 +31,10 @@ import {
   Pencil,
   Check,
   AlertCircle,
+  Clock,
 } from 'lucide-react'
 import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
 import { nodeTypes } from '../components/workflow/CustomNodes'
-import { roleStats as mockRoleStats, toolBuckets, type Tool } from '../data/mockData'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -45,21 +42,6 @@ interface NodeComment {
   id: string
   text: string
   createdAt: string
-}
-
-const statusBadge: Record<string, string> = {
-  completed: 'bg-sea-500/15 text-sea-300',
-  running:   'bg-gold-500/15 text-gold-300',
-  failed:    'bg-red-500/15 text-red-300',
-}
-
-const bucketColorMap: Record<string, string> = {
-  indigo:  'bg-cerulean-500/15 text-cerulean-300 border-cerulean-500/30',
-  violet:  'bg-magenta-500/15 text-magenta-300 border-magenta-500/30',
-  cyan:    'bg-cerulean-500/15 text-cerulean-200 border-cerulean-500/30',
-  emerald: 'bg-sea-500/15 text-sea-300 border-sea-500/30',
-  amber:   'bg-gold-500/15 text-gold-300 border-gold-500/30',
-  rose:    'bg-magenta-500/15 text-magenta-200 border-magenta-500/30',
 }
 
 const BRAND = {
@@ -87,28 +69,37 @@ export default function Dashboard() {
   const [apiProject, setApiProject] = useState<Project | null>(null)
   const [apiToolEvals, setApiToolEvals] = useState<ToolEvaluation[] | null>(null)
   const [hasTaskData, setHasTaskData] = useState(false)
+  const [pipelineTaskNodes, setPipelineTaskNodes] = useState<ApiTaskNode[]>([])
 
   useEffect(() => {
     if (!projectId) return
     projectsApi.get(projectId).then(setApiProject).catch(() => {})
     toolEvalsApi.list(projectId).then(setApiToolEvals).catch(() => {})
-    // Check whether all_tasks.json exists (independent of pipeline status)
+    // Fetch tasks for both task-data check and tool stack derivation
     tasksApi.get(projectId)
-      .then((nodes) => setHasTaskData(nodes.length > 0))
-      .catch(() => setHasTaskData(false))
+      .then((nodes) => {
+        setHasTaskData(nodes.length > 0)
+        setPipelineTaskNodes(nodes)
+      })
+      .catch(() => { setHasTaskData(false); setPipelineTaskNodes([]) })
   }, [projectId, markovRefreshKey])
 
-  const roleStats = apiProject
-    ? {
-        ...mockRoleStats,
-        company: apiProject.company_name,
-        primaryRole: apiProject.primary_role,
-        teamSize: apiProject.team_size ?? mockRoleStats.numEmployees,
-        numEmployees: apiProject.team_size ?? mockRoleStats.numEmployees,
+  // Derive tool list from task app_cluster
+  const derivedToolList = useMemo(() => {
+    if (pipelineTaskNodes.length === 0) return []
+    const map: Record<string, { minutes: number; count: number }> = {}
+    for (const task of pipelineTaskNodes) {
+      for (const tool of task.app_cluster) {
+        if (!map[tool]) map[tool] = { minutes: 0, count: 0 }
+        map[tool].minutes += task.duration_distribution.mean_minutes
+        map[tool].count++
       }
-    : mockRoleStats
+    }
+    return Object.entries(map)
+      .map(([name, { minutes, count }]) => ({ name, weeklyHrs: +(minutes / 60 / 5).toFixed(1), count }))
+      .sort((a, b) => b.weeklyHrs - a.weeklyHrs)
+  }, [pipelineTaskNodes])
 
-  const [selectedTool, setSelectedTool] = useState<string | null>(null)
   // Two fixed tabs: workspace | report
   const [activeTab, setActiveTab] = useState<"workspace" | "report">("workspace")
   const [reportRec, setReportRec] = useState<RecommendationData | null>(null)
@@ -284,25 +275,12 @@ export default function Dashboard() {
   }, [existingEdges])
 
   // ── Derived stats ────────────────────────────────────────────────────────
-  const allTools = toolBuckets.flatMap((b) => b.tools)
-  const avgUtilization = Math.round(allTools.reduce((sum, t) => sum + t.utilization, 0) / allTools.length)
-  const totalUnusedFeatures = allTools.reduce((sum, t) => sum + t.features.filter((f) => !f.used).length, 0)
-  const selectedToolData = selectedTool ? allTools.find((t) => t.name === selectedTool) : null
   const taskNodes = existingNodes.filter((n) => n.type === 'taskNode')
   const totalMinutes = taskNodes.reduce((sum, n) => sum + ((n.data as { minutes?: number }).minutes ?? 0), 0)
 
   const commentingNodeLabel = commentingNode
     ? (existingNodes.find((n) => n.id === commentingNode)?.data as { label?: string } | undefined)?.label ?? commentingNode
     : ''
-
-  const handleRunSimulation = (toolName: string) => {
-    localStorage.setItem('axisToolInput', JSON.stringify({ useCase: 'adoption', toolName }))
-    if (projectId) {
-      navigate(`/projects/${projectId}/tool-input`)
-    } else {
-      navigate('/toolinput')
-    }
-  }
 
   return (
     <ClientWorkspaceShell
@@ -352,47 +330,29 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(94,20,159,0.12)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
               <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Workflow Steps</div>
-              <div className="text-2xl font-bold leading-tight text-black">{taskNodes.length}</div>
-              <div className="text-[11px] text-black/42 mt-0.5">{totalMinutes} min total cycle</div>
-            </div>
-            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(180,48,139,0.12)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.orchid }}>Avg Utilization</div>
-              <div className="text-2xl font-bold leading-tight text-black">{avgUtilization}%</div>
-              <div className="mt-1.5 h-1 w-full rounded-full bg-black/10">
-                <div className="h-1 rounded-full" style={{ width: `${avgUtilization}%`, background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }} />
-              </div>
-            </div>
-            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(226,64,155,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.pink }}>Unused Features</div>
-              <div className="text-2xl font-bold leading-tight text-black">{totalUnusedFeatures}</div>
-              <div className="text-[11px] text-black/42 mt-0.5">across {allTools.length} tools</div>
+              <div className="text-2xl font-bold leading-tight text-black">{taskNodes.length || '—'}</div>
+              <div className="text-[11px] text-black/42 mt-0.5">{totalMinutes ? `${totalMinutes} min total cycle` : 'Run pipeline to populate'}</div>
             </div>
             <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(247,90,140,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
               <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.coral }}>Team Size</div>
-              <div className="text-2xl font-bold leading-tight text-black">{roleStats.numEmployees}</div>
+              <div className="text-2xl font-bold leading-tight text-black">{apiProject?.team_size ?? '—'}</div>
               <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-black/42">
                 <Users size={11} style={{ color: BRAND.coral }} />
-                <span className="line-clamp-2 leading-snug">{roleStats.role.split('(')[0].trim()}s · Active seats</span>
+                <span className="line-clamp-2 leading-snug">{apiProject?.primary_role ?? 'reps'} · Active seats</span>
               </div>
+            </div>
+            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(180,48,139,0.12)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.orchid }}>Tools in Stack</div>
+              <div className="text-2xl font-bold leading-tight text-black">{derivedToolList.length || '—'}</div>
+              <div className="text-[11px] text-black/42 mt-0.5">{derivedToolList.length > 0 ? 'Extracted from workflow tasks' : 'Run pipeline to populate'}</div>
             </div>
             <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(226,64,155,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.pink }}>Tools Avg</div>
-              <div className="text-2xl font-bold leading-tight text-black">{roleStats.avgToolsUsed}</div>
-              <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-black/42">
-                <Layers size={11} style={{ color: BRAND.pink }} />
-                Per rep
-              </div>
-            </div>
-            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(247,90,140,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.coral }}>Weekly Load</div>
-              <div className="text-2xl font-bold leading-tight text-black">{roleStats.avgWeeklyHours}</div>
-              <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-black/42">
-                <Clock size={11} style={{ color: BRAND.coral }} />
-                Hours / week
-              </div>
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.pink }}>Simulations Run</div>
+              <div className="text-2xl font-bold leading-tight text-black">{apiToolEvals?.length ?? '—'}</div>
+              <div className="text-[11px] text-black/42 mt-0.5">Tool evaluations</div>
             </div>
         </div>
 
@@ -730,116 +690,27 @@ export default function Dashboard() {
             <div className="bg-white border rounded-[24px] p-5 max-h-[520px] overflow-y-auto" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Tool Stack</h3>
-                <span className="text-xs text-black/38">{avgUtilization}% avg utilization</span>
+                <span className="text-xs text-black/38">{derivedToolList.length} tools</span>
               </div>
 
-              {/* Tool list with utilization bars */}
-              {!selectedToolData && (
-                <div className="space-y-4">
-                  {toolBuckets.map((bucket) => (
-                    <div key={bucket.category}>
-                      <span className={`text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded border ${bucketColorMap[bucket.color]}`}>
-                        {bucket.category}
-                      </span>
-                      <div className="mt-2 space-y-1.5 pl-1">
-                        {bucket.tools.map((tool) => {
-                          const unusedCount = tool.features.filter((f) => !f.used).length
-                          return (
-                            <button
-                              key={tool.name}
-                              onClick={() => setSelectedTool(tool.name)}
-                              className="w-full text-left px-2.5 py-2 rounded-2xl text-black/72 hover:bg-black/[0.03] transition-all"
-                            >
-                              <div className="flex items-center justify-between text-xs mb-1">
-                                <span className="font-medium">{tool.name}</span>
-                                <span className={`font-semibold ${tool.utilization < 40 ? 'text-gold-300' : tool.utilization < 60 ? 'text-slate-400' : 'text-sea-300'}`}>
-                                  {tool.utilization}%
-                                </span>
-                              </div>
-                              <div className="w-full bg-black/10 rounded-full h-1">
-                                <div
-                                  className={`h-1 rounded-full transition-all ${tool.utilization < 40 ? 'bg-gold' : tool.utilization < 60 ? 'bg-cerulean' : 'bg-sea'}`}
-                                  style={{ width: `${tool.utilization}%` }}
-                                />
-                              </div>
-                              {unusedCount > 0 && (
-                                <div className="text-[10px] text-black/34 mt-1">{unusedCount} unused feature{unusedCount !== 1 ? 's' : ''}</div>
-                              )}
-                            </button>
-                          )
-                        })}
-                      </div>
+              {derivedToolList.length > 0 ? (
+                <div className="space-y-1">
+                  <div className="grid grid-cols-2 gap-1 text-[10px] text-black/34 font-semibold uppercase tracking-wide pb-1 border-b border-black/8">
+                    <span>Tool</span>
+                    <span className="text-right">Est. hrs/wk</span>
+                  </div>
+                  {derivedToolList.map((tool) => (
+                    <div key={tool.name} className="grid grid-cols-2 gap-1 text-xs py-1.5 border-b border-black/6">
+                      <span className="text-black/78 font-medium truncate">{tool.name}</span>
+                      <span className="text-right text-black/42">{tool.weeklyHrs}h</span>
                     </div>
                   ))}
+                  <p className="text-[10px] text-black/34 mt-2">Derived from extracted workflow tasks</p>
                 </div>
-              )}
-
-              {/* Selected tool detail — features used vs unused */}
-              {selectedToolData && (
-                <div>
-                  <button
-                    onClick={() => setSelectedTool(null)}
-                    className="flex items-center gap-1 text-xs text-black/46 hover:text-black mb-3 transition-colors"
-                  >
-                    <ChevronRight size={12} className="rotate-180" />
-                    Back to all tools
-                  </button>
-
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold text-black">{selectedToolData.name}</span>
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded ${selectedToolData.utilization < 40 ? 'bg-gold-500/15 text-gold-300' : 'bg-sea-500/15 text-sea-300'}`}>
-                      {selectedToolData.utilization}% utilized
-                    </span>
-                  </div>
-                  <div className="w-full bg-black/10 rounded-full h-1.5 mb-4">
-                    <div
-                      className={`h-1.5 rounded-full ${selectedToolData.utilization < 40 ? 'bg-gold' : selectedToolData.utilization < 60 ? 'bg-cerulean' : 'bg-sea'}`}
-                      style={{ width: `${selectedToolData.utilization}%` }}
-                    />
-                  </div>
-
-                  {/* Used features */}
-                  <div className="text-[10px] font-bold text-black/42 uppercase tracking-widest mb-2">Using</div>
-                  <div className="space-y-1.5 mb-4">
-                    {selectedToolData.features.filter((f) => f.used).map((f) => (
-                      <div key={f.name} className="flex items-start gap-2 px-2 py-1.5 rounded-2xl bg-[#F6FFFA] border border-sea-500/10">
-                        <div className="w-1.5 h-1.5 rounded-full bg-sea mt-1 flex-shrink-0" />
-                        <div>
-                          <div className="text-xs font-medium text-black/78">{f.name}</div>
-                          <div className="text-[10px] text-black/40">{f.description}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Unused features */}
-                  <div className="text-[10px] font-bold text-[#B4308B] uppercase tracking-widest mb-2">Not Using</div>
-                  <div className="space-y-1.5 mb-4">
-                    {selectedToolData.features.filter((f) => !f.used).map((f) => (
-                      <div key={f.name} className="flex items-start gap-2 px-2 py-1.5 rounded-2xl bg-[#FFF7FC] border border-[#E2409B]/10">
-                        <div className="w-1.5 h-1.5 rounded-full bg-gold mt-1 flex-shrink-0" />
-                        <div>
-                          <div className="text-xs font-medium text-black/78">{f.name}</div>
-                          <div className="text-[10px] text-black/40">{f.description}</div>
-                          {f.workflowStep && (
-                            <div className="text-[10px] mt-0.5" style={{ color: BRAND.violet }}>
-                              Could save ~{f.potentialTimeSaved}min at "{f.workflowStep}"
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={() => handleRunSimulation(selectedToolData.name)}
-                    className="w-full flex items-center justify-center gap-2 text-white px-4 py-2.5 rounded-2xl font-semibold text-xs transition-colors"
-                    style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}
-                  >
-                    <Play size={13} />
-                    Simulate Full Adoption
-                  </button>
-                </div>
+              ) : (
+                <p className="rounded-2xl border border-black/8 bg-[#FBFAFD] px-4 py-6 text-center text-xs text-black/45">
+                  Run the pipeline to generate your tool stack.
+                </p>
               )}
             </div>
 

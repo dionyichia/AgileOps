@@ -13,9 +13,9 @@ import TranscriptInput from './pages/TranscriptInput'
 import InternalDashboard from './pages/InternalDashboard'
 import Consultation from './pages/Consultation'
 import Login from './pages/Login'
-import AdminLogin from './pages/AdminLogin'
 import AcceptInvite from './pages/AcceptInvite'
 import AdminRoute from './components/AdminRoute'
+import InternalLogin from './pages/InternalLogin'
 
 export default function App() {
   return (
@@ -25,7 +25,6 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/get-started" element={<Consultation />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/signup" element={<AcceptInvite />} />
 
         {/* Client workspace — legacy flat routes (no project scope) */}
@@ -38,6 +37,7 @@ export default function App() {
         <Route path="/recommendation" element={<FinalRecommendation />} />
 
         {/* Internal tools hub — admin only */}
+        <Route path="/internal/login" element={<InternalLogin />} />
         <Route path="/internal" element={<AdminRoute><InternalDashboard /></AdminRoute>} />
         <Route path="/internal/form" element={<AdminRoute><DataForm /></AdminRoute>} />
         <Route path="/internal/workflow-report" element={<AdminRoute><WorkflowReport /></AdminRoute>} />
