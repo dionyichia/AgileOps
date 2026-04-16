@@ -42,11 +42,18 @@ const navItems = [
   { label: 'How it Works', href: '#how-it-works' },
 ]
 
-const statChips = [
-  '200+ Audits Delivered',
-  '40+ Sales Tools Evaluated',
-  '98% Client Satisfaction',
+const trustedByLogos = [
+  {
+    src: '/berkeley-logo.png',
+    alt: 'Berkeley',
+  },
 ]
+
+const trustedBySequence = Array.from({ length: 8 }, (_, index) => ({
+  ...trustedByLogos[index % trustedByLogos.length],
+  id: index,
+}))
+const trustedByTrack = [...trustedBySequence, ...trustedBySequence]
 
 const HEADLINE_TEXT = 'Stop guessing which tools your sales team needs.'
 const HEADLINE_STAGGER = 0.2
@@ -622,52 +629,41 @@ export default function LandingPage() {
                 </motion.button>
               </motion.div>
 
-              {/* Social proof stat chips */}
-              <div className="mt-16 md:mt-16 flex flex-wrap items-center justify-center gap-3">
-                {statChips.map((text, i) => (
-                  <motion.span
-                    key={text}
-                    className="liquid-glass rounded-full px-5 py-2 text-sm font-semibold text-white/90"
-                    initial={{ y: 24, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{
-                      duration: 0.45,
-                      ease: 'easeOut',
-                      delay: chipsDelay + i * 0.1,
-                    }}
-                  >
-                    {text}
-                  </motion.span>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Trusted By marquee */}
-            <div className="absolute bottom-12 md:bottom-32 inset-x-0 z-20 flex flex-col items-center gap-4 md:gap-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
-                Trusted By
-              </p>
-              <div
-                className="w-full overflow-hidden"
-                style={{
-                  maskImage:
-                    'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)',
-                  WebkitMaskImage:
-                    'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)',
+              <motion.div
+                className="mt-16 flex w-full flex-col items-center gap-2"
+                initial={{ y: 24, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{
+                  duration: 0.45,
+                  ease: 'easeOut',
+                  delay: chipsDelay,
                 }}
               >
-                <div className="marquee-track flex w-max items-center">
-                  {Array.from({ length: 16 }).map((_, i) => (
-                    <img
-                      key={i}
-                      src="/berkeley-logo.png"
-                      alt="Berkeley"
-                      className="h-16 md:h-24 w-auto opacity-40 grayscale mx-8 md:mx-16 flex-shrink-0"
-                    />
-                  ))}
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
+                  Trusted By
+                </p>
+                <div
+                  className="w-full overflow-hidden"
+                  style={{
+                    maskImage:
+                      'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)',
+                    WebkitMaskImage:
+                      'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)',
+                  }}
+                >
+                  <div className="marquee-track flex w-max items-center">
+                    {trustedByTrack.map(({ src, alt, id }, i) => (
+                      <img
+                        key={`${alt}-${id}-${i}`}
+                        src={src}
+                        alt={alt}
+                        className="mx-8 h-16 w-auto flex-shrink-0 opacity-40 grayscale md:mx-16 md:h-24"
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* Scroll down indicator */}
             <motion.div
