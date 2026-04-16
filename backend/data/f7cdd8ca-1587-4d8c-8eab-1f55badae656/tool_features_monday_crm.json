@@ -1,0 +1,251 @@
+{
+  "tool_summary": "Monday CRM is a fully customizable CRM built on the monday.com Work OS platform that centralizes customer data, automates repetitive sales tasks through no-code workflows, and provides AI-assisted email composition and activity summarization. It aims to replace manual data entry and fragmented tools with a unified pipeline management system, claiming up to 80% reduction in repetitive data entry and 30 hours/month saved on manual CRM tasks.",
+  "micro_features": [
+    {
+      "feature_id": "no_code_workflow_automations",
+      "name": "No-Code Workflow Automations",
+      "description": "Automate repetitive tasks like lead assignment, deal stage transitions, notification triggers, and status updates without coding. Includes auto-assign leads, trigger notifications, and move deals between stages.",
+      "affected_nodes": [
+        "outreach_logging",
+        "follow_up_sequence_management",
+        "deal_closure_handoff",
+        "response_triage"
+      ],
+      "feature_type": "automation",
+      "evidence": "Up to 80% reduction in time spent on repetitive data entry through automations; saving up to 30 hours per month on manual CRM tasks"
+    },
+    {
+      "feature_id": "ai_email_composer",
+      "name": "AI-Powered Email Composer",
+      "description": "AI generates personalized sales emails using context from the CRM, helping reps draft outreach and follow-up messages faster.",
+      "affected_nodes": [
+        "cold_outreach_drafting",
+        "follow_up_sequence_management",
+        "objection_handling"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "AI-powered email composer for personalized sales emails"
+    },
+    {
+      "feature_id": "email_sync_tracking",
+      "name": "Email Sync and Tracking",
+      "description": "Two-way email sync with Gmail and Outlook, with open/click notifications and automatic logging of email activity to deal records.",
+      "affected_nodes": [
+        "outreach_logging",
+        "follow_up_sequence_management",
+        "response_triage"
+      ],
+      "feature_type": "automation",
+      "evidence": "Email sync and tracking (Gmail, Outlook) with open/click notifications"
+    },
+    {
+      "feature_id": "lead_scoring_management",
+      "name": "Lead Scoring and Lead Management",
+      "description": "Score and prioritize leads based on customizable criteria, helping reps focus on the most qualified prospects.",
+      "affected_nodes": [
+        "prospect_research",
+        "response_triage"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Lead scoring and lead management"
+    },
+    {
+      "feature_id": "ai_activity_summaries",
+      "name": "AI-Generated Task and Activity Summaries",
+      "description": "AI summarizes updates, activities, and communications on deals to quickly bring reps up to speed without reading through all history.",
+      "affected_nodes": [
+        "call_debrief_documentation",
+        "discovery_call_prep",
+        "deal_closure_handoff"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "AI-generated task and activity summaries; AI assistant for generating content, summarizing updates"
+    },
+    {
+      "feature_id": "customizable_pipelines_dashboards",
+      "name": "Customizable Sales Pipelines and Dashboards",
+      "description": "Drag-and-drop pipeline management with real-time reporting dashboards providing visibility into deal stages, forecasting, and team performance.",
+      "affected_nodes": [
+        "follow_up_sequence_management",
+        "stakeholder_mapping",
+        "deal_closure_handoff"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Customizable sales pipelines with drag-and-drop interface; Claims of 50% faster deal cycle times due to streamlined pipeline management"
+    },
+    {
+      "feature_id": "mass_email_templates",
+      "name": "Mass Email Campaigns and Built-in Templates",
+      "description": "Send mass emails using built-in templates with tracking, enabling scalable outreach while maintaining personalization.",
+      "affected_nodes": [
+        "cold_outreach_drafting",
+        "follow_up_sequence_management"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Mass email campaigns and tracking; Built-in email templates"
+    },
+    {
+      "feature_id": "activity_tracking_logging",
+      "name": "Activity Tracking and Logging",
+      "description": "Automatically track and log calls, meetings, and notes within the CRM, reducing manual data entry.",
+      "affected_nodes": [
+        "outreach_logging",
+        "call_debrief_documentation"
+      ],
+      "feature_type": "automation",
+      "evidence": "Activity tracking and logging (calls, meetings, notes); Up to 80% reduction in time spent on repetitive data entry"
+    },
+    {
+      "feature_id": "quote_invoice_generation",
+      "name": "Quote and Invoice Generation",
+      "description": "Generate quotes and invoices directly from deal records within the CRM.",
+      "affected_nodes": [
+        "proposal_creation"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Quote and invoice generation"
+    },
+    {
+      "feature_id": "data_enrichment",
+      "name": "Data Enrichment and Deduplication",
+      "description": "Merge duplicate records and enrich contact data with external sources like Clearbit.",
+      "affected_nodes": [
+        "prospect_research",
+        "stakeholder_mapping"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Merge duplicate data and data enrichment capabilities; Clearbit (enrichment) integration"
+    },
+    {
+      "feature_id": "document_management",
+      "name": "Document Management and File Sharing",
+      "description": "Store, share, and manage documents within deal records, with integrations to DocuSign and PandaDoc for contracts.",
+      "affected_nodes": [
+        "proposal_creation",
+        "contract_negotiation",
+        "deal_closure_handoff"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Document management and file sharing within deals; DocuSign and PandaDoc integrations"
+    },
+    {
+      "feature_id": "unified_customer_view",
+      "name": "Unified Contact and Account View",
+      "description": "Centralized view of all customer data, interactions, and history across the sales cycle in one place.",
+      "affected_nodes": [
+        "discovery_call_prep",
+        "stakeholder_mapping",
+        "demo_preparation"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Contact and account management with unified customer view"
+    },
+    {
+      "feature_id": "post_sale_onboarding_tracking",
+      "name": "Post-Sale Account Management and Onboarding Tracking",
+      "description": "Track customer onboarding and post-sale activities within the same platform used for sales.",
+      "affected_nodes": [
+        "deal_closure_handoff"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Post-sale account management and customer onboarding tracking"
+    },
+    {
+      "feature_id": "team_collaboration",
+      "name": "Team Collaboration Features",
+      "description": "In-context comments, mentions, and updates within deal items for team coordination.",
+      "affected_nodes": [
+        "call_debrief_documentation",
+        "objection_handling",
+        "proposal_creation"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Team collaboration features (comments, mentions, updates within items)"
+    }
+  ],
+  "node_impact": {
+    "prospect_research": 0.3,
+    "cold_outreach_drafting": 0.35,
+    "outreach_logging": 0.7,
+    "follow_up_sequence_management": 0.4,
+    "response_triage": 0.25,
+    "discovery_call_prep": 0.2,
+    "discovery_call_execution": 0.03,
+    "call_debrief_documentation": 0.4,
+    "stakeholder_mapping": 0.2,
+    "demo_preparation": 0.12,
+    "demo_execution": 0.02,
+    "objection_handling": 0.15,
+    "proposal_creation": 0.3,
+    "contract_negotiation": 0.08,
+    "deal_closure_handoff": 0.4
+  },
+  "node_impact_reasoning": {
+    "prospect_research": "Lead scoring, data enrichment via Clearbit integration, and centralized customer view reduce manual research effort. The 80% data entry reduction claim applies partially here, but core qualification judgment remains human. Estimated ~30% reduction.",
+    "cold_outreach_drafting": "AI email composer and built-in templates significantly accelerate drafting. Mass email capability helps scale. However, personalization still requires human input. Estimated ~35% time savings.",
+    "outreach_logging": "Email sync auto-logs sent messages, and workflow automations handle attribution. This is a highly automatable node and Monday CRM directly targets it with '80% reduction in repetitive data entry.' Estimated 70% reduction.",
+    "follow_up_sequence_management": "Email templates, mass campaigns, engagement signal tracking via open/click notifications, and automation rules for sequence management provide meaningful acceleration. However, Monday CRM is not a dedicated sequencing tool like Outreach. Estimated 40%.",
+    "response_triage": "Email sync and open/click tracking help prioritize responses. Lead scoring aids classification. AI email composer can help draft replies. However, classification judgment is still human-driven. Estimated 25%.",
+    "discovery_call_prep": "Unified customer view and AI activity summaries reduce time aggregating prior touchpoints and account history. Core research and agenda building remain manual. Estimated 20%.",
+    "discovery_call_execution": "Monday CRM has no real-time call assistance or conversation intelligence. Integrates with Zoom but doesn't aid in-call execution. Minimal impact at 3%.",
+    "call_debrief_documentation": "AI-generated activity summaries, team collaboration features, and automated CRM field updates meaningfully reduce documentation effort. Not as specialized as Gong for transcript analysis but helpful. Estimated 40%.",
+    "stakeholder_mapping": "Unified contact/account view and data enrichment help identify stakeholders. LinkedIn integration aids research. But mapping relationships and influence is largely manual. Estimated 20%.",
+    "demo_preparation": "Centralized deal context helps customize demo flow. No sandbox automation or demo-specific features. Estimated 12%.",
+    "demo_execution": "No in-demo assistance features. Zoom integration is basic. Minimal impact at 2%.",
+    "objection_handling": "AI email composer can help draft responses, collaboration features enable team input, and document management provides access to case studies. Moderate assistance. Estimated 15%.",
+    "proposal_creation": "Quote/invoice generation, document management, and team collaboration features directly accelerate proposal building. Not a full CPQ replacement but meaningful. Estimated 30%.",
+    "contract_negotiation": "DocuSign/PandaDoc integrations help with contract logistics but don't assist with negotiation strategy or legal redlining. Estimated 8%.",
+    "deal_closure_handoff": "Post-sale tracking, automated CRM updates, DocuSign integration, and AI summaries for handoff documentation significantly streamline this step. Estimated 40%."
+  },
+  "edge_impact": {
+    "cold_outreach_drafting,outreach_logging": 0.6,
+    "outreach_logging,follow_up_sequence_management": 0.3,
+    "follow_up_sequence_management,response_triage": 0.2,
+    "response_triage,discovery_call_prep": 0.15,
+    "discovery_call_execution,call_debrief_documentation": 0.25,
+    "call_debrief_documentation,stakeholder_mapping": 0.15,
+    "call_debrief_documentation,demo_preparation": 0.15,
+    "proposal_creation,contract_negotiation": 0.15,
+    "contract_negotiation,deal_closure_handoff": 0.25
+  },
+  "topology_changes": [
+    {
+      "type": "boost_exit",
+      "node": "prospect_research",
+      "delta": 0.06,
+      "reason": "Lead scoring and data enrichment via Clearbit integration provide better qualification signals, enabling reps to disqualify poor-fit prospects earlier."
+    },
+    {
+      "type": "boost_exit",
+      "node": "response_triage",
+      "delta": 0.04,
+      "reason": "Engagement tracking (open/click data) and lead scoring help identify unresponsive or unqualified leads faster, increasing early-exit rate."
+    }
+  ],
+  "confidence": {
+    "overall": "medium",
+    "per_node": {
+      "prospect_research": "medium",
+      "cold_outreach_drafting": "medium",
+      "outreach_logging": "high",
+      "follow_up_sequence_management": "medium",
+      "response_triage": "medium",
+      "discovery_call_prep": "medium",
+      "discovery_call_execution": "high",
+      "call_debrief_documentation": "medium",
+      "stakeholder_mapping": "low",
+      "demo_preparation": "low",
+      "demo_execution": "high",
+      "objection_handling": "low",
+      "proposal_creation": "medium",
+      "contract_negotiation": "medium",
+      "deal_closure_handoff": "medium"
+    },
+    "notes": "ROI benchmarks are vendor-claimed (30 hrs/month saved, 80% data entry reduction, 50% faster cycles) without independent validation or case study specifics. No source content excerpts were available for deeper verification. Monday CRM is a generalist CRM platform rather than a specialized sales acceleration tool, so impact estimates are moderate across most nodes. High confidence only on nodes where impact is clearly minimal (calls, demo execution) or clearly high (outreach logging automation)."
+  },
+  "tool_name": "Monday CRM",
+  "tool_slug": "monday_crm",
+  "generated_at": "2026-04-16T01:29:25.028548+00:00",
+  "model": "claude-opus-4-6",
+  "source_count": 0
+}

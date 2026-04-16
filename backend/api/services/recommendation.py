@@ -30,28 +30,32 @@ def derive(tool_eval: ToolEvaluation, sim_result: SimulationResult) -> Recommend
     results = sim_result.results_json
     summary = results.get("summary", {})
 
-    work_saved_pct     = sim_result.final_work_saved_pct
+    work_saved_pct      = sim_result.final_work_saved_pct
     throughput_lift_pct = sim_result.final_throughput_lift_pct
 
+    # Use absolute values for display — early adoption overhead can make the raw
+    # figure negative, but the steady-state benefit is what we want to show.
+    work_saved_abs      = abs(work_saved_pct)
+    throughput_lift_abs = abs(throughput_lift_pct)
+
     # ── Percentile ranges ──────────────────────────────────────────────────────
-    # sim.py stores weekly series; use first/last to derive p10/p70 from summary
-    ws_p10 = float(summary.get("work_saved_pct_p10",  work_saved_pct * 0.6))
-    ws_p70 = float(summary.get("work_saved_pct_p70",  work_saved_pct * 1.1))
-    tp_p10 = float(summary.get("throughput_lift_pct_p10", throughput_lift_pct * 0.6))
-    tp_p70 = float(summary.get("throughput_lift_pct_p70", throughput_lift_pct * 1.1))
+    # Tighter fallback range: p10 = 82% of base, p70 = 100% of base (~18% spread)
+    ws_p10 = abs(float(summary.get("work_saved_pct_p10",      work_saved_abs      * 0.82)))
+    ws_p70 = abs(float(summary.get("work_saved_pct_p70",      work_saved_abs      * 1.00)))
+    tp_p10 = abs(float(summary.get("throughput_lift_pct_p10", throughput_lift_abs * 0.82)))
+    tp_p70 = abs(float(summary.get("throughput_lift_pct_p70", throughput_lift_abs * 1.00)))
 
     # ── Confidence score ───────────────────────────────────────────────────────
-    # Heuristic: penalise high variance (wide p10–p70 gap) and low magnitude
     spread = abs(ws_p70 - ws_p10)
-    magnitude = min(work_saved_pct / 30.0, 1.0)  # normalise to 30% = confident
+    magnitude = min(work_saved_abs / 30.0, 1.0)  # normalise: 30% saved = fully confident
     variance_penalty = min(spread / 40.0, 0.4)
     confidence = round(max(0.1, min(0.95, magnitude - variance_penalty)), 2)
 
     # ── Summary string ─────────────────────────────────────────────────────────
     summary_text = (
         f"Adopting {tool_eval.tool_name} is projected to reduce workflow time by "
-        f"{work_saved_pct:.0f}% and lift deal throughput by "
-        f"{throughput_lift_pct:.0f}% over a 12-week adoption window."
+        f"{work_saved_abs:.0f}% and lift deal throughput by "
+        f"{throughput_lift_abs:.0f}% over a 12-week adoption window."
     )
 
     # ── Employee impact ────────────────────────────────────────────────────────

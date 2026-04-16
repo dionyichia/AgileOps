@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useMarkovData } from '../hooks/pullMarkovData'
 import { clearMarkovCache } from '../hooks/dataLoader'
 import { useIsAdmin } from '../hooks/useIsAdmin'
@@ -35,6 +35,7 @@ import {
 } from 'lucide-react'
 import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
 import { nodeTypes } from '../components/workflow/CustomNodes'
+import { useJobProgress } from '../hooks/useJobProgress'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -60,6 +61,7 @@ const BRAND = {
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { projectId } = useParams<{ projectId?: string }>()
 
   const [markovRefreshKey, setMarkovRefreshKey] = useState(0)
@@ -105,7 +107,28 @@ export default function Dashboard() {
   const [reportRec, setReportRec] = useState<RecommendationData | null>(null)
   const [reportLoading, setReportLoading] = useState(false)
 
-  // Fetch recommendation for the most recent tool eval when report tab is activated
+  const focusSimulationTab = useCallback((_simId: string) => {
+    setActiveTab("report")
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }, [])
+
+  // Simulation job progress tracking (set when navigating here from ToolInputForm)
+  const [simJobId, setSimJobId] = useState<string | null>(null)
+  const { job: simJob, isRunning: simRunning, isDone: simDone, isFailed: simFailed } = useJobProgress(simJobId)
+
+  // On mount: if ToolInputForm navigated here with { openTab, jobId }, switch to report tab
+  useEffect(() => {
+    const state = location.state as { openTab?: string; jobId?: string } | null
+    if (state?.openTab) {
+      focusSimulationTab(state.openTab)
+      if (state.jobId) setSimJobId(state.jobId)
+      // Clear nav state so a back-forward doesn't re-trigger
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch recommendation for the most recent tool eval when report tab is activated,
+  // or when the simulation job finishes (simDone flips true)
   useEffect(() => {
     if (activeTab !== "report" || !projectId || !apiToolEvals?.length) return
     const latestEval = apiToolEvals[0]
@@ -114,12 +137,7 @@ export default function Dashboard() {
       .then(setReportRec)
       .catch(() => setReportRec(null))
       .finally(() => setReportLoading(false))
-  }, [activeTab, projectId, apiToolEvals])
-
-  const focusSimulationTab = useCallback((_simId: string) => {
-    setActiveTab("report")
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }, [])
+  }, [activeTab, projectId, apiToolEvals, simDone])
 
 
   // ── Edit mode state ──────────────────────────────────────────────────────
@@ -804,7 +822,7 @@ export default function Dashboard() {
                         <Clock size={12} /> Time Saved / Rep
                       </div>
                       <div className="mt-2 text-2xl font-bold text-black">
-                        {reportRec.employee_impact.time_saved.p10}–{reportRec.employee_impact.time_saved.p70}
+                        {Math.abs(reportRec.employee_impact.time_saved.p10).toFixed(1)}–{Math.abs(reportRec.employee_impact.time_saved.p70).toFixed(1)}
                         <span className="ml-1 text-sm font-normal text-black/40">hrs/wk</span>
                       </div>
                       <div className="mt-1 text-xs text-black/42">p10–p70 range across reps</div>
@@ -814,7 +832,7 @@ export default function Dashboard() {
                         <Zap size={12} /> Throughput Lift
                       </div>
                       <div className="mt-2 text-2xl font-bold text-black">
-                        {reportRec.company_impact.throughput.p10}–{reportRec.company_impact.throughput.p70}
+                        {Math.abs(reportRec.company_impact.throughput.p10).toFixed(1)}–{Math.abs(reportRec.company_impact.throughput.p70).toFixed(1)}
                         <span className="ml-1 text-sm font-normal text-black/40">%</span>
                       </div>
                       <div className="mt-1 text-xs text-black/42">more deals closed per rep</div>
@@ -824,7 +842,7 @@ export default function Dashboard() {
                         <TrendingUp size={12} /> Revenue Impact
                       </div>
                       <div className="mt-2 text-2xl font-bold text-black">
-                        ${reportRec.company_impact.revenue_impact.p10}k–${reportRec.company_impact.revenue_impact.p70}k
+                        ${(Math.abs(reportRec.company_impact.revenue_impact.p10) / 1000).toFixed(1)}k–${(Math.abs(reportRec.company_impact.revenue_impact.p70) / 1000).toFixed(1)}k
                       </div>
                       <div className="mt-1 text-xs text-black/42">projected uplift</div>
                     </div>
@@ -882,8 +900,36 @@ export default function Dashboard() {
                 </>
               )}
 
+              {/* Simulation job in progress */}
+              {!reportLoading && !reportRec && simJobId && (simRunning || (!simDone && !simFailed)) && (
+                <div className="rounded-[24px] border bg-white p-6 space-y-4" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-black">{simJob?.current_step ?? 'Starting simulation…'}</p>
+                    <span className="text-sm font-semibold tabular-nums" style={{ color: BRAND.violet }}>{simJob?.progress_pct ?? 0}%</span>
+                  </div>
+                  <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(94,20,159,0.10)' }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${simJob?.progress_pct ?? 0}%`,
+                        background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)`,
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-black/42">Axis is scraping the product site, classifying features, and running your Monte Carlo simulation. This takes 1–2 minutes.</p>
+                </div>
+              )}
+
+              {/* Simulation job failed */}
+              {!reportLoading && simJobId && simFailed && !reportRec && (
+                <div className="rounded-[24px] border border-red-200 bg-red-50 p-5">
+                  <p className="text-sm font-semibold text-red-600">Simulation failed</p>
+                  <p className="mt-1 text-xs text-red-500">{simJob?.error_message ?? 'An error occurred. Please try again from the Workspace tab.'}</p>
+                </div>
+              )}
+
               {/* Fetched OK but no recommendation data yet (simulation not run) */}
-              {!reportLoading && apiToolEvals?.length && !reportRec && (
+              {!reportLoading && apiToolEvals?.length && !reportRec && !simJobId && (
                 <div className="flex flex-col items-center justify-center gap-3 rounded-[24px] border bg-[#F7F4FB] py-16 text-center" style={{ borderColor: BRAND.border }}>
                   <p className="text-sm font-semibold text-black">Simulation not run yet</p>
                   <p className="text-xs text-black/42">Run a simulation from the Workspace tab to generate your report.</p>

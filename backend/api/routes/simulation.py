@@ -38,9 +38,9 @@ async def get_simulation(
     else:
         # Fallback to file on disk (e.g. after a manual pipeline run)
         results_json = data_io.read_simulation_results(project_id)
-        summary      = results_json.get("summary", {})
-        work_saved   = float(summary.get("work_saved_pct_p50", 0.0))
-        throughput   = float(summary.get("throughput_lift_pct_p50", 0.0))
+        week_final   = results_json.get("summary", {}).get("week_final", {})
+        work_saved   = float(week_final.get("work_saved_pct", 0.0))
+        throughput   = float(week_final.get("throughput_lift_pct", 0.0))
 
     metadata = results_json.get("metadata", {})
 
