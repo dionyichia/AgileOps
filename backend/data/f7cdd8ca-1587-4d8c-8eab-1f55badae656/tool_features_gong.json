@@ -1,0 +1,232 @@
+{
+  "tool_summary": "Gong is a revenue intelligence platform that captures and analyzes customer interactions across calls, emails, and web conferences using AI. It provides conversation intelligence, deal health scoring, automated call summaries, coaching insights, and AI-powered sales engagement to help sales teams improve win rates, forecast accuracy, and overall pipeline execution.",
+  "micro_features": [
+    {
+      "feature_id": "conversation_intelligence",
+      "name": "AI-Powered Conversation Intelligence",
+      "description": "Automatically records, transcribes, and analyzes sales calls, video meetings, and emails to surface key moments, talk ratios, topics discussed, and sentiment.",
+      "affected_nodes": [
+        "discovery_call_execution",
+        "demo_execution",
+        "call_debrief_documentation",
+        "objection_handling"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "AI-powered conversation intelligence — automatic recording, transcription, and analysis of sales calls, video meetings, and emails"
+    },
+    {
+      "feature_id": "auto_call_summaries",
+      "name": "AI-Generated Call Summaries and Action Items",
+      "description": "Automatically generates structured summaries with pain points, action items, and next steps from every interaction, reducing manual note-taking and CRM entry.",
+      "affected_nodes": [
+        "call_debrief_documentation",
+        "outreach_logging"
+      ],
+      "feature_type": "automation",
+      "evidence": "Reps save 2-3 hours per week on call note-taking and CRM data entry through automated summaries"
+    },
+    {
+      "feature_id": "deal_intelligence",
+      "name": "Deal Intelligence and Risk Alerts",
+      "description": "Real-time deal health scoring, risk alerts, and pipeline visibility based on actual buyer interactions rather than rep self-reporting.",
+      "affected_nodes": [
+        "stakeholder_mapping",
+        "follow_up_sequence_management",
+        "response_triage"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "Customers report 50%+ reduction in deal slippage with proactive risk alerts"
+    },
+    {
+      "feature_id": "ai_meeting_briefs",
+      "name": "AI-Generated Meeting Prep Briefs",
+      "description": "Automatically compiles context from past interactions, stakeholder details, and prior touchpoints to prepare reps for upcoming calls.",
+      "affected_nodes": [
+        "discovery_call_prep",
+        "demo_preparation"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "AI-generated call summaries and briefs — automatic meeting prep with context from past interactions"
+    },
+    {
+      "feature_id": "smart_trackers",
+      "name": "Smart Trackers for Keyword and Topic Monitoring",
+      "description": "Custom keyword and topic tracking across all conversations for competitive mentions, pricing objections, and feature requests.",
+      "affected_nodes": [
+        "objection_handling",
+        "prospect_research",
+        "response_triage"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "Smart Trackers — custom keyword and topic tracking across all conversations (competitors, pricing objections, feature requests)"
+    },
+    {
+      "feature_id": "gong_engage",
+      "name": "Gong Engage Multi-Channel Sequences",
+      "description": "AI-powered sales engagement with multi-channel sequences, automated follow-ups, and personalized email generation.",
+      "affected_nodes": [
+        "cold_outreach_drafting",
+        "follow_up_sequence_management",
+        "outreach_logging"
+      ],
+      "feature_type": "automation",
+      "evidence": "Gong Engage — AI-powered sales engagement with multi-channel sequences, automated follow-ups, and personalized email generation"
+    },
+    {
+      "feature_id": "coaching_scorecards",
+      "name": "Sales Coaching and Rep Scorecards",
+      "description": "Automated identification of coaching opportunities, talk ratios, question frequency, and methodology adherence tracking.",
+      "affected_nodes": [
+        "discovery_call_execution",
+        "demo_execution",
+        "objection_handling"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "Teams using Gong coaching see 35% improvement in adherence to sales methodology"
+    },
+    {
+      "feature_id": "automated_account_mapping",
+      "name": "Automated Account and Contact Mapping",
+      "description": "Automatically maps accounts and contacts based on interaction data, identifying stakeholders involved in deals.",
+      "affected_nodes": [
+        "stakeholder_mapping",
+        "prospect_research"
+      ],
+      "feature_type": "automation",
+      "evidence": "Automated account and contact mapping based on interaction data"
+    },
+    {
+      "feature_id": "ask_anything",
+      "name": "Gong AI Search / Ask Anything",
+      "description": "Natural language queries across the entire conversation database to find relevant past interactions, competitor mentions, or deal context.",
+      "affected_nodes": [
+        "discovery_call_prep",
+        "objection_handling",
+        "proposal_creation",
+        "demo_preparation"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Ask Anything / Gong AI search — natural language queries across the entire conversation database"
+    },
+    {
+      "feature_id": "ai_recommended_actions",
+      "name": "AI-Recommended Next Best Actions",
+      "description": "Proactive nudges and action recommendations for reps on what to do next in a deal based on interaction signals.",
+      "affected_nodes": [
+        "follow_up_sequence_management",
+        "response_triage",
+        "deal_closure_handoff"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "AI-recommended actions and nudges for reps on next best steps"
+    },
+    {
+      "feature_id": "market_intelligence",
+      "name": "Market and Competitive Intelligence",
+      "description": "Aggregate trends across thousands of conversations to surface competitive insights, market shifts, and emerging objection patterns.",
+      "affected_nodes": [
+        "objection_handling",
+        "prospect_research"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "Market intelligence — aggregate trends across thousands of conversations for competitive insights and market shifts"
+    }
+  ],
+  "node_impact": {
+    "prospect_research": 0.2,
+    "cold_outreach_drafting": 0.35,
+    "outreach_logging": 0.7,
+    "follow_up_sequence_management": 0.45,
+    "response_triage": 0.25,
+    "discovery_call_prep": 0.45,
+    "discovery_call_execution": 0.08,
+    "call_debrief_documentation": 0.75,
+    "stakeholder_mapping": 0.35,
+    "demo_preparation": 0.3,
+    "demo_execution": 0.07,
+    "objection_handling": 0.3,
+    "proposal_creation": 0.15,
+    "contract_negotiation": 0.05,
+    "deal_closure_handoff": 0.2
+  },
+  "node_impact_reasoning": {
+    "prospect_research": "Automated account/contact mapping and market intelligence from conversation data provide some enrichment, but Gong is not primarily a prospecting tool. Smart Trackers offer competitive context. Moderate impact.",
+    "cold_outreach_drafting": "Gong Engage provides AI-powered personalized email generation and multi-channel sequence capabilities, significantly accelerating drafting. However, the core insight advantage comes from existing conversation data, which may not exist for cold prospects.",
+    "outreach_logging": "Gong Engage automates activity logging to CRM, and automated call/email capture eliminates most manual logging. The 2-3 hours/week savings benchmark (on ~40 min/day baseline for logging across interactions) supports a high estimate.",
+    "follow_up_sequence_management": "Gong Engage manages multi-channel sequences with automated follow-ups, and AI-recommended next actions guide cadence adjustments. Deal intelligence signals inform engagement timing.",
+    "response_triage": "Smart Trackers and AI analysis help classify response sentiment and urgency, and AI-recommended actions help prioritize. However, crafting the actual reply remains human work.",
+    "discovery_call_prep": "AI-generated meeting briefs automatically compile context from prior interactions, stakeholder details, and touchpoints. Ask Anything enables quick querying of historical context. This directly addresses the 43-min prep window, potentially saving ~20 minutes.",
+    "discovery_call_execution": "Gong provides real-time coaching cues and methodology adherence tracking, but the call itself is inherently human-driven. Capped at 0.08 for low-automatable node with indirect AI assistance.",
+    "call_debrief_documentation": "Strongest impact area. Auto-generated summaries, action items, and CRM field updates from transcripts directly automate debrief. Benchmark: reps save 2-3 hrs/week on note-taking and CRM entry. Against 23-min baseline per debrief, this is substantial.",
+    "stakeholder_mapping": "Automated account and contact mapping based on interaction data identifies who has been engaged, their roles, and sentiment. Reduces manual LinkedIn/CRM cross-referencing significantly.",
+    "demo_preparation": "AI meeting briefs and Ask Anything provide discovery context for customizing demo flow. However, sandbox setup and logistics coordination remain manual. Moderate impact.",
+    "demo_execution": "Coaching scorecards and conversation analytics improve demo quality over time, but the live demo is human-essential. Capped at low-automatable maximum.",
+    "objection_handling": "Smart Trackers surface common objections and competitive mentions across the conversation database. Ask Anything helps find relevant case studies and past successful objection responses. Market intelligence provides competitive context.",
+    "proposal_creation": "Ask Anything can surface deal context and past successful proposals, and conversation data informs ROI projections. However, actual proposal assembly, pricing, and approvals remain largely manual.",
+    "contract_negotiation": "Gong has minimal direct impact on legal redlines and MSA customizations. Some indirect benefit from conversation history context, but this is fundamentally a legal/human process.",
+    "deal_closure_handoff": "Automated summaries and CRM updates from conversation data help create handoff documentation. Stakeholder details and commitments are already captured, reducing manual compilation."
+  },
+  "edge_impact": {
+    "discovery_call_execution,call_debrief_documentation": 0.6,
+    "call_debrief_documentation,stakeholder_mapping": 0.3,
+    "call_debrief_documentation,demo_preparation": 0.25,
+    "discovery_call_prep,discovery_call_execution": 0.2,
+    "demo_execution,objection_handling": 0.2,
+    "response_triage,discovery_call_prep": 0.15,
+    "objection_handling,proposal_creation": 0.15,
+    "follow_up_sequence_management,response_triage": 0.15
+  },
+  "topology_changes": [
+    {
+      "type": "boost_exit",
+      "node": "prospect_research",
+      "delta": 0.05,
+      "reason": "Market intelligence and conversation-derived account signals help disqualify poor-fit prospects earlier based on patterns observed across the conversation database."
+    },
+    {
+      "type": "boost_exit",
+      "node": "discovery_call_execution",
+      "delta": 0.08,
+      "reason": "Deal intelligence and real-time conversation analysis provide stronger qualification signals during discovery, enabling reps to exit low-probability deals faster. Supports the 50%+ reduction in deal slippage claim."
+    },
+    {
+      "type": "boost_exit",
+      "node": "demo_execution",
+      "delta": 0.05,
+      "reason": "Post-demo conversation analysis reveals deal risk signals (sentiment, stakeholder engagement, competitor mentions) that help reps identify unlikely-to-close deals sooner."
+    },
+    {
+      "type": "add_edge",
+      "from": "discovery_call_execution",
+      "to": "demo_preparation",
+      "probability": 0.15,
+      "reason": "Automated call summaries and action items from Gong can make the formal debrief step partially redundant for straightforward deals, allowing reps to move directly to demo prep with AI-generated context."
+    }
+  ],
+  "confidence": {
+    "overall": "medium",
+    "per_node": {
+      "prospect_research": "medium",
+      "cold_outreach_drafting": "medium",
+      "outreach_logging": "high",
+      "follow_up_sequence_management": "medium",
+      "response_triage": "medium",
+      "discovery_call_prep": "high",
+      "discovery_call_execution": "high",
+      "call_debrief_documentation": "high",
+      "stakeholder_mapping": "medium",
+      "demo_preparation": "medium",
+      "demo_execution": "high",
+      "objection_handling": "medium",
+      "proposal_creation": "low",
+      "contract_negotiation": "medium",
+      "deal_closure_handoff": "medium"
+    },
+    "notes": "Strong confidence in conversation intelligence core (call debrief, call prep, coaching) backed by ROI benchmarks. Gong Engage features are newer and less documented, reducing confidence for outreach-related nodes. Proposal creation and contract negotiation impacts are largely inferred rather than directly evidenced. No source content excerpts were available, so all analysis is based on the AI research summary."
+  },
+  "tool_name": "Gong",
+  "tool_slug": "gong",
+  "generated_at": "2026-04-16T01:08:37.208451+00:00",
+  "model": "claude-opus-4-6",
+  "source_count": 0
+}

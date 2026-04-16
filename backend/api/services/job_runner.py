@@ -12,6 +12,7 @@ Design notes:
 
 import asyncio
 import logging
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,7 +20,7 @@ from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.deps import async_session
-from backend.api.models.db import Job, JobStatus, JobType, SimulationResult, Transcript
+from backend.api.models.db import Job, JobStatus, JobType, SimulationResult, Transcript, ToolEvaluation
 from backend.api.services import data_io, ws_manager
 
 logger = logging.getLogger(__name__)
@@ -211,7 +212,8 @@ async def run_simulation_job(
     sim_kwargs: dict,
 ) -> None:
     """
-    Run sim.py only (assumes transition_matrix.json already exists).
+    Run parser_scraper → classifier → sim for a given tool evaluation.
+    All intermediate files are written to the project-scoped data directory.
     Stores a SimulationResult row on completion.
     Runs as a FastAPI BackgroundTask.
     """
@@ -220,34 +222,71 @@ async def run_simulation_job(
         status=JobStatus.running,
         started_at=datetime.now(timezone.utc),
     )
-    data_dir        = data_io.project_data_dir(project_id)
-    transition_path = data_dir / "transition_matrix.json"
-    simulation_path = data_dir / "monte_carlo_results.json"
 
     try:
-        await _progress(job_id, 10, "Starting simulation")
+        # Fetch tool details from DB
+        async with async_session() as db:
+            tool_eval = await db.get(ToolEvaluation, tool_evaluation_id)
+            if not tool_eval:
+                raise RuntimeError("Tool evaluation not found")
+            tool_name   = tool_eval.tool_name
+            website_url = tool_eval.website_url or ""
 
+        # Slug logic matches parser_scraper.py's slugify()
+        tool_slug = re.sub(r'[^a-z0-9]+', '_', tool_name.lower()).strip('_')
+
+        data_dir        = data_io.project_data_dir(project_id)
+        scraped_path    = data_io.scraped_tool_path(project_id, tool_slug)
+        features_path   = data_io.tool_features_path(project_id, tool_slug)
+        tasks_path      = data_dir / "all_tasks.json"
+        transition_path = data_dir / "transition_matrix.json"
+        simulation_path = data_dir / "monte_carlo_results.json"
+
+        # Step 1 — scrape product website
+        await _progress(job_id, 10, "Scraping product website\u2026")
+        rc, _, stderr = await _run_script([
+            "backend/scripts/parser_scraper.py",
+            "--tool",   tool_name,
+            "--url",    website_url,
+            "--output", str(scraped_path),
+        ])
+        if rc != 0:
+            raise RuntimeError(f"parser_scraper.py failed: {stderr}")
+
+        # Step 2 — classify features into pipeline impact parameters
+        await _progress(job_id, 40, "Mapping features to workflow\u2026")
+        rc, _, stderr = await _run_script([
+            "backend/scripts/classifier.py",
+            "--scraped", str(scraped_path),
+            "--tasks",   str(tasks_path),
+            "--output",  str(features_path),
+        ])
+        if rc != 0:
+            raise RuntimeError(f"classifier.py failed: {stderr}")
+
+        # Step 3 — Monte Carlo simulation with tool-specific features
+        await _progress(job_id, 65, "Running Monte Carlo simulation\u2026")
         cmd = [
             "backend/scripts/sim.py",
             "--telemetry_path", str(transition_path),
             "--output_path",    str(simulation_path),
+            "--tool_features",  str(features_path),
         ]
         for key, value in sim_kwargs.items():
             cmd += [f"--{key}", str(value)]
-
-        await _progress(job_id, 30, "Running Monte Carlo simulation")
         rc, _, stderr = await _run_script(cmd)
         if rc != 0:
             raise RuntimeError(f"sim.py failed: {stderr}")
 
+        # Step 4 — persist to DB
         await _progress(job_id, 85, "Storing results")
 
-        results = data_io.read_simulation_results(project_id)
-        work_saved     = float(results.get("summary", {}).get("work_saved_pct_p50", 0.0))
-        throughput_lift = float(results.get("summary", {}).get("throughput_lift_pct_p50", 0.0))
+        results         = data_io.read_simulation_results(project_id)
+        week_final      = results.get("summary", {}).get("week_final", {})
+        work_saved      = float(week_final.get("work_saved_pct", 0.0))
+        throughput_lift = float(week_final.get("throughput_lift_pct", 0.0))
 
         async with async_session() as db:
-            # Upsert: replace any existing result for this tool eval
             from sqlalchemy import select
             existing = await db.execute(
                 select(SimulationResult).where(

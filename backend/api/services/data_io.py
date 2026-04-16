@@ -104,6 +104,16 @@ def read_simulation_results(project_id: str) -> dict:
     return _read_json(path)
 
 
+def scraped_tool_path(project_id: str, tool_slug: str) -> Path:
+    """Return path for scraped_{slug}.json in the project directory."""
+    return project_data_dir(project_id) / f"scraped_{tool_slug}.json"
+
+
+def tool_features_path(project_id: str, tool_slug: str) -> Path:
+    """Return path for tool_features_{slug}.json in the project directory."""
+    return project_data_dir(project_id) / f"tool_features_{tool_slug}.json"
+
+
 def save_transcript_text(project_id: str, transcript_id: str, raw_text: str) -> Path:
     """Persist raw transcript text to disk. Returns the file path."""
     dest = transcripts_dir(project_id) / f"{transcript_id}.txt"
