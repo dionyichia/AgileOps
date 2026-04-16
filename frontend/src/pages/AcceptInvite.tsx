@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { invite as inviteApi, projects } from '../api/client'
+import PublicNavbar from '../components/public/PublicNavbar'
+import PublicFooter from '../components/public/PublicFooter'
 
 type Status = 'validating' | 'ready' | 'invalid' | 'expired' | 'done'
 
@@ -67,22 +69,10 @@ export default function AcceptInvite() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F7FB] text-black flex flex-col">
-      <header className="border-b border-black/5 bg-white/90 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-5 flex items-center justify-between">
-          <button onClick={() => navigate('/')} className="flex items-center">
-            <img src="/axis-logo.png" alt="Axis logo" className="h-11 w-11 rounded-2xl object-cover" />
-          </button>
-          <button
-            onClick={() => navigate('/get-started')}
-            className="axis-gradient-button rounded-full px-6 py-3 text-[16px] font-bold"
-          >
-            Get Started
-          </button>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-black text-black">
+      <PublicNavbar />
 
-      <main className="flex-1 px-6 md:px-10 py-10 md:py-14">
+      <main className="flex-1 px-6 py-10 pt-28 md:px-10 md:py-14 md:pt-32">
         <div
           className="max-w-7xl mx-auto rounded-[34px] bg-white border border-black/6 p-4 md:p-5"
           style={{ boxShadow: '0 26px 70px rgba(15, 23, 42, 0.10), 0 6px 18px rgba(15, 23, 42, 0.05)' }}
@@ -198,14 +188,7 @@ export default function AcceptInvite() {
         </div>
       </main>
 
-      <footer
-        className="mt-10 px-6 md:px-10 pt-8 pb-6 text-white"
-        style={{ background: 'linear-gradient(180deg, #5E149F 0%, #B4308B 48%, #F75A8C 100%)' }}
-      >
-        <div className="max-w-6xl mx-auto border-t border-white/18 pt-6 text-[13px] text-white/64">
-          © 2026 Axis. All rights reserved.
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   )
 }

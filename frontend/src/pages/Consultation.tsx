@@ -13,6 +13,8 @@ import {
   ArrowLeft,
   Calendar,
 } from 'lucide-react'
+import PublicNavbar from '../components/public/PublicNavbar'
+import PublicFooter from '../components/public/PublicFooter'
 
 // ── Calendly global type ────────────────────────────────────────────────────
 declare global {
@@ -167,6 +169,7 @@ function loadCalendlyAssets(): Promise<void> {
 
 export default function Consultation() {
   const navigate = useNavigate()
+  const [scrolled, setScrolled] = useState(false)
 
   // ── Form state ─────────────────────────────────────────────────────────────
   const [firstName, setFirstName] = useState('')
@@ -185,6 +188,7 @@ export default function Consultation() {
   const [booked, setBooked] = useState(false) // drives success animation timing
   const [inviteToken, setInviteToken] = useState('')
   const [calendlyReady, setCalendlyReady] = useState(false)
+  const [calendlyError, setCalendlyError] = useState<string | null>(null)
 
   // ── Calendly container ref (must be empty — Calendly injects iframe here) ──
   const calendlyContainerRef = useRef<HTMLDivElement>(null)
@@ -193,20 +197,37 @@ export default function Consultation() {
   useEffect(() => {
     if (stage !== 'booking') return
     setCalendlyReady(false)
+    setCalendlyError(null)
 
-    loadCalendlyAssets().then(() => {
-      if (!calendlyContainerRef.current || !window.Calendly) return
-      window.Calendly.initInlineWidget({
-        url: `${CALENDLY_URL}?hide_gdpr_banner=1`,
-        parentElement: calendlyContainerRef.current,
-        prefill: {
-          name: `${firstName} ${lastName}`.trim(),
-          email,
-        },
+    if (!CALENDLY_URL) {
+      setCalendlyError(
+        'Calendly is not configured yet. Add VITE_CALENDLY_URL to frontend/.env and restart the dev server.',
+      )
+      return
+    }
+
+    loadCalendlyAssets()
+      .then(() => {
+        if (!calendlyContainerRef.current || !window.Calendly) {
+          setCalendlyError('Calendly failed to load. Please verify the booking URL and try again.')
+          return
+        }
+
+        calendlyContainerRef.current.innerHTML = ''
+        window.Calendly.initInlineWidget({
+          url: `${CALENDLY_URL}?hide_gdpr_banner=1`,
+          parentElement: calendlyContainerRef.current,
+          prefill: {
+            name: `${firstName} ${lastName}`.trim(),
+            email,
+          },
+        })
+        // Give Calendly's iframe a moment to paint before hiding the loader
+        setTimeout(() => setCalendlyReady(true), 1800)
       })
-      // Give Calendly's iframe a moment to paint before hiding the loader
-      setTimeout(() => setCalendlyReady(true), 1800)
-    })
+      .catch(() => {
+        setCalendlyError('Calendly failed to load. Please verify the booking URL and try again.')
+      })
   }, [stage]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Listen for Calendly booking confirmation ───────────────────────────────
@@ -221,6 +242,12 @@ export default function Consultation() {
     }
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
+  }, [])
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   // ── Form helpers ───────────────────────────────────────────────────────────
@@ -275,29 +302,15 @@ export default function Consultation() {
   // ══════════════════════════════════════════════════════════════════════════
   if (stage === 'booking') {
     return (
-      <div className="min-h-screen bg-white text-black flex flex-col">
-        {/* Header */}
-        <header className="border-b border-black/5 bg-white sticky top-0 z-20">
-          <div className="max-w-7xl mx-auto px-6 md:px-10 py-5 flex items-center justify-between">
-            <button onClick={() => navigate('/')} className="flex items-center">
-              <img src="/axis-logo.png" alt="Axis logo" className="h-11 w-11 rounded-2xl object-cover" />
-            </button>
-            <button
-              onClick={() => setStage('form')}
-              className="flex items-center gap-2 text-[15px] font-medium text-black/55 transition-opacity hover:opacity-70"
-            >
-              <ArrowLeft size={16} />
-              Back
-            </button>
-          </div>
-        </header>
+      <div className="min-h-screen flex flex-col bg-black text-white">
+        <PublicNavbar scrolled={scrolled} />
 
         {/* Body */}
-        <main className="flex-1 px-6 md:px-10 pt-10 pb-16">
+        <main className="flex-1 px-6 pb-16 pt-28 md:px-10 md:pt-32">
           <div className="max-w-7xl mx-auto grid gap-10 lg:grid-cols-[1fr_1.5fr] items-start">
 
             {/* Left — copy */}
-            <div className="pt-4 lg:pt-8 lg:sticky lg:top-28">
+            <div className="pt-4 lg:sticky lg:top-32">
               <div
                 className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[13px] font-semibold text-white"
                 style={{ background: 'linear-gradient(90deg, #5E149F, #B4308B)' }}
@@ -306,11 +319,11 @@ export default function Consultation() {
                 Step 3 of 3
               </div>
 
-              <h2 className="mt-5 text-[36px] md:text-[44px] leading-[1.05] font-bold tracking-[-0.03em] text-black">
+              <h2 className="mt-5 text-[36px] md:text-[44px] leading-[1.05] font-bold tracking-[-0.03em] text-white">
                 Book your<br />consultation call.
               </h2>
 
-              <p className="mt-5 text-[17px] leading-[1.65] text-black/64">
+              <p className="mt-5 text-[17px] leading-[1.65] text-white/64">
                 Pick a time that works for you. On the call we'll walk through your workflow, confirm your current setup, and explain what comes next.
               </p>
 
@@ -327,10 +340,17 @@ export default function Consultation() {
                     >
                       <CheckCircle2 size={12} />
                     </span>
-                    <span className="text-[15px] text-black/70">{item}</span>
+                    <span className="text-[15px] text-white/72">{item}</span>
                   </li>
                 ))}
               </ul>
+              <button
+                onClick={() => setStage('form')}
+                className="mt-8 inline-flex items-center gap-2 text-[15px] font-medium text-white/68 transition-opacity hover:opacity-70"
+              >
+                <ArrowLeft size={16} />
+                Back
+              </button>
             </div>
 
             {/* Right — Calendly widget */}
@@ -339,7 +359,7 @@ export default function Consultation() {
               style={{ minWidth: '320px', height: '700px', boxShadow: '0 18px 50px rgba(15,23,42,0.08), 0 4px 14px rgba(15,23,42,0.04)' }}
             >
               {/* Loading overlay — fades out once Calendly iframe paints */}
-              {!calendlyReady && (
+              {!calendlyReady && !calendlyError && (
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white">
                   <div
                     className="h-7 w-7 animate-spin rounded-full border-2 border-black/10"
@@ -348,12 +368,21 @@ export default function Consultation() {
                   <span className="text-[14px] text-black/35">Loading calendar…</span>
                 </div>
               )}
+              {calendlyError && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-white p-8 text-center">
+                  <div className="max-w-md">
+                    <p className="text-[20px] font-semibold text-black">Calendar unavailable</p>
+                    <p className="mt-3 text-[15px] leading-7 text-black/60">{calendlyError}</p>
+                  </div>
+                </div>
+              )}
               {/* Empty container — Calendly appends its iframe here */}
               <div ref={calendlyContainerRef} style={{ width: '100%', height: '100%' }} />
             </div>
 
           </div>
         </main>
+        <PublicFooter />
       </div>
     )
   }
@@ -363,16 +392,10 @@ export default function Consultation() {
   // ══════════════════════════════════════════════════════════════════════════
   if (stage === 'success') {
     return (
-      <div className="min-h-screen bg-white text-black flex flex-col">
-        <header className="border-b border-black/5 bg-white">
-          <div className="max-w-7xl mx-auto px-6 md:px-10 py-5 flex items-center">
-            <button onClick={() => navigate('/')} className="flex items-center">
-              <img src="/axis-logo.png" alt="Axis logo" className="h-11 w-11 rounded-2xl object-cover" />
-            </button>
-          </div>
-        </header>
+      <div className="min-h-screen flex flex-col bg-black text-white">
+        <PublicNavbar scrolled={scrolled} />
 
-        <main className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center">
+        <main className="flex-1 flex flex-col items-center justify-center px-6 py-20 pt-32 text-center">
           {/* Animated ring + checkmark */}
           <div
             className="relative flex items-center justify-center"
@@ -414,17 +437,17 @@ export default function Consultation() {
 
           {/* Text */}
           <h1
-            className="mt-9 text-[38px] md:text-[50px] font-bold leading-[1.05] tracking-[-0.03em] text-black"
+            className="mt-9 text-[38px] md:text-[50px] font-bold leading-[1.05] tracking-[-0.03em] text-white"
             style={{ animation: 'fadeSlideUp 0.5s ease 0.25s both' }}
           >
             You're all booked!
           </h1>
 
           <p
-            className="mt-5 max-w-md text-[18px] leading-[1.65] text-black/60"
+            className="mt-5 max-w-md text-[18px] leading-[1.65] text-white/60"
             style={{ animation: 'fadeSlideUp 0.5s ease 0.38s both' }}
           >
-            A calendar invite is on its way to <strong className="text-black">{email}</strong>. We'll review your workflow submission before the call so we can hit the ground running.
+            A calendar invite is on its way to <strong className="text-white">{email}</strong>. We'll review your workflow submission before the call so we can hit the ground running.
           </p>
 
           <div
@@ -448,7 +471,7 @@ export default function Consultation() {
             )}
             <button
               onClick={() => navigate('/')}
-              className="rounded-full border border-black/15 px-8 py-3.5 text-[16px] font-semibold text-black/70 transition-colors hover:bg-black/[0.03]"
+              className="rounded-full border border-white/15 px-8 py-3.5 text-[16px] font-semibold text-white/70 transition-colors hover:bg-white/[0.03]"
             >
               Back to home
             </button>
@@ -482,6 +505,7 @@ export default function Consultation() {
             </ol>
           </div>
         </main>
+        <PublicFooter />
 
         {/* Keyframe styles */}
         <style>{`
@@ -498,54 +522,18 @@ export default function Consultation() {
   // STAGE: FORM — original two-step form (unchanged)
   // ══════════════════════════════════════════════════════════════════════════
   return (
-    <div className="min-h-screen bg-white text-black">
-      <header className="border-b border-black/5 bg-white">
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-5 flex items-center justify-between">
-          <button onClick={() => navigate('/')} className="flex items-center">
-            <img
-              src="/axis-logo.png"
-              alt="Axis logo"
-              className="h-11 w-11 rounded-2xl object-cover"
-            />
-          </button>
+    <div className="min-h-screen bg-black text-white">
+      <PublicNavbar scrolled={scrolled} />
 
-          <div className="ml-auto flex items-center justify-end gap-4 md:gap-8">
-            <nav className="hidden md:flex items-center gap-10 text-[16px] font-medium">
-              <button onClick={() => navigate('/#why-axis')} className="transition-opacity hover:opacity-70">
-                Why Axis?
-              </button>
-              <button onClick={() => navigate('/#how-it-works')} className="transition-opacity hover:opacity-70">
-                How it Works
-              </button>
-            </nav>
-            <button
-              onClick={() => navigate('/login')}
-              className="hidden md:inline text-[16px] font-medium transition-opacity hover:opacity-70"
-            >
-              Client Login
-            </button>
-            <button
-              onClick={() => navigate('/internal/login')}
-              className="hidden md:inline text-[15px] font-medium text-black/45 transition-opacity hover:opacity-70"
-            >
-              Admin Login
-            </button>
-            <button className="axis-gradient-button rounded-full px-6 py-3 text-[16px] font-bold">
-              Get Started
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="pt-12 md:pt-16">
+      <main className="pt-28 md:pt-32">
         <div className="px-6 md:px-10">
           <div className="max-w-7xl mx-auto grid gap-12 lg:grid-cols-[0.95fr_1.05fr] items-start">
           <section className="pt-6 md:pt-16">
-            <h1 className="max-w-xl text-[40px] md:text-[56px] leading-[1.02] font-bold tracking-[-0.04em] text-black">
+            <h1 className="max-w-xl text-[40px] md:text-[56px] leading-[1.02] font-bold tracking-[-0.04em] text-white">
               Evaluate your sales tools with confidence.
             </h1>
 
-            <p className="mt-8 max-w-xl text-[24px] leading-[1.35] font-medium text-black/84">
+            <p className="mt-8 max-w-xl text-[24px] leading-[1.35] font-medium text-white/84">
               Tell us about your team, your workflow, and the tools you&apos;re currently using. We&apos;ll analyze your setup and prepare a tailored recommendation through your consultation.
             </p>
 
@@ -563,7 +551,7 @@ export default function Consultation() {
                   >
                     <CheckCircle2 size={14} />
                   </span>
-                  <span className="text-[17px] leading-[1.35] text-black/70">{item}</span>
+                  <span className="text-[17px] leading-[1.35] text-white/70">{item}</span>
                 </li>
               ))}
             </ul>
@@ -779,7 +767,7 @@ export default function Consultation() {
 
         <section className="px-6 md:px-10 py-10 md:py-16 pb-24">
           <div className="max-w-6xl mx-auto">
-            <div className="text-[34px] md:text-[46px] leading-tight font-bold text-black">
+            <div className="text-[34px] md:text-[46px] leading-tight font-bold text-white">
               How It Works
             </div>
 
@@ -821,7 +809,7 @@ export default function Consultation() {
             </div>
 
             <div className="mt-12 flex flex-col items-center justify-center gap-4 text-center">
-              <p className="max-w-2xl text-[18px] leading-8 text-black/72">
+              <p className="max-w-2xl text-[18px] leading-8 text-white/72">
                 Start with a quick consultation and we&apos;ll turn your current workflow into a clear plan.
               </p>
               <button
@@ -908,10 +896,10 @@ export default function Consultation() {
               >
                 Why Axis?
               </p>
-              <h2 className="mt-4 text-[34px] md:text-[48px] leading-tight font-bold text-black">
+              <h2 className="mt-4 text-[34px] md:text-[48px] leading-tight font-bold text-white">
                 Not another SaaS management tool.
               </h2>
-              <p className="mt-6 max-w-3xl text-[18px] leading-8 text-black/72">
+              <p className="mt-6 max-w-3xl text-[18px] leading-8 text-white/72">
                 Unlike traditional platforms that track usage or licenses, we focus on how tools impact real workflows. We evaluate whether a tool improves how your team actually works before you commit to it.
               </p>
             </div>
@@ -937,81 +925,7 @@ export default function Consultation() {
           </div>
         </section>
 
-        <footer
-          className="mt-16 md:mt-24 px-6 md:px-10 pt-14 pb-8 text-white"
-          style={{ background: 'linear-gradient(180deg, #5E149F 0%, #B4308B 48%, #F75A8C 100%)' }}
-        >
-          <div className="max-w-6xl mx-auto">
-            <div className="grid gap-12 lg:grid-cols-[1.15fr_1.6fr_0.9fr]">
-              <div className="max-w-sm">
-                <div className="flex items-center gap-3">
-                  <img
-                    src="/axis-logo.png"
-                    alt="Axis logo"
-                    className="h-11 w-11 rounded-2xl object-cover"
-                  />
-                  <span className="text-[22px] font-bold">Axis</span>
-                </div>
-                <p className="mt-5 text-[14px] leading-7 text-white/78">
-                  We help revenue teams evaluate and select the right tools by analyzing real workflows and delivering data-backed recommendations.
-                </p>
-              </div>
-
-              <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-                {[
-                  {
-                    title: 'Product',
-                    items: ['How It Works', 'Workflow Analysis', 'Tool Evaluation', 'Recommendations', 'Sample Report'],
-                  },
-                  {
-                    title: 'Company',
-                    items: ['About', 'Why Axis', 'Contact'],
-                  },
-                  {
-                    title: 'Resources',
-                    items: ['FAQs', 'Case Studies', 'Documentation'],
-                  },
-                  {
-                    title: 'Legal',
-                    items: ['Privacy Policy', 'Terms of Service', 'Security'],
-                  },
-                ].map((group) => (
-                  <div key={group.title}>
-                    <h3 className="text-[13px] font-semibold uppercase tracking-[0.18em] text-white/68">
-                      {group.title}
-                    </h3>
-                    <ul className="mt-4 space-y-3">
-                      {group.items.map((item) => (
-                        <li key={item} className="text-[14px] text-white/82">
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-
-              <div className="rounded-[24px] border border-white/18 bg-white/10 px-6 py-6 backdrop-blur-sm">
-                <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-white/68">
-                  Get Started
-                </p>
-                <h3 className="mt-4 text-[24px] leading-tight font-bold">
-                  Make your next tool decision with confidence.
-                </h3>
-                <button
-                  onClick={() => navigate('/get-started')}
-                  className="mt-6 rounded-full bg-white px-6 py-3 text-[15px] font-bold text-black transition-transform hover:-translate-y-0.5"
-                >
-                  Get My Recommendation
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-12 border-t border-white/18 pt-6 text-[13px] text-white/64">
-              © 2026 Axis. All rights reserved.
-            </div>
-          </div>
-        </footer>
+        <PublicFooter />
       </main>
     </div>
   )

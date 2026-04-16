@@ -24,11 +24,9 @@ import {
   TextGenerateEffect,
   calcTextGenerateDuration,
 } from '../components/ui/text-generate-effect'
-import {
-  MotionHighlight,
-  MotionHighlightItem,
-} from '../components/ui/motion-highlight'
 import { NoiseCanvas } from '../components/ui/noise-canvas'
+import PublicNavbar from '../components/public/PublicNavbar'
+import PublicFooter from '../components/public/PublicFooter'
 
 const COLORS = {
   white: '#FFFFFF',
@@ -508,73 +506,7 @@ export default function LandingPage() {
       />
 
       {/* ───── Navbar ───── */}
-      <motion.header
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="fixed top-0 inset-x-0 w-full z-50 liquid-glass"
-        style={{
-          background: 'rgba(255,255,255,0.01)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
-          borderBottom: scrolled
-            ? '1px solid rgba(255,255,255,0.08)'
-            : '1px solid transparent',
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-5 flex items-center justify-between">
-          <a href="#top" className="flex items-center">
-            <img
-              src="/axis-logo.png"
-              alt="Axis logo"
-              className="h-10 w-auto rounded-lg"
-            />
-          </a>
-
-          <div className="ml-auto flex items-center justify-end gap-3 md:gap-8">
-            <MotionHighlight
-              hover
-              mode="children"
-              className="rounded-full bg-white/[0.08]"
-            >
-              <nav className="hidden md:flex items-center gap-2 text-[16px] font-medium">
-                {navItems.map(({ label, href }) => (
-                  <MotionHighlightItem key={href} asChild>
-                    <a
-                      href={href}
-                      className="px-3 py-1.5 text-white transition-opacity hover:opacity-70"
-                    >
-                      {label}
-                    </a>
-                  </MotionHighlightItem>
-                ))}
-              </nav>
-              <MotionHighlightItem asChild>
-                <button
-                  onClick={() => navigate('/login')}
-                  className="hidden md:inline px-3 py-1.5 text-[16px] font-medium text-white transition-opacity hover:opacity-70"
-                >
-                  Client Login
-                </button>
-              </MotionHighlightItem>
-              <MotionHighlightItem asChild>
-                <button
-                  onClick={() => navigate('/internal/login')}
-                  className="hidden md:inline px-3 py-1.5 text-[16px] font-medium text-white transition-opacity hover:opacity-70"
-                >
-                  Admin Login
-                </button>
-              </MotionHighlightItem>
-            </MotionHighlight>
-            <button
-              onClick={goToConsultation}
-              className="bg-white text-black rounded-full px-6 py-3 text-[15px] md:text-[16px] font-bold transition-transform hover:-translate-y-0.5"
-            >
-              Get Started
-            </button>
-          </div>
-        </div>
-      </motion.header>
+      <PublicNavbar scrolled={scrolled} />
 
       <main id="top">
         {/* ───── Hero ───── */}
@@ -985,78 +917,7 @@ export default function LandingPage() {
         </section>
 
         {/* ───── Footer ───── */}
-        <footer className="mt-16 md:mt-24 px-8 md:px-16 lg:px-24 pt-24 pb-16 text-white bg-black">
-          <div>
-            <div className="grid gap-16 lg:gap-24 lg:grid-cols-[1fr_2fr_1.1fr]">
-              <div>
-                <div className="flex items-center gap-3">
-                  <img
-                    src="/axis-logo.png"
-                    alt="Axis logo"
-                    className="h-11 w-11 rounded-2xl object-cover"
-                  />
-                  <span className="text-[22px] font-bold">Axis</span>
-                </div>
-                <p className="mt-6 max-w-xs text-[15px] leading-7 text-white/70 text-balance">
-                  We help revenue teams evaluate and select the right tools by analyzing real workflows and delivering data-backed recommendations.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-16 gap-y-10">
-                {[
-                  {
-                    title: 'Product',
-                    items: ['How It Works', 'Workflow Analysis', 'Tool Evaluation', 'Recommendations', 'Sample Report'],
-                  },
-                  {
-                    title: 'Company',
-                    items: ['About', 'Why Axis', 'Contact'],
-                  },
-                  {
-                    title: 'Resources',
-                    items: ['FAQs', 'Case Studies', 'Documentation'],
-                  },
-                  {
-                    title: 'Legal',
-                    items: ['Privacy Policy', 'Terms of Service', 'Security'],
-                  },
-                ].map((group) => (
-                  <div key={group.title}>
-                    <h3 className="text-[13px] font-semibold uppercase tracking-[0.18em] text-white/50 mb-5">
-                      {group.title}
-                    </h3>
-                    <ul className="space-y-0">
-                      {group.items.map((item) => (
-                        <li key={item} className="text-[15px] text-white/70 leading-8 hover:text-white transition-colors cursor-pointer">
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-
-              <div className="rounded-[24px] border border-white/[0.12] bg-white/[0.06] px-8 py-8 backdrop-blur-sm min-w-[280px]">
-                <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-white/50">
-                  Get Started
-                </p>
-                <h3 className="mt-4 text-[28px] leading-tight font-bold text-white text-balance">
-                  Make your next tool decision with confidence.
-                </h3>
-                <button
-                  onClick={goToConsultation}
-                  className="mt-6 w-full rounded-full bg-white py-4 text-[15px] font-bold text-black transition-transform hover:-translate-y-0.5"
-                >
-                  Get My Recommendation
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-20 border-t border-white/[0.12] pt-6 text-[13px] text-white/40">
-              © 2026 Axis. All rights reserved.
-            </div>
-          </div>
-        </footer>
+        <PublicFooter />
       </main>
     </div>
   )
