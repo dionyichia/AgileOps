@@ -12,7 +12,7 @@ Usage:
     python backend/scripts/transcript_to_tasks.py --transcript path/to/call.txt --tasks backend/data/all_tasks.json
 
 Requires:
-    ANTHROPIC_API_KEY env var (or .env file in project root)
+    ANTHROPIC_API_KEY env var (or backend/.env)
     pip install anthropic
 """
 
