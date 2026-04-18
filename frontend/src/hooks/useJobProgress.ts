@@ -149,8 +149,11 @@ export function useJobProgress(
 
       // Try WebSocket
       try {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-        const wsUrl = `${protocol}//${window.location.host}/ws/jobs/${jobId}`
+        const apiUrl = import.meta.env.VITE_API_URL
+        const wsBase = apiUrl
+          ? apiUrl.replace(/^http/, 'ws')
+          : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
+        const wsUrl = `${wsBase}/ws/jobs/${jobId}`
         const ws = new WebSocket(wsUrl)
         wsRef.current = ws
 

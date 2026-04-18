@@ -7,7 +7,7 @@
 
 import { getAccessToken, supabase } from '../lib/supabase'
 
-const BASE = '/api'
+const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api'
 
 // ── Token helpers ──────────────────────────────────────
 // Kept for backward-compat with any legacy code that calls token.clear().

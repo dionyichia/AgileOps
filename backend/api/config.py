@@ -13,6 +13,11 @@ DATABASE_URL = os.getenv(
     f"sqlite+aiosqlite:///{_BASE_DIR / 'data' / 'agileops.db'}",
 )
 
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
 # Supabase — obtain from Supabase Dashboard → Settings → API
 SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
@@ -24,10 +29,8 @@ SITE_URL: str = os.getenv("SITE_URL", "http://localhost:5173")
 # Set to postgresql+asyncpg://user:pass@host/agileops for production
 # Requires: pip install asyncpg (already in requirements.txt)
 
-CORS_ORIGINS = [
-    "http://localhost:5173",  # Vite dev server
-    "http://localhost:4173",  # Vite preview
-]
+_raw_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:4173")
+CORS_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 
 # Project-scoped data directory — all pipeline JSON files live under here
 DATA_DIR: Path = Path(os.getenv("DATA_DIR", str(_BASE_DIR / "data")))
