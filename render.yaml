@@ -4,9 +4,9 @@ services:
     runtime: python
     region: oregon
     plan: starter
-    rootDir: .
+    rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: PYTHONPATH=. uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT
+    startCommand: PYTHONPATH=.. uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /docs
     envVars:
       - key: PYTHON_VERSION
