@@ -8,7 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from backend.api.config import DATABASE_URL, SUPABASE_ANON_KEY, SUPABASE_URL
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+_pg_kwargs = (
+    {"pool_size": 5, "max_overflow": 10, "pool_pre_ping": True}
+    if DATABASE_URL.startswith("postgresql")
+    else {}
+)
+engine = create_async_engine(DATABASE_URL, echo=False, **_pg_kwargs)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 bearer = HTTPBearer(auto_error=False)

@@ -1,0 +1,67 @@
+Alex: Thanks for taking the time, Priya. We’re trying to map how product work actually moves day to day — not the roadmap version, the real execution. Let’s start at the beginning. When an idea or problem isn’t handed to you, how do you figure out what to work on?
+
+Priya: Yeah, so it’s a mix of user signals and internal noise management. I usually start my day in Amplitude and Intercom. I’ll spend maybe 25 to 35 minutes scanning event dashboards — activation drop-offs, feature usage trends, support ticket spikes. Then I cross-check Intercom conversations to see what users are actually complaining about in plain language. If something looks off, I’ll log it into Notion as a “problem candidate,” but I don’t commit anything yet.
+
+Alex: And once something looks real, how do you validate it?
+
+Priya: That’s when I move into “triangulation mode.” I’ll pull the relevant cohort in Mixpanel, then check qualitative feedback in Canny or Intercom tags. I usually spend 40 to 50 minutes here. I’m basically trying to answer: is this a real user pain or just statistical noise? If it passes that threshold, I’ll create a ticket in Linear and tag it with a rough severity score.
+
+Alex: How do you go from that to shaping the actual solution?
+
+Priya: So I’ll open the Linear ticket and then jump into Figma. I’m not designing fully, just rough flows. I’ll usually block off 45 to 60 minutes for this. I’ll sketch edge cases, user states, and anything that might break backend assumptions. I also keep Notion open with a PRD template — I’ll start filling in problem statement, user impact, and success metrics.
+
+Alex: Who do you involve at that stage?
+
+Priya: I’ll usually loop in engineering pretty early via Slack. I’ll drop a rough proposal in our #product-eng channel and ask for quick gut checks. That’s maybe 10 to 15 minutes of async back-and-forth, but it saves days later. If it’s a bigger feature, I’ll schedule a 30-minute sync in Google Calendar and walk through the Figma draft.
+
+Alex: Once alignment starts forming, how do you formalize the work?
+
+Priya: That’s PRD time. I’ll spend about 60 to 75 minutes building out a structured doc in Notion — problem framing, hypotheses, edge cases, rollout plan, and success metrics. I also embed screenshots from Figma and pull historical data from Amplitude. Then I post it in Slack for review and tag eng, design, and data.
+
+Alex: And what happens after the PRD is shared?
+
+Priya: Review loop. This is where things get iterative. I’ll get comments in Notion, Slack threads, sometimes Jira-linked feedback. I spend roughly 30 to 40 minutes consolidating everything, resolving contradictions, and updating the Linear ticket. Usually 1–2 revision cycles before we’re aligned.
+
+Alex: Let’s talk about planning and prioritization. How do you decide when something actually gets built?
+
+Priya: That happens in our weekly planning session using Jira Product Discovery. I’ll go in with maybe 5–8 validated items. I spend about 20 to 30 minutes beforehand ranking them using an RICE model I maintain in Notion. Then in the meeting we negotiate tradeoffs with engineering capacity. That meeting itself is usually 45 minutes.
+
+Alex: Once something is prioritized, how does it move into execution?
+
+Priya: Engineering takes over in Jira, but I stay very involved. I’ll break the epic into user stories in Linear first — that’s about 30 minutes of setup. Then I sync with engineers in Slack daily. I also track progress in Jira dashboards, usually spending 15 to 20 minutes a day just reviewing statuses and blockers.
+
+Alex: How do you handle design and implementation changes mid-sprint?
+
+Priya: That’s constant. If engineers hit ambiguity, they ping me in Slack or tag me in Jira. I usually respond within 10–15 minutes. If it’s non-trivial, I’ll jump back into Figma and adjust flows — that’s another 20–30 minutes per revision cycle. It’s very fluid, not linear at all.
+
+Alex: When a feature is ready, how do you validate it internally?
+
+Priya: Pre-release QA is a mix of Staging environment testing and analytics validation. I’ll use Datadog to check logs and errors, and Amplitude to verify event firing. That’s usually 30 to 40 minutes of structured testing. I’ll also run through a QA checklist in Notion to make sure edge cases are covered.
+
+Alex: And launch — what does that look like?
+
+Priya: Launch coordination is surprisingly operational. I’ll schedule the release in LaunchDarkly, coordinate with engineering in Slack, and prep a rollout plan in Notion. I also draft a short internal announcement in Slack and a customer-facing update in Intercom. That whole process is usually 45 to 55 minutes.
+
+Alex: After launch, how do you measure success?
+
+Priya: Post-launch analysis is very data-heavy. I’ll build a quick dashboard in Looker to track adoption, retention impact, and funnel movement. Then I compare it against the baseline I defined in the PRD. I usually spend 40 to 60 minutes here. If something looks off, I immediately create follow-up Linear tickets.
+
+Alex: What about feedback after release?
+
+Priya: That flows in constantly. I monitor Intercom, Canny, and sometimes Zendesk. I’ll spend maybe 20 to 25 minutes twice a day just categorizing feedback — bugs, confusion, feature requests. Anything critical goes straight into Linear with a severity tag.
+
+Alex: Do you ever coordinate experiments or A/B tests?
+
+Priya: Yes, pretty often. I use Optimizely for experiments. Setting one up takes about 30 to 40 minutes — defining variants, success metrics, and exposure rules. Then I monitor results in Amplitude over a few days. Interpreting results usually takes another 25 to 35 minutes per review cycle.
+
+Alex: Where do you feel most time is leaking in your workflow?
+
+Priya: Honestly, context switching. I’m constantly bouncing between Linear, Notion, Slack, and Amplitude. Just reconstructing context before making a decision probably costs me 10 to 15 minutes every time. Also writing PRDs — even with templates — still takes a solid hour every time.
+
+Alex: Anything you wish could be automated?
+
+Priya: Yeah. If something could read Intercom + Amplitude together and auto-surface “validated problems” with evidence, that would cut my discovery time in half. And if PRDs could be partially generated from Figma + Linear tickets, that’d probably save me an hour per feature.
+
+Alex: That’s really helpful. This is exactly the kind of workflow clarity we’re looking for.
+
+Priya: Happy to share — it’s messy but it works.

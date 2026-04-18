@@ -6,7 +6,7 @@ Compares BASELINE rep behaviour vs GONG-augmented workflow.
 
 Inputs  : transition_matrix.json  (from 02_markov_builder.py)
 Params  : adoption_rate, learning_rate, n_simulations, n_weeks, ...
-Outputs : monte_carlo_results.json + printed report
+Outputs : monte_carlo_results_original_workflow.json (baseline) or monte_carlo_results_{slug}.json (tool run)
 
 ─────────────────────────────────────────────────────────────────────────────
 ASSUMPTIONS (all explicit, all overridable in CONFIG)
@@ -135,7 +135,7 @@ class SimConfig:
 
     # ── Paths ──────────────────────────────────────────────────────────────────
     telemetry_path:   str = "backend/data/transition_matrix.json"
-    output_path:      str = "backend/data/monte_carlo_results.json"
+    output_path:      str = "backend/data/monte_carlo_results_original_workflow.json"
     max_path_length:  int = 60      # hard cap to prevent infinite loops in simulation
 
 
@@ -712,7 +712,7 @@ if __name__ == "__main__":
     parser.add_argument("--adoption_midpoint", type=float, default=3.0,
         help="Week at which 50%% of adopters are on Gong (default: 3.0)")
     parser.add_argument("--telemetry_path", type=str, default="backend/data/transition_matrix.json")
-    parser.add_argument("--output_path",    type=str, default="backend/data/monte_carlo_results.json")
+    parser.add_argument("--output_path",    type=str, default="backend/data/monte_carlo_results_original_workflow.json")
     parser.add_argument("--tool_features",  type=str, default="",
         help="Path to tool_features_{slug}.json from classifier.py. "
              "Overrides the built-in Gong impact parameters with the specified tool's values.")

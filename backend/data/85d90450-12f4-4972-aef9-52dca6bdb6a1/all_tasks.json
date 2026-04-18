@@ -1,0 +1,463 @@
+[
+  {
+    "node_id": "prospect_research",
+    "label": "Research and Qualify Prospects",
+    "description": "Pull up prospect lists, research individual contacts on LinkedIn and company pages to determine if they fit the ICP based on company size, vertical, and tech stack. Create or update contact records in CRM.",
+    "action_verb": "research",
+    "inputs": [
+      "prospect lists",
+      "company information",
+      "ICP criteria"
+    ],
+    "outputs": [
+      "qualified prospect list",
+      "updated contact records",
+      "fit assessment"
+    ],
+    "app_cluster": [
+      "salesforce",
+      "linkedin"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 35,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "draft_outreach_messages",
+    "label": "Draft Personalized Outreach Messages",
+    "description": "Write personalized cold emails or LinkedIn DMs using templates as starting points, customizing first two lines with specific references like funding rounds or LinkedIn posts to make messages feel personal.",
+    "action_verb": "produce",
+    "inputs": [
+      "message templates",
+      "prospect research",
+      "personalization details"
+    ],
+    "outputs": [
+      "personalized outreach messages"
+    ],
+    "app_cluster": [
+      "notion",
+      "gmail",
+      "linkedin"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 22,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "send_and_log_outreach",
+    "label": "Send Messages and Log Activities",
+    "description": "Send outreach messages via email or LinkedIn and immediately log the activity in CRM with date, sequence information, and relevant notes.",
+    "action_verb": "log",
+    "inputs": [
+      "drafted messages",
+      "prospect contact info"
+    ],
+    "outputs": [
+      "sent messages",
+      "logged activities",
+      "sequence tracking"
+    ],
+    "app_cluster": [
+      "gmail",
+      "linkedin",
+      "salesforce"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 7,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "high",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "manage_follow_up_sequences",
+    "label": "Manage Multi-Touch Follow-Up Sequences",
+    "description": "Run 5-7 touch cadences over two weeks mixing email and LinkedIn, monitoring open rates and click signals to adjust subject lines and timing based on engagement.",
+    "action_verb": "sequence",
+    "inputs": [
+      "initial outreach results",
+      "engagement metrics",
+      "sequence templates"
+    ],
+    "outputs": [
+      "follow-up touchpoints",
+      "adjusted messaging",
+      "engagement tracking"
+    ],
+    "app_cluster": [
+      "outreach",
+      "gmail",
+      "linkedin"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 17,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "high",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "triage_and_respond_to_replies",
+    "label": "Triage and Respond to Prospect Replies",
+    "description": "Read incoming replies and classify as hot, warm, cold, or unsubscribe. Draft appropriate responses, update CRM stages, and notify manager for important accounts.",
+    "action_verb": "classify",
+    "inputs": [
+      "prospect replies",
+      "account importance data"
+    ],
+    "outputs": [
+      "classified responses",
+      "response messages",
+      "updated CRM stages",
+      "manager notifications"
+    ],
+    "app_cluster": [
+      "gmail",
+      "salesforce",
+      "slack"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 12,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "discovery_call_preparation",
+    "label": "Prepare for Discovery Calls",
+    "description": "Research company background using multiple sources, review prospect LinkedIn profiles, build call agenda using MEDDIC template with qualification questions, and review prior touchpoint history in CRM.",
+    "action_verb": "prepare",
+    "inputs": [
+      "company information",
+      "prospect profiles",
+      "CRM history",
+      "MEDDIC template"
+    ],
+    "outputs": [
+      "call agenda",
+      "qualification questions",
+      "company research summary"
+    ],
+    "app_cluster": [
+      "google",
+      "crunchbase",
+      "linkedin",
+      "notion",
+      "salesforce"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 42,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "conduct_discovery_calls",
+    "label": "Conduct Discovery Calls",
+    "description": "Lead 30-45 minute qualification calls focusing on listening, identifying pain points, budget signals, decision-making process, and timeline while working toward a clear next step.",
+    "action_verb": "converse",
+    "inputs": [
+      "call agenda",
+      "prospect information",
+      "qualification framework"
+    ],
+    "outputs": [
+      "call recording",
+      "qualification data",
+      "next steps",
+      "live notes"
+    ],
+    "app_cluster": [
+      "zoom",
+      "gong"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 37,
+      "std_minutes": 8
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "debrief_discovery_calls",
+    "label": "Debrief and Document Discovery Calls",
+    "description": "Review call transcripts, write structured summaries covering pain points, budget, timeline and blockers, update MEDDIC fields in CRM, log outcomes and follow-up tasks.",
+    "action_verb": "log",
+    "inputs": [
+      "call recordings",
+      "call transcripts",
+      "MEDDIC framework"
+    ],
+    "outputs": [
+      "call summaries",
+      "updated CRM fields",
+      "follow-up tasks",
+      "team notifications"
+    ],
+    "app_cluster": [
+      "gong",
+      "notion",
+      "salesforce",
+      "slack"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 22,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "high",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "map_stakeholders",
+    "label": "Map Deal Stakeholders",
+    "description": "Identify economic buyers, champions, and potential blockers using LinkedIn research and prospect intel, document organizational structure and decision-making relationships.",
+    "action_verb": "map",
+    "inputs": [
+      "discovery call intel",
+      "LinkedIn profiles",
+      "organizational information"
+    ],
+    "outputs": [
+      "stakeholder map",
+      "decision-making structure",
+      "updated contact records"
+    ],
+    "app_cluster": [
+      "linkedin",
+      "notion",
+      "lucidchart",
+      "salesforce"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 30,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "prepare_product_demo",
+    "label": "Prepare Customized Product Demo",
+    "description": "Coordinate stakeholder schedules, customize demo flow based on discovery insights, set up sandbox environments for specific use cases, and prepare workshop-style presentation.",
+    "action_verb": "prepare",
+    "inputs": [
+      "discovery notes",
+      "stakeholder availability",
+      "use case requirements"
+    ],
+    "outputs": [
+      "demo agenda",
+      "customized environment",
+      "scheduled demo",
+      "presentation materials"
+    ],
+    "app_cluster": [
+      "calendly",
+      "notion",
+      "sandbox"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 50,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "deliver_product_demo",
+    "label": "Deliver Product Demo",
+    "description": "Conduct interactive 45-60 minute demo focused on specific problem-solving, engage all stakeholders with direct questions, and capture real-time feedback on features and fit.",
+    "action_verb": "present",
+    "inputs": [
+      "demo preparation",
+      "customized environment",
+      "stakeholder questions"
+    ],
+    "outputs": [
+      "demo recording",
+      "stakeholder feedback",
+      "feature interest signals",
+      "next step commitments"
+    ],
+    "app_cluster": [
+      "zoom",
+      "gong"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 52,
+      "std_minutes": 8
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "handle_objections",
+    "label": "Address Prospect Objections",
+    "description": "Handle common objections around price, timing, and competitors by drafting written responses, gathering relevant case studies, building ROI arguments, and coordinating with technical resources.",
+    "action_verb": "respond",
+    "inputs": [
+      "prospect objections",
+      "case studies",
+      "ROI data",
+      "competitive intelligence"
+    ],
+    "outputs": [
+      "objection responses",
+      "supporting materials",
+      "ROI calculations",
+      "technical clarifications"
+    ],
+    "app_cluster": [
+      "notion",
+      "google drive",
+      "slack"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 35,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "draft_proposals",
+    "label": "Draft and Submit Proposals",
+    "description": "Build pricing tiers in CPQ, write scope of work against SOW templates, add timelines and ROI projections, get manager approval for discounts, and conduct internal reviews.",
+    "action_verb": "produce",
+    "inputs": [
+      "deal requirements",
+      "pricing guidelines",
+      "SOW templates",
+      "ROI models"
+    ],
+    "outputs": [
+      "pricing proposals",
+      "scope documents",
+      "ROI projections",
+      "approved proposals"
+    ],
+    "app_cluster": [
+      "salesforce",
+      "google docs",
+      "gmail",
+      "slack"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 65,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "negotiate_contracts",
+    "label": "Negotiate Contract Terms",
+    "description": "Manage legal redlines and custom MSA terms through multiple revision cycles, track version changes, and coordinate with legal teams while managing quarter-end deadlines.",
+    "action_verb": "negotiate",
+    "inputs": [
+      "initial proposals",
+      "legal requirements",
+      "redline requests",
+      "approval workflows"
+    ],
+    "outputs": [
+      "negotiated terms",
+      "contract revisions",
+      "legal approvals",
+      "final agreements"
+    ],
+    "app_cluster": [
+      "gmail",
+      "google docs"
+    ],
+    "duration_distribution": {
+      "type": "lognormal",
+      "mean_minutes": 90,
+      "std_minutes": 20
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  },
+  {
+    "node_id": "close_and_handoff_deals",
+    "label": "Close Deals and Handoff to Customer Success",
+    "description": "Confirm signed contracts and payment terms, update CRM to closed-won status, create comprehensive handoff documentation covering stakeholders and commitments, and schedule kickoff calls.",
+    "action_verb": "handoff",
+    "inputs": [
+      "signed contracts",
+      "deal history",
+      "stakeholder information",
+      "implementation requirements"
+    ],
+    "outputs": [
+      "closed deal records",
+      "handoff documentation",
+      "kickoff meetings",
+      "CS transition"
+    ],
+    "app_cluster": [
+      "docusign",
+      "salesforce",
+      "notion"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 27,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "0be78387-c5be-4375-a4cb-8e7cf3e7b88c.txt"
+    ]
+  }
+]

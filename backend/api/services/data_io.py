@@ -1,121 +1,175 @@
 """
-Project-scoped file I/O helpers.
+Project-scoped Storage I/O helpers — Supabase Storage backend.
 
-All pipeline scripts read/write JSON files under backend/data/{project_id}/.
-This module centralises path construction and file access so routes stay clean.
+Pipeline JSON files live under:
+  pipeline-data/{project_id}/...   (project-scoped)
+  pipeline-data/_global/...        (fallback for projects without their own all_tasks.json)
+
+User-uploaded documents live under:
+  uploads/{project_id}/{uuid}_{filename}
 """
 
 import json
-from pathlib import Path
 from typing import Any
 
+import anyio
 from fastapi import HTTPException
+from supabase import Client, create_client
 
-from backend.api.config import DATA_DIR
+from backend.api.config import SUPABASE_SERVICE_KEY, SUPABASE_URL
 
+PIPELINE_BUCKET = "pipeline-data"
+UPLOADS_BUCKET = "uploads"
+GLOBAL_PREFIX = "_global"
 
-def project_data_dir(project_id: str) -> Path:
-    """Return the data directory for a project, creating it if needed."""
-    path = DATA_DIR / project_id
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
-
-def uploads_dir(project_id: str) -> Path:
-    """Return the uploads directory for a project, creating it if needed."""
-    path = project_data_dir(project_id) / "uploads"
-    path.mkdir(parents=True, exist_ok=True)
-    return path
+_client: Client | None = None
 
 
-def transcripts_dir(project_id: str) -> Path:
-    """Return the transcripts directory for a project, creating it if needed."""
-    path = project_data_dir(project_id) / "transcripts"
-    path.mkdir(parents=True, exist_ok=True)
-    return path
+def _storage() -> Client:
+    global _client
+    if _client is None:
+        if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+            raise RuntimeError("SUPABASE_URL and SUPABASE_SERVICE_KEY must be set")
+        _client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    return _client
 
 
-# ── JSON helpers ───────────────────────────────────────────────────────────────
+# ── Low-level Storage helpers (sync SDK wrapped for async callers) ────────────
 
-def _read_json(path: Path) -> Any:
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def _write_json(path: Path, data: Any) -> None:
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
-
-
-# ── Pipeline data accessors ────────────────────────────────────────────────────
-
-def read_tasks_json(project_id: str) -> list[dict]:
-    """Read all_tasks.json for a project. Returns [] if the file does not exist."""
-    path = project_data_dir(project_id) / "all_tasks.json"
-    if not path.exists():
-        return []
-    return _read_json(path)
+async def _download(bucket: str, path: str) -> bytes | None:
+    def _do() -> bytes | None:
+        try:
+            return _storage().storage.from_(bucket).download(path)
+        except Exception:
+            return None
+    return await anyio.to_thread.run_sync(_do)
 
 
-def write_tasks_json(project_id: str, tasks: list[dict]) -> None:
-    """Write all_tasks.json for a project, replacing existing content."""
-    path = project_data_dir(project_id) / "all_tasks.json"
-    _write_json(path, tasks)
+async def _upload(
+    bucket: str,
+    path: str,
+    data: bytes,
+    content_type: str = "application/octet-stream",
+) -> None:
+    def _do() -> None:
+        _storage().storage.from_(bucket).upload(
+            path=path,
+            file=data,
+            file_options={"content-type": content_type, "upsert": "true"},
+        )
+    await anyio.to_thread.run_sync(_do)
 
 
-def clear_tasks_json(project_id: str) -> None:
-    """Delete all_tasks.json for a project (if it exists)."""
-    path = project_data_dir(project_id) / "all_tasks.json"
-    if path.exists():
-        path.unlink()
+async def _delete(bucket: str, path: str) -> None:
+    def _do() -> None:
+        try:
+            _storage().storage.from_(bucket).remove([path])
+        except Exception:
+            pass
+    await anyio.to_thread.run_sync(_do)
 
 
-def clear_telemetry_json(project_id: str) -> None:
-    """Delete telemetry.json for a project (if it exists).
+async def _exists(bucket: str, path: str) -> bool:
+    return await _download(bucket, path) is not None
 
-    Called after all_tasks.json is edited so the stale synthetic log
-    is removed. The pipeline will regenerate it from the updated
-    all_tasks.json on the next run.
+
+async def _read_json(bucket: str, path: str) -> Any | None:
+    data = await _download(bucket, path)
+    if data is None:
+        return None
+    return json.loads(data.decode("utf-8"))
+
+
+async def _write_json(bucket: str, path: str, obj: Any) -> None:
+    payload = json.dumps(obj, indent=2).encode("utf-8")
+    await _upload(bucket, path, payload, "application/json")
+
+
+# ── Active prefix resolution ──────────────────────────────────────────────────
+
+async def active_data_prefix(project_id: str) -> str:
+    """Return the Storage prefix for pipeline I/O.
+
+    Uses the project-scoped prefix when the project has its own all_tasks.json;
+    otherwise falls back to the shared _global defaults.
     """
-    path = project_data_dir(project_id) / "telemetry.json"
-    if path.exists():
-        path.unlink()
+    has_tasks = await _exists(PIPELINE_BUCKET, f"{project_id}/all_tasks.json")
+    return project_id if has_tasks else GLOBAL_PREFIX
 
 
-def read_transition_matrix(project_id: str) -> dict:
-    """Read transition_matrix.json. Raises 404 if not yet generated."""
-    path = project_data_dir(project_id) / "transition_matrix.json"
-    if not path.exists():
+async def resolve_data_path(project_id: str, filename: str) -> str:
+    """Return the Storage object path for filename.
+
+    Returns the project-scoped path if it exists, otherwise the _global fallback.
+    """
+    project_path = f"{project_id}/{filename}"
+    if await _exists(PIPELINE_BUCKET, project_path):
+        return project_path
+    return f"{GLOBAL_PREFIX}/{filename}"
+
+
+# ── Pipeline data accessors ───────────────────────────────────────────────────
+
+async def read_tasks_json(project_id: str) -> list[dict]:
+    result = await _read_json(PIPELINE_BUCKET, f"{project_id}/all_tasks.json")
+    return result or []
+
+
+async def write_tasks_json(project_id: str, tasks: list[dict]) -> None:
+    await _write_json(PIPELINE_BUCKET, f"{project_id}/all_tasks.json", tasks)
+
+
+async def clear_tasks_json(project_id: str) -> None:
+    await _delete(PIPELINE_BUCKET, f"{project_id}/all_tasks.json")
+
+
+async def clear_telemetry_json(project_id: str) -> None:
+    await _delete(PIPELINE_BUCKET, f"{project_id}/telemetry.json")
+
+
+async def read_transition_matrix(project_id: str) -> dict:
+    path = await resolve_data_path(project_id, "transition_matrix.json")
+    result = await _read_json(PIPELINE_BUCKET, path)
+    if result is None:
         raise HTTPException(
             status_code=404,
             detail="Transition matrix not found. Run the pipeline first.",
         )
-    return _read_json(path)
+    return result
 
 
-def read_simulation_results(project_id: str) -> dict:
-    """Read monte_carlo_results.json. Raises 404 if not yet generated."""
-    path = project_data_dir(project_id) / "monte_carlo_results.json"
-    if not path.exists():
+async def read_simulation_results(project_id: str) -> dict:
+    path = await resolve_data_path(project_id, "monte_carlo_results_original_workflow.json")
+    result = await _read_json(PIPELINE_BUCKET, path)
+    if result is None:
         raise HTTPException(
             status_code=404,
-            detail="Simulation results not found. Run the pipeline first.",
+            detail="Baseline simulation results not found. Run the full pipeline first.",
         )
-    return _read_json(path)
+    return result
 
 
-def scraped_tool_path(project_id: str, tool_slug: str) -> Path:
-    """Return path for scraped_{slug}.json in the project directory."""
-    return project_data_dir(project_id) / f"scraped_{tool_slug}.json"
+async def read_tool_simulation_results(project_id: str, tool_slug: str) -> dict:
+    prefix = await active_data_prefix(project_id)
+    path = f"{prefix}/monte_carlo_results_{tool_slug}.json"
+    result = await _read_json(PIPELINE_BUCKET, path)
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Simulation results for '{tool_slug}' not found. Run the simulation first.",
+        )
+    return result
 
 
-def tool_features_path(project_id: str, tool_slug: str) -> Path:
-    """Return path for tool_features_{slug}.json in the project directory."""
-    return project_data_dir(project_id) / f"tool_features_{tool_slug}.json"
+async def save_transcript_text(project_id: str, transcript_id: str, raw_text: str) -> str:
+    """Upload raw transcript text to Storage. Returns the object path."""
+    path = f"{project_id}/transcripts/{transcript_id}.txt"
+    await _upload(PIPELINE_BUCKET, path, raw_text.encode("utf-8"), "text/plain")
+    return path
 
 
-def save_transcript_text(project_id: str, transcript_id: str, raw_text: str) -> Path:
-    """Persist raw transcript text to disk. Returns the file path."""
-    dest = transcripts_dir(project_id) / f"{transcript_id}.txt"
-    dest.write_text(raw_text, encoding="utf-8")
-    return dest
+# ── Upload helpers ────────────────────────────────────────────────────────────
+
+def uploads_storage_path(project_id: str, dest_filename: str) -> str:
+    """Return the Storage object path for an uploaded file."""
+    return f"{project_id}/{dest_filename}"

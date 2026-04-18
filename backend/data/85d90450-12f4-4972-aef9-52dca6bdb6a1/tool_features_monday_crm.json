@@ -1,0 +1,253 @@
+{
+  "tool_summary": "monday CRM is an AI-first CRM platform built on monday.com's Work OS that provides customizable sales pipeline management, contact/deal tracking, no-code workflow automations, email sequences, AI-assisted email composition, AI notetaker for calls, and AI agents that can source, qualify, and prioritize leads. It centralizes customer communication, automates repetitive CRM tasks like data entry and activity logging, and provides real-time dashboards and reporting for pipeline visibility.",
+  "micro_features": [
+    {
+      "feature_id": "ai_sales_agents",
+      "name": "AI Sales Agents",
+      "description": "AI agents that source, qualify, and prioritize leads, and can book meetings autonomously 24/7 from within the CRM.",
+      "affected_nodes": [
+        "prospect_research",
+        "manage_follow_up_sequences"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "AI sales agents source, qualify and prioritize leads, and even book the meetings for you, right from your CRM, 24/7."
+    },
+    {
+      "feature_id": "automated_data_entry_logging",
+      "name": "Automated Data Entry and Activity Logging",
+      "description": "AI pulls data from calls, emails and files, updates CRM fields, logs activities automatically, auto-assigns reps, and sets alerts.",
+      "affected_nodes": [
+        "send_and_log_outreach",
+        "debrief_discovery_calls",
+        "close_and_handoff_deals"
+      ],
+      "feature_type": "automation",
+      "evidence": "AI pulls data from calls, emails and files, updates fields and logs activities, auto-assigns reps and sets alerts. Users report eliminating 70%+ of manual data entry through automations and integrations."
+    },
+    {
+      "feature_id": "email_sequences",
+      "name": "Automated Email Sequences",
+      "description": "Automated multi-touch email sequences with task reminders for lead nurturing and customer follow-up.",
+      "affected_nodes": [
+        "manage_follow_up_sequences",
+        "send_and_log_outreach"
+      ],
+      "feature_type": "automation",
+      "evidence": "Sequences: Move deals faster with automated email sequences and task reminders. From lead nurturing to customer follow-up, manage it all without dropping any balls."
+    },
+    {
+      "feature_id": "ai_email_composition",
+      "name": "AI-Assisted Email Composition",
+      "description": "AI-powered email writing with advanced HTML editing and customizable templates for faster personalized outreach.",
+      "affected_nodes": [
+        "draft_outreach_messages",
+        "triage_and_respond_to_replies",
+        "handle_objections"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "Email composition: Writing emails is easier and faster with AI-assisted email composition, advanced HTML editing, and customizable email templates."
+    },
+    {
+      "feature_id": "mass_emails",
+      "name": "Mass Email Outreach",
+      "description": "Send personalized emails to prospects and leads in bulk to save time on manual outreach.",
+      "affected_nodes": [
+        "send_and_log_outreach",
+        "manage_follow_up_sequences"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Mass emails: Send personalized emails to prospects and leads in bulk to save time on manual work and make outreach more efficient."
+    },
+    {
+      "feature_id": "activity_tracking",
+      "name": "Email Activity Tracking",
+      "description": "Advanced email analytics showing opens, clicks, and engagement signals for outreach optimization.",
+      "affected_nodes": [
+        "manage_follow_up_sequences",
+        "triage_and_respond_to_replies"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Activity tracking: Stay on top of every interaction with advanced email analytics. See who opened or engaged with your emails, clicked links, and more."
+    },
+    {
+      "feature_id": "ai_notetaker",
+      "name": "AI Notetaker",
+      "description": "AI that records, transcribes, and summarizes meetings, turning calls into actionable notes and CRM updates.",
+      "affected_nodes": [
+        "debrief_discovery_calls",
+        "conduct_discovery_calls"
+      ],
+      "feature_type": "ai_assist",
+      "evidence": "Turn calls into action with AI Notetaker. AI Notetaker listens in on your calls and summa[rizes]. AI that records, transcribes, and summarizes your meetings."
+    },
+    {
+      "feature_id": "no_code_automations",
+      "name": "No-Code Workflow Automations",
+      "description": "Code-free automations for lead assignment, deal stage transitions, notifications, and repetitive workflow tasks.",
+      "affected_nodes": [
+        "send_and_log_outreach",
+        "triage_and_respond_to_replies",
+        "close_and_handoff_deals",
+        "manage_follow_up_sequences"
+      ],
+      "feature_type": "automation",
+      "evidence": "monday.com claims customers see up to 30% improvement in team productivity through automations. Reported average of 10 hours per week saved per user on manual CRM tasks."
+    },
+    {
+      "feature_id": "quote_invoice_management",
+      "name": "Quote and Invoice Management",
+      "description": "Create and share customizable quotes and invoices directly from the CRM.",
+      "affected_nodes": [
+        "draft_proposals"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Create and share customizable quotes & invoices. Quote and invoice management listed as core feature."
+    },
+    {
+      "feature_id": "dashboards_reporting",
+      "name": "Dashboards and Real-Time Reporting",
+      "description": "Custom dashboards with real-time sales analytics, pipeline visibility, forecasting, and team goal/quota tracking.",
+      "affected_nodes": [
+        "prospect_research",
+        "discovery_call_preparation"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Get data-driven insights about your team's work using robust dashboards. Sales forecasting. Team goals and quota tracking."
+    },
+    {
+      "feature_id": "contact_account_management",
+      "name": "Contact and Account Management",
+      "description": "Centralized contact and account records with merge duplicate contacts, data cleansing, and activity logging.",
+      "affected_nodes": [
+        "prospect_research",
+        "map_stakeholders"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Contact and account management. Merge duplicate contacts and data cleansing. Activity logging (calls, meetings, notes)."
+    },
+    {
+      "feature_id": "lead_capture_forms",
+      "name": "WorkForms Lead Capture",
+      "description": "Customizable forms for lead capture that feed directly into the CRM pipeline.",
+      "affected_nodes": [
+        "prospect_research"
+      ],
+      "feature_type": "automation",
+      "evidence": "Lead capturing and management. WorkForms for lead capture forms."
+    },
+    {
+      "feature_id": "docusign_integration",
+      "name": "DocuSign Integration",
+      "description": "Native integration with DocuSign for contract signing and deal closure workflows.",
+      "affected_nodes": [
+        "close_and_handoff_deals",
+        "negotiate_contracts"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "DocuSign listed as native integration; close and handoff workflow supported."
+    },
+    {
+      "feature_id": "monday_docs",
+      "name": "monday Docs",
+      "description": "Built-in document management for creating and collaborating on proposals, handoff docs, and other sales materials.",
+      "affected_nodes": [
+        "draft_proposals",
+        "close_and_handoff_deals",
+        "handle_objections"
+      ],
+      "feature_type": "acceleration",
+      "evidence": "Document management via monday Docs. monday Docs listed as core platform capability."
+    }
+  ],
+  "node_impact": {
+    "prospect_research": 0.35,
+    "draft_outreach_messages": 0.4,
+    "send_and_log_outreach": 0.75,
+    "manage_follow_up_sequences": 0.65,
+    "triage_and_respond_to_replies": 0.3,
+    "discovery_call_preparation": 0.15,
+    "conduct_discovery_calls": 0.05,
+    "debrief_discovery_calls": 0.6,
+    "map_stakeholders": 0.1,
+    "prepare_product_demo": 0.05,
+    "deliver_product_demo": 0.02,
+    "handle_objections": 0.15,
+    "draft_proposals": 0.3,
+    "negotiate_contracts": 0.05,
+    "close_and_handoff_deals": 0.35
+  },
+  "node_impact_reasoning": {
+    "prospect_research": "AI sales agents can source, qualify, and prioritize leads; lead capture forms automate inbound; contact/account management with deduplication reduces manual research. Capped at 0.35 as ICP research and LinkedIn-level qualification still require human judgment.",
+    "draft_outreach_messages": "AI-assisted email composition and customizable templates significantly accelerate personalized message drafting. The 70% manual data entry reduction claim supports high automation, but personalization still needs human input.",
+    "send_and_log_outreach": "Two-way email sync with automatic logging, mass email capabilities, and no-code automations eliminate most of the send-and-log manual work. The 70%+ manual data entry elimination claim directly supports this high estimate.",
+    "manage_follow_up_sequences": "Automated email sequences with task reminders, activity tracking with engagement signals, and mass email capabilities automate the majority of multi-touch cadence management. Strong feature evidence.",
+    "triage_and_respond_to_replies": "AI email composition helps draft responses, activity tracking surfaces engagement signals, and automations can route/classify replies. However, human judgment is still needed for nuanced triage decisions.",
+    "discovery_call_preparation": "Centralized CRM data and dashboards provide quicker access to prospect history and touchpoints, reducing research time. However, the tool doesn't specifically generate MEDDIC agendas or deeply automate multi-source research.",
+    "conduct_discovery_calls": "AI Notetaker can listen in on calls, reducing note-taking burden during the call, but the core activity of leading the conversation is human-essential. Capped at 0.05.",
+    "debrief_discovery_calls": "AI Notetaker transcribes and summarizes calls; automated data entry updates CRM fields from call data. This is a strong use case with direct evidence, significantly reducing post-call documentation time.",
+    "map_stakeholders": "Contact and account management provides a centralized place to track stakeholders, but the tool doesn't offer dedicated org-chart mapping or automated stakeholder identification from LinkedIn. Minor acceleration only.",
+    "prepare_product_demo": "The tool doesn't specifically address demo preparation, sandbox setup, or presentation customization. Calendly integration exists but is external. Minimal impact.",
+    "deliver_product_demo": "monday CRM has no features that directly impact live demo delivery. AI Notetaker could record the session, but the core activity is human-led.",
+    "handle_objections": "AI email composition and monday Docs help draft written responses; centralized document storage can house case studies. However, the tool doesn't specifically provide objection-handling frameworks or auto-generate ROI arguments.",
+    "draft_proposals": "Quote and invoice management, monday Docs for SOW creation, and templates accelerate proposal drafting. However, CPQ-level pricing configuration and complex approval workflows aren't deeply featured.",
+    "negotiate_contracts": "DocuSign integration helps with contract execution, but the tool doesn't address legal redlining, version tracking of MSA terms, or negotiation workflows. Minimal impact.",
+    "close_and_handoff_deals": "Automated CRM status updates, DocuSign integration, monday Docs for handoff documentation, and no-code automations for kickoff scheduling significantly reduce manual close/handoff work."
+  },
+  "edge_impact": {
+    "send_and_log_outreach,manage_follow_up_sequences": 0.5,
+    "manage_follow_up_sequences,triage_and_respond_to_replies": 0.3,
+    "conduct_discovery_calls,debrief_discovery_calls": 0.4,
+    "debrief_discovery_calls,map_stakeholders": 0.15,
+    "draft_proposals,negotiate_contracts": 0.1,
+    "negotiate_contracts,close_and_handoff_deals": 0.2,
+    "prospect_research,draft_outreach_messages": 0.2,
+    "triage_and_respond_to_replies,discovery_call_preparation": 0.15
+  },
+  "topology_changes": [
+    {
+      "type": "boost_exit",
+      "node": "prospect_research",
+      "delta": 0.06,
+      "reason": "AI sales agents that qualify and prioritize leads provide better early-stage qualification signals, allowing reps to disqualify poor-fit prospects faster before investing in outreach."
+    },
+    {
+      "type": "add_edge",
+      "from": "draft_outreach_messages",
+      "to": "manage_follow_up_sequences",
+      "probability": 0.15,
+      "reason": "Automated email sequences and mass email capabilities allow reps to skip the manual send-and-log step by launching sequences directly from the composition workflow."
+    },
+    {
+      "type": "boost_exit",
+      "node": "triage_and_respond_to_replies",
+      "delta": 0.04,
+      "reason": "Activity tracking and engagement analytics provide clearer signals for classifying prospects as unresponsive or disqualified, enabling faster exit of dead deals."
+    }
+  ],
+  "confidence": {
+    "overall": "medium",
+    "per_node": {
+      "prospect_research": "medium",
+      "draft_outreach_messages": "medium",
+      "send_and_log_outreach": "high",
+      "manage_follow_up_sequences": "high",
+      "triage_and_respond_to_replies": "medium",
+      "discovery_call_preparation": "low",
+      "conduct_discovery_calls": "low",
+      "debrief_discovery_calls": "high",
+      "map_stakeholders": "low",
+      "prepare_product_demo": "low",
+      "deliver_product_demo": "low",
+      "handle_objections": "low",
+      "draft_proposals": "medium",
+      "negotiate_contracts": "low",
+      "close_and_handoff_deals": "medium"
+    },
+    "notes": "ROI benchmarks (10 hrs/week saved, 70% data entry reduction, 30% productivity improvement) are vendor-claimed without independent verification. AI sales agents and AI Notetaker are early-access features whose real-world impact is uncertain. Core CRM automations (email sequences, activity logging, two-way sync) have strong feature-level evidence. Gaps exist around demo prep, stakeholder mapping, and negotiation workflows where the tool has minimal differentiation."
+  },
+  "tool_name": "monday crm",
+  "tool_slug": "monday_crm",
+  "generated_at": "2026-04-17T01:13:24.253275+00:00",
+  "model": "claude-opus-4-6",
+  "source_count": 3
+}

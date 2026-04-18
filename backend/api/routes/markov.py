@@ -22,4 +22,4 @@ async def get_markov(project_id: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Project not found")
 
     # data_io raises 404 HTTPException if the file doesn't exist yet
-    return data_io.read_transition_matrix(project_id)
+    return await data_io.read_transition_matrix(project_id)

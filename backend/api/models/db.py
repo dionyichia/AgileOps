@@ -62,17 +62,6 @@ class Project(Base):
     uploads          = relationship("UploadedFile",     back_populates="project", cascade="all, delete-orphan")
 
 
-class PendingInvite(Base):
-    __tablename__ = "pending_invites"
-
-    id         = Column(String(36), primary_key=True, default=_uuid)
-    token      = Column(String(36), unique=True, index=True, default=_uuid)
-    email      = Column(Text, nullable=False)
-    project_id = Column(String(36), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
-    expires_at = Column(DateTime(timezone=True), nullable=False)
-    used_at    = Column(DateTime(timezone=True))
-    created_at = Column(DateTime(timezone=True), nullable=False, default=_now)
-
 
 class WorkflowProfile(Base):
     __tablename__ = "workflow_profiles"

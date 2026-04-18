@@ -26,6 +26,7 @@ export default function App() {
         <Route path="/get-started" element={<Consultation />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<AcceptInvite />} />
+        <Route path="/auth/callback" element={<AcceptInvite />} />
 
         {/* Client workspace — legacy flat routes (no project scope) */}
         <Route path="/dashboard" element={<Dashboard />} />

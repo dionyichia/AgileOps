@@ -160,13 +160,6 @@ export const consultation = {
     }),
 }
 
-export const invite = {
-  validate: (token: string) =>
-    request<{ email: string; project_id: string }>(`/invite/${token}`),
-  markUsed: (token: string) =>
-    request<{ ok: boolean }>(`/invite/${token}/use`, { method: 'POST' }),
-}
-
 // ── Projects ───────────────────────────────────────────
 
 export const projects = {

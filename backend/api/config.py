@@ -18,11 +18,7 @@ SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
 SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "")  # service_role key — keep secret
 
-# Email (Resend — https://resend.com, free tier)
-RESEND_API_KEY: str = os.getenv("RESEND_API_KEY", "")
-RESEND_FROM: str = os.getenv("RESEND_FROM", "Axis <onboarding@resend.dev>")
-
-# Frontend base URL — used only for constructing invite links in emails
+# Frontend base URL — used for constructing Supabase invite redirect URLs
 SITE_URL: str = os.getenv("SITE_URL", "http://localhost:5173")
 
 # Set to postgresql+asyncpg://user:pass@host/agileops for production

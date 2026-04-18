@@ -262,6 +262,7 @@ export default function TranscriptInput() {
     try {
       const result = await pipelineApi.run(projectId)
       setPipelineJobId(result.job_id)
+      navigate(`/projects/${projectId}/dashboard`, { state: { pipelineJobId: result.job_id } })
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Failed to start pipeline')
     }
@@ -288,7 +289,7 @@ export default function TranscriptInput() {
         <div className="text-center">
           <AlertCircle size={40} className="text-red-400 mx-auto mb-4" />
           <p className="text-red-400 mb-4">{loadError}</p>
-          <button onClick={() => navigate('/dashboard')} className="text-[#5E149F] hover:opacity-70 text-sm">
+          <button onClick={() => navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')} className="text-[#5E149F] hover:opacity-70 text-sm">
             Back to Dashboard
           </button>
         </div>
@@ -311,7 +312,7 @@ export default function TranscriptInput() {
               <span className="font-bold text-[#111111] text-[28px] tracking-[-0.04em]">Axis</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-black/44">
-              <button onClick={() => navigate('/dashboard')} className="hover:text-black transition-colors">Dashboard</button>
+              <button onClick={() => navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')} className="hover:text-black transition-colors">Dashboard</button>
               <ChevronRight size={14} />
               <span className="text-black">{project?.company_name ?? 'Loading...'}</span>
             </div>
@@ -533,10 +534,7 @@ export default function TranscriptInput() {
                   )}
                   <div>
                     <div className={`text-sm font-medium ${canRunPipeline ? 'text-white' : 'text-slate-500'}`}>
-                      Run Full Pipeline
-                    </div>
-                    <div className="text-xs text-slate-500">
-                      Telemetry → Markov → Simulation
+                      Visualise Workflow
                     </div>
                   </div>
                 </button>
@@ -639,7 +637,7 @@ export default function TranscriptInput() {
       <footer className="border-t border-slate-800 bg-[#0B0F1E] sticky bottom-0">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')}
             className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors"
           >
             <ArrowLeft size={16} />

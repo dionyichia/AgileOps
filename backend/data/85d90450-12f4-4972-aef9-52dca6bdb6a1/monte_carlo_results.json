@@ -1,0 +1,831 @@
+{
+  "config": {
+    "n_simulations": 2000,
+    "n_weeks": 12,
+    "adoption_rate": 0.75,
+    "learning_rate": 0.3,
+    "adoption_midpoint": 3.0,
+    "pipeline_depth": 20,
+    "working_hrs_week": 40.0
+  },
+  "assumptions": [
+    "A1: Markov transitions are memoryless",
+    "A2: Node durations sampled from lognormal fit to observed data",
+    "A3: Edge dwell sampled from lognormal fit; includes async calendar time",
+    "A4: Gong impact percentages from published benchmarks + Mission Andromeda research",
+    "A5: Adoption follows logistic S-curve over weeks",
+    "A6: Per-rep skill follows exponential saturation: 1 - exp(-\u03bbt)",
+    "A7: Effective reduction = max_reduction \u00d7 adoption(t) \u00d7 skill(t)",
+    "A8: 8h/day, 5 days/week working schedule",
+    "A9: 20 concurrent deals per rep",
+    "A10: Deals are independent \u2014 no resource contention",
+    "A11: Topology changes applied structurally before sampling",
+    "A12: Win-rate emergent from transition probabilities, not fixed"
+  ],
+  "tool_name": "monday crm",
+  "topology_changes": [
+    {
+      "type": "boost_exit",
+      "node": "prospect_research",
+      "delta": 0.06,
+      "reason": "AI sales agents that qualify and prioritize leads provide better early-stage qualification signals, allowing reps to disqualify poor-fit prospects faster before investing in outreach."
+    },
+    {
+      "type": "add_edge",
+      "from": "draft_outreach_messages",
+      "to": "manage_follow_up_sequences",
+      "probability": 0.15,
+      "reason": "Automated email sequences and mass email capabilities allow reps to skip the manual send-and-log step by launching sequences directly from the composition workflow."
+    },
+    {
+      "type": "boost_exit",
+      "node": "triage_and_respond_to_replies",
+      "delta": 0.04,
+      "reason": "Activity tracking and engagement analytics provide clearer signals for classifying prospects as unresponsive or disqualified, enabling faster exit of dead deals."
+    }
+  ],
+  "tool_node_impact": {
+    "prospect_research": 0.35,
+    "draft_outreach_messages": 0.4,
+    "send_and_log_outreach": 0.75,
+    "manage_follow_up_sequences": 0.65,
+    "triage_and_respond_to_replies": 0.3,
+    "discovery_call_preparation": 0.15,
+    "conduct_discovery_calls": 0.05,
+    "debrief_discovery_calls": 0.6,
+    "map_stakeholders": 0.1,
+    "prepare_product_demo": 0.05,
+    "deliver_product_demo": 0.02,
+    "handle_objections": 0.15,
+    "draft_proposals": 0.3,
+    "negotiate_contracts": 0.05,
+    "close_and_handoff_deals": 0.35
+  },
+  "tool_edge_impact": {
+    "send_and_log_outreach,manage_follow_up_sequences": 0.5,
+    "manage_follow_up_sequences,triage_and_respond_to_replies": 0.3,
+    "conduct_discovery_calls,debrief_discovery_calls": 0.4,
+    "debrief_discovery_calls,map_stakeholders": 0.15,
+    "draft_proposals,negotiate_contracts": 0.1,
+    "negotiate_contracts,close_and_handoff_deals": 0.2,
+    "prospect_research,draft_outreach_messages": 0.2,
+    "triage_and_respond_to_replies,discovery_call_preparation": 0.15
+  },
+  "weekly_snapshots": [
+    {
+      "week": 0,
+      "adoption_pct": 2.0,
+      "learning_pct": 0.0,
+      "effective_reduction_avg": 0.0,
+      "baseline_latency_hrs": 254.17,
+      "gong_latency_hrs": 230.84,
+      "latency_delta_hrs": 23.32,
+      "latency_delta_pct": -16.7,
+      "baseline_work_min": 256.74,
+      "gong_work_min": 247.64,
+      "work_saved_min": 9.1,
+      "work_saved_pct": -86.1,
+      "baseline_throughput": 9.35,
+      "gong_throughput": 9.69,
+      "throughput_lift_pct": 3.7,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.71,
+        455.19
+      ],
+      "ci_work_saved": [
+        -416.92,
+        421.39
+      ],
+      "ci_throughput_gong": [
+        4.69,
+        57.62
+      ],
+      "node_savings_min": {
+        "prospect_research": -0.11,
+        "draft_outreach_messages": 1.4,
+        "send_and_log_outreach": 1.62,
+        "manage_follow_up_sequences": 0.09,
+        "triage_and_respond_to_replies": 0.13,
+        "discovery_call_preparation": 0.89,
+        "conduct_discovery_calls": 1.34,
+        "debrief_discovery_calls": 0.54,
+        "map_stakeholders": 0.64,
+        "prepare_product_demo": 1.03,
+        "deliver_product_demo": 1.28,
+        "handle_objections": 0.37,
+        "draft_proposals": 0.36,
+        "negotiate_contracts": -0.39,
+        "close_and_handoff_deals": -0.08
+      }
+    },
+    {
+      "week": 1,
+      "adoption_pct": 6.2,
+      "learning_pct": 25.9,
+      "effective_reduction_avg": 0.5,
+      "baseline_latency_hrs": 255.04,
+      "gong_latency_hrs": 232.62,
+      "latency_delta_hrs": 22.42,
+      "latency_delta_pct": -20.8,
+      "baseline_work_min": 255.74,
+      "gong_work_min": 246.88,
+      "work_saved_min": 8.86,
+      "work_saved_pct": -91.3,
+      "baseline_throughput": 9.38,
+      "gong_throughput": 9.72,
+      "throughput_lift_pct": 3.6,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.64,
+        466.55
+      ],
+      "ci_work_saved": [
+        -419.09,
+        425.33
+      ],
+      "ci_throughput_gong": [
+        4.71,
+        63.15
+      ],
+      "node_savings_min": {
+        "prospect_research": 0.21,
+        "draft_outreach_messages": 1.59,
+        "send_and_log_outreach": 1.52,
+        "manage_follow_up_sequences": 0.11,
+        "triage_and_respond_to_replies": 0.13,
+        "discovery_call_preparation": 1.17,
+        "conduct_discovery_calls": 1.08,
+        "debrief_discovery_calls": 0.38,
+        "map_stakeholders": 0.49,
+        "prepare_product_demo": 0.87,
+        "deliver_product_demo": 0.52,
+        "handle_objections": 0.27,
+        "draft_proposals": 0.24,
+        "negotiate_contracts": 0.15,
+        "close_and_handoff_deals": 0.13
+      }
+    },
+    {
+      "week": 2,
+      "adoption_pct": 17.4,
+      "learning_pct": 45.1,
+      "effective_reduction_avg": 2.2,
+      "baseline_latency_hrs": 260.13,
+      "gong_latency_hrs": 227.68,
+      "latency_delta_hrs": 32.45,
+      "latency_delta_pct": -12.9,
+      "baseline_work_min": 265.01,
+      "gong_work_min": 242.58,
+      "work_saved_min": 22.44,
+      "work_saved_pct": -80.0,
+      "baseline_throughput": 9.06,
+      "gong_throughput": 9.89,
+      "throughput_lift_pct": 9.2,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.69,
+        453.89
+      ],
+      "ci_work_saved": [
+        -409.95,
+        423.34
+      ],
+      "ci_throughput_gong": [
+        4.74,
+        58.69
+      ],
+      "node_savings_min": {
+        "prospect_research": 0.79,
+        "draft_outreach_messages": 1.63,
+        "send_and_log_outreach": 1.72,
+        "manage_follow_up_sequences": 0.7,
+        "triage_and_respond_to_replies": 0.35,
+        "discovery_call_preparation": 1.94,
+        "conduct_discovery_calls": 2.05,
+        "debrief_discovery_calls": 1.28,
+        "map_stakeholders": 1.26,
+        "prepare_product_demo": 1.86,
+        "deliver_product_demo": 2.29,
+        "handle_objections": 1.37,
+        "draft_proposals": 2.28,
+        "negotiate_contracts": 2.08,
+        "close_and_handoff_deals": 0.84
+      }
+    },
+    {
+      "week": 3,
+      "adoption_pct": 37.5,
+      "learning_pct": 59.3,
+      "effective_reduction_avg": 6.3,
+      "baseline_latency_hrs": 256.82,
+      "gong_latency_hrs": 225.04,
+      "latency_delta_hrs": 31.78,
+      "latency_delta_pct": -12.5,
+      "baseline_work_min": 258.69,
+      "gong_work_min": 239.48,
+      "work_saved_min": 19.21,
+      "work_saved_pct": -78.4,
+      "baseline_throughput": 9.28,
+      "gong_throughput": 10.02,
+      "throughput_lift_pct": 8.0,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.61,
+        450.3
+      ],
+      "ci_work_saved": [
+        -392.5,
+        436.72
+      ],
+      "ci_throughput_gong": [
+        4.89,
+        66.51
+      ],
+      "node_savings_min": {
+        "prospect_research": 2.88,
+        "draft_outreach_messages": 3.11,
+        "send_and_log_outreach": 2.65,
+        "manage_follow_up_sequences": 1.39,
+        "triage_and_respond_to_replies": 0.5,
+        "discovery_call_preparation": 1.4,
+        "conduct_discovery_calls": 0.82,
+        "debrief_discovery_calls": 1.49,
+        "map_stakeholders": 0.37,
+        "prepare_product_demo": 0.4,
+        "deliver_product_demo": 0.17,
+        "handle_objections": 0.67,
+        "draft_proposals": 1.77,
+        "negotiate_contracts": 0.9,
+        "close_and_handoff_deals": 0.7
+      }
+    },
+    {
+      "week": 4,
+      "adoption_pct": 57.6,
+      "learning_pct": 69.9,
+      "effective_reduction_avg": 11.5,
+      "baseline_latency_hrs": 249.01,
+      "gong_latency_hrs": 212.53,
+      "latency_delta_hrs": 36.49,
+      "latency_delta_pct": -9.3,
+      "baseline_work_min": 246.22,
+      "gong_work_min": 226.14,
+      "work_saved_min": 20.08,
+      "work_saved_pct": -77.7,
+      "baseline_throughput": 9.75,
+      "gong_throughput": 10.61,
+      "throughput_lift_pct": 8.9,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.6,
+        427.33
+      ],
+      "ci_work_saved": [
+        -373.51,
+        425.5
+      ],
+      "ci_throughput_gong": [
+        5.1,
+        67.39
+      ],
+      "node_savings_min": {
+        "prospect_research": 4.0,
+        "draft_outreach_messages": 4.33,
+        "send_and_log_outreach": 3.39,
+        "manage_follow_up_sequences": 2.67,
+        "triage_and_respond_to_replies": 0.79,
+        "discovery_call_preparation": 2.33,
+        "conduct_discovery_calls": 0.6,
+        "debrief_discovery_calls": 1.98,
+        "map_stakeholders": -0.03,
+        "prepare_product_demo": -0.41,
+        "deliver_product_demo": -0.78,
+        "handle_objections": -0.22,
+        "draft_proposals": 1.17,
+        "negotiate_contracts": -0.31,
+        "close_and_handoff_deals": 0.58
+      }
+    },
+    {
+      "week": 5,
+      "adoption_pct": 68.8,
+      "learning_pct": 77.7,
+      "effective_reduction_avg": 15.2,
+      "baseline_latency_hrs": 255.7,
+      "gong_latency_hrs": 203.78,
+      "latency_delta_hrs": 51.93,
+      "latency_delta_pct": -3.8,
+      "baseline_work_min": 256.56,
+      "gong_work_min": 218.14,
+      "work_saved_min": 38.42,
+      "work_saved_pct": -64.6,
+      "baseline_throughput": 9.35,
+      "gong_throughput": 11.0,
+      "throughput_lift_pct": 17.6,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.52,
+        413.62
+      ],
+      "ci_work_saved": [
+        -357.86,
+        428.74
+      ],
+      "ci_throughput_gong": [
+        5.25,
+        76.28
+      ],
+      "node_savings_min": {
+        "prospect_research": 6.37,
+        "draft_outreach_messages": 5.45,
+        "send_and_log_outreach": 4.3,
+        "manage_follow_up_sequences": 3.73,
+        "triage_and_respond_to_replies": 1.37,
+        "discovery_call_preparation": 2.62,
+        "conduct_discovery_calls": 1.07,
+        "debrief_discovery_calls": 3.45,
+        "map_stakeholders": 0.89,
+        "prepare_product_demo": 0.65,
+        "deliver_product_demo": 0.51,
+        "handle_objections": 1.36,
+        "draft_proposals": 3.71,
+        "negotiate_contracts": 1.52,
+        "close_and_handoff_deals": 1.4
+      }
+    },
+    {
+      "week": 6,
+      "adoption_pct": 73.0,
+      "learning_pct": 83.5,
+      "effective_reduction_avg": 17.3,
+      "baseline_latency_hrs": 255.4,
+      "gong_latency_hrs": 197.0,
+      "latency_delta_hrs": 58.4,
+      "latency_delta_pct": -0.7,
+      "baseline_work_min": 259.0,
+      "gong_work_min": 209.49,
+      "work_saved_min": 49.51,
+      "work_saved_pct": -57.4,
+      "baseline_throughput": 9.27,
+      "gong_throughput": 11.46,
+      "throughput_lift_pct": 23.6,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.52,
+        391.89
+      ],
+      "ci_work_saved": [
+        -353.09,
+        435.39
+      ],
+      "ci_throughput_gong": [
+        5.33,
+        79.09
+      ],
+      "node_savings_min": {
+        "prospect_research": 6.78,
+        "draft_outreach_messages": 5.93,
+        "send_and_log_outreach": 4.49,
+        "manage_follow_up_sequences": 4.33,
+        "triage_and_respond_to_replies": 1.69,
+        "discovery_call_preparation": 3.89,
+        "conduct_discovery_calls": 2.13,
+        "debrief_discovery_calls": 3.96,
+        "map_stakeholders": 1.33,
+        "prepare_product_demo": 1.67,
+        "deliver_product_demo": 0.87,
+        "handle_objections": 2.46,
+        "draft_proposals": 5.46,
+        "negotiate_contracts": 2.79,
+        "close_and_handoff_deals": 1.73
+      }
+    },
+    {
+      "week": 7,
+      "adoption_pct": 74.4,
+      "learning_pct": 87.8,
+      "effective_reduction_avg": 18.6,
+      "baseline_latency_hrs": 256.8,
+      "gong_latency_hrs": 200.97,
+      "latency_delta_hrs": 55.83,
+      "latency_delta_pct": -3.7,
+      "baseline_work_min": 265.94,
+      "gong_work_min": 212.98,
+      "work_saved_min": 52.95,
+      "work_saved_pct": -58.9,
+      "baseline_throughput": 9.02,
+      "gong_throughput": 11.27,
+      "throughput_lift_pct": 24.9,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.57,
+        401.9
+      ],
+      "ci_work_saved": [
+        -352.12,
+        434.67
+      ],
+      "ci_throughput_gong": [
+        5.32,
+        75.04
+      ],
+      "node_savings_min": {
+        "prospect_research": 7.57,
+        "draft_outreach_messages": 6.13,
+        "send_and_log_outreach": 4.68,
+        "manage_follow_up_sequences": 4.97,
+        "triage_and_respond_to_replies": 1.78,
+        "discovery_call_preparation": 4.1,
+        "conduct_discovery_calls": 1.47,
+        "debrief_discovery_calls": 4.69,
+        "map_stakeholders": 1.78,
+        "prepare_product_demo": 2.44,
+        "deliver_product_demo": 1.79,
+        "handle_objections": 2.16,
+        "draft_proposals": 5.47,
+        "negotiate_contracts": 2.13,
+        "close_and_handoff_deals": 1.79
+      }
+    },
+    {
+      "week": 8,
+      "adoption_pct": 74.8,
+      "learning_pct": 90.9,
+      "effective_reduction_avg": 19.4,
+      "baseline_latency_hrs": 256.02,
+      "gong_latency_hrs": 193.4,
+      "latency_delta_hrs": 62.62,
+      "latency_delta_pct": -0.8,
+      "baseline_work_min": 259.52,
+      "gong_work_min": 208.98,
+      "work_saved_min": 50.54,
+      "work_saved_pct": -61.1,
+      "baseline_throughput": 9.25,
+      "gong_throughput": 11.48,
+      "throughput_lift_pct": 24.2,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.49,
+        380.45
+      ],
+      "ci_work_saved": [
+        -347.95,
+        443.51
+      ],
+      "ci_throughput_gong": [
+        5.36,
+        82.5
+      ],
+      "node_savings_min": {
+        "prospect_research": 7.96,
+        "draft_outreach_messages": 6.5,
+        "send_and_log_outreach": 4.8,
+        "manage_follow_up_sequences": 4.7,
+        "triage_and_respond_to_replies": 1.56,
+        "discovery_call_preparation": 3.49,
+        "conduct_discovery_calls": 1.18,
+        "debrief_discovery_calls": 4.5,
+        "map_stakeholders": 1.85,
+        "prepare_product_demo": 1.87,
+        "deliver_product_demo": 1.4,
+        "handle_objections": 1.74,
+        "draft_proposals": 4.53,
+        "negotiate_contracts": 2.6,
+        "close_and_handoff_deals": 1.87
+      }
+    },
+    {
+      "week": 9,
+      "adoption_pct": 74.9,
+      "learning_pct": 93.3,
+      "effective_reduction_avg": 19.9,
+      "baseline_latency_hrs": 259.95,
+      "gong_latency_hrs": 200.78,
+      "latency_delta_hrs": 59.18,
+      "latency_delta_pct": 0.1,
+      "baseline_work_min": 267.41,
+      "gong_work_min": 214.61,
+      "work_saved_min": 52.8,
+      "work_saved_pct": -55.4,
+      "baseline_throughput": 8.98,
+      "gong_throughput": 11.18,
+      "throughput_lift_pct": 24.6,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.49,
+        399.61
+      ],
+      "ci_work_saved": [
+        -344.55,
+        444.11
+      ],
+      "ci_throughput_gong": [
+        5.41,
+        82.38
+      ],
+      "node_savings_min": {
+        "prospect_research": 7.82,
+        "draft_outreach_messages": 6.66,
+        "send_and_log_outreach": 5.03,
+        "manage_follow_up_sequences": 5.24,
+        "triage_and_respond_to_replies": 2.02,
+        "discovery_call_preparation": 4.22,
+        "conduct_discovery_calls": 2.44,
+        "debrief_discovery_calls": 4.86,
+        "map_stakeholders": 1.92,
+        "prepare_product_demo": 1.79,
+        "deliver_product_demo": 2.4,
+        "handle_objections": 1.8,
+        "draft_proposals": 4.67,
+        "negotiate_contracts": 0.52,
+        "close_and_handoff_deals": 1.41
+      }
+    },
+    {
+      "week": 10,
+      "adoption_pct": 75.0,
+      "learning_pct": 95.0,
+      "effective_reduction_avg": 20.3,
+      "baseline_latency_hrs": 255.86,
+      "gong_latency_hrs": 198.24,
+      "latency_delta_hrs": 57.63,
+      "latency_delta_pct": 0.4,
+      "baseline_work_min": 258.85,
+      "gong_work_min": 208.59,
+      "work_saved_min": 50.26,
+      "work_saved_pct": -56.3,
+      "baseline_throughput": 9.27,
+      "gong_throughput": 11.51,
+      "throughput_lift_pct": 24.1,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.65,
+        388.52
+      ],
+      "ci_work_saved": [
+        -346.53,
+        437.37
+      ],
+      "ci_throughput_gong": [
+        5.43,
+        75.23
+      ],
+      "node_savings_min": {
+        "prospect_research": 8.23,
+        "draft_outreach_messages": 6.54,
+        "send_and_log_outreach": 4.78,
+        "manage_follow_up_sequences": 5.06,
+        "triage_and_respond_to_replies": 1.69,
+        "discovery_call_preparation": 3.68,
+        "conduct_discovery_calls": 1.79,
+        "debrief_discovery_calls": 4.81,
+        "map_stakeholders": 2.02,
+        "prepare_product_demo": 2.24,
+        "deliver_product_demo": 2.1,
+        "handle_objections": 1.12,
+        "draft_proposals": 3.89,
+        "negotiate_contracts": 0.86,
+        "close_and_handoff_deals": 1.45
+      }
+    },
+    {
+      "week": 11,
+      "adoption_pct": 75.0,
+      "learning_pct": 96.3,
+      "effective_reduction_avg": 20.6,
+      "baseline_latency_hrs": 258.35,
+      "gong_latency_hrs": 200.29,
+      "latency_delta_hrs": 58.05,
+      "latency_delta_pct": -1.2,
+      "baseline_work_min": 260.46,
+      "gong_work_min": 211.27,
+      "work_saved_min": 49.19,
+      "work_saved_pct": -54.8,
+      "baseline_throughput": 9.21,
+      "gong_throughput": 11.36,
+      "throughput_lift_pct": 23.3,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.48,
+        408.49
+      ],
+      "ci_work_saved": [
+        -341.0,
+        438.85
+      ],
+      "ci_throughput_gong": [
+        5.49,
+        83.95
+      ],
+      "node_savings_min": {
+        "prospect_research": 8.44,
+        "draft_outreach_messages": 6.85,
+        "send_and_log_outreach": 5.13,
+        "manage_follow_up_sequences": 5.17,
+        "triage_and_respond_to_replies": 1.96,
+        "discovery_call_preparation": 3.89,
+        "conduct_discovery_calls": 1.8,
+        "debrief_discovery_calls": 4.52,
+        "map_stakeholders": 1.34,
+        "prepare_product_demo": 1.0,
+        "deliver_product_demo": 1.53,
+        "handle_objections": 1.79,
+        "draft_proposals": 4.38,
+        "negotiate_contracts": -0.0,
+        "close_and_handoff_deals": 1.4
+      }
+    },
+    {
+      "week": 12,
+      "adoption_pct": 75.0,
+      "learning_pct": 97.3,
+      "effective_reduction_avg": 20.8,
+      "baseline_latency_hrs": 258.28,
+      "gong_latency_hrs": 193.63,
+      "latency_delta_hrs": 64.65,
+      "latency_delta_pct": 3.4,
+      "baseline_work_min": 257.76,
+      "gong_work_min": 209.6,
+      "work_saved_min": 48.16,
+      "work_saved_pct": -55.0,
+      "baseline_throughput": 9.31,
+      "gong_throughput": 11.45,
+      "throughput_lift_pct": 23.0,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.48,
+        388.51
+      ],
+      "ci_work_saved": [
+        -340.91,
+        446.45
+      ],
+      "ci_throughput_gong": [
+        5.43,
+        84.31
+      ],
+      "node_savings_min": {
+        "prospect_research": 8.35,
+        "draft_outreach_messages": 6.77,
+        "send_and_log_outreach": 5.02,
+        "manage_follow_up_sequences": 5.23,
+        "triage_and_respond_to_replies": 1.86,
+        "discovery_call_preparation": 3.9,
+        "conduct_discovery_calls": 1.53,
+        "debrief_discovery_calls": 4.47,
+        "map_stakeholders": 1.12,
+        "prepare_product_demo": 0.88,
+        "deliver_product_demo": 0.12,
+        "handle_objections": 1.47,
+        "draft_proposals": 4.23,
+        "negotiate_contracts": 1.54,
+        "close_and_handoff_deals": 1.68
+      }
+    }
+  ],
+  "summary": {
+    "week_0": {
+      "week": 0,
+      "adoption_pct": 2.0,
+      "learning_pct": 0.0,
+      "effective_reduction_avg": 0.0,
+      "baseline_latency_hrs": 254.17,
+      "gong_latency_hrs": 230.84,
+      "latency_delta_hrs": 23.32,
+      "latency_delta_pct": -16.7,
+      "baseline_work_min": 256.74,
+      "gong_work_min": 247.64,
+      "work_saved_min": 9.1,
+      "work_saved_pct": -86.1,
+      "baseline_throughput": 9.35,
+      "gong_throughput": 9.69,
+      "throughput_lift_pct": 3.7,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.71,
+        455.19
+      ],
+      "ci_work_saved": [
+        -416.92,
+        421.39
+      ],
+      "ci_throughput_gong": [
+        4.69,
+        57.62
+      ],
+      "node_savings_min": {
+        "prospect_research": -0.11,
+        "draft_outreach_messages": 1.4,
+        "send_and_log_outreach": 1.62,
+        "manage_follow_up_sequences": 0.09,
+        "triage_and_respond_to_replies": 0.13,
+        "discovery_call_preparation": 0.89,
+        "conduct_discovery_calls": 1.34,
+        "debrief_discovery_calls": 0.54,
+        "map_stakeholders": 0.64,
+        "prepare_product_demo": 1.03,
+        "deliver_product_demo": 1.28,
+        "handle_objections": 0.37,
+        "draft_proposals": 0.36,
+        "negotiate_contracts": -0.39,
+        "close_and_handoff_deals": -0.08
+      }
+    },
+    "week_final": {
+      "week": 12,
+      "adoption_pct": 75.0,
+      "learning_pct": 97.3,
+      "effective_reduction_avg": 20.8,
+      "baseline_latency_hrs": 258.28,
+      "gong_latency_hrs": 193.63,
+      "latency_delta_hrs": 64.65,
+      "latency_delta_pct": 3.4,
+      "baseline_work_min": 257.76,
+      "gong_work_min": 209.6,
+      "work_saved_min": 48.16,
+      "work_saved_pct": -55.0,
+      "baseline_throughput": 9.31,
+      "gong_throughput": 11.45,
+      "throughput_lift_pct": 23.0,
+      "win_rate_baseline": 0.0,
+      "win_rate_gong": 0.0,
+      "pipeline_velocity_base": 0.0,
+      "pipeline_velocity_gong": 0.0,
+      "ci_latency_gong": [
+        0.48,
+        388.51
+      ],
+      "ci_work_saved": [
+        -340.91,
+        446.45
+      ],
+      "ci_throughput_gong": [
+        5.43,
+        84.31
+      ],
+      "node_savings_min": {
+        "prospect_research": 8.35,
+        "draft_outreach_messages": 6.77,
+        "send_and_log_outreach": 5.02,
+        "manage_follow_up_sequences": 5.23,
+        "triage_and_respond_to_replies": 1.86,
+        "discovery_call_preparation": 3.9,
+        "conduct_discovery_calls": 1.53,
+        "debrief_discovery_calls": 4.47,
+        "map_stakeholders": 1.12,
+        "prepare_product_demo": 0.88,
+        "deliver_product_demo": 0.12,
+        "handle_objections": 1.47,
+        "draft_proposals": 4.23,
+        "negotiate_contracts": 1.54,
+        "close_and_handoff_deals": 1.68
+      }
+    },
+    "peak_work_saved_min": 52.95,
+    "peak_throughput_lift_pct": 24.9,
+    "peak_latency_reduction_pct": 3.4
+  }
+}

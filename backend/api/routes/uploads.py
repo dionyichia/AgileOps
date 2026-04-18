@@ -1,7 +1,6 @@
 import uuid
 from pathlib import Path
 
-import aiofiles
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,10 +29,7 @@ async def upload_file(
     tool_evaluation_id: str | None = Form(None),
     db: AsyncSession = Depends(get_db),
 ):
-    """
-    Accept a multipart file upload and store it on disk.
-    Associates the file with an optional tool evaluation.
-    """
+    """Accept a multipart file upload and store it in Supabase Storage."""
     await _get_project_or_404(project_id, db)
 
     if tool_evaluation_id:
@@ -41,27 +37,25 @@ async def upload_file(
         if not tool_eval or tool_eval.project_id != project_id:
             raise HTTPException(status_code=404, detail="Tool evaluation not found")
 
-    # Read and validate size before writing to disk
     content = await file.read()
     if len(content) > UPLOAD_MAX_BYTES:
         raise HTTPException(
             status_code=413,
-            detail=f"File exceeds the {UPLOAD_MAX_BYTES // (1024*1024)} MB limit",
+            detail=f"File exceeds the {UPLOAD_MAX_BYTES // (1024 * 1024)} MB limit",
         )
 
-    safe_name = Path(file.filename or "upload").name  # strip path traversal
+    safe_name = Path(file.filename or "upload").name
     dest_filename = f"{uuid.uuid4()}_{safe_name}"
-    dest_path = data_io.uploads_dir(project_id) / dest_filename
+    storage_path = data_io.uploads_storage_path(project_id, dest_filename)
 
-    async with aiofiles.open(dest_path, "wb") as f_out:
-        await f_out.write(content)
+    await data_io._upload(data_io.UPLOADS_BUCKET, storage_path, content)
 
     record = UploadedFile(
         project_id         = project_id,
         tool_evaluation_id = tool_evaluation_id,
         file_type          = file_type,
         original_name      = safe_name,
-        storage_path       = str(dest_path),
+        storage_path       = storage_path,
         size_bytes         = len(content),
     )
     db.add(record)
@@ -89,10 +83,7 @@ async def delete_upload(
     if not record or record.project_id != project_id:
         raise HTTPException(status_code=404, detail="File not found")
 
-    # Remove from disk (best-effort — do not fail if already gone)
-    path = Path(record.storage_path)
-    if path.exists():
-        path.unlink()
+    await data_io._delete(data_io.UPLOADS_BUCKET, record.storage_path)
 
     await db.delete(record)
     await db.commit()

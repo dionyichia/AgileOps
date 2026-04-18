@@ -112,20 +112,41 @@ export default function Dashboard() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }, [])
 
+  // Pipeline job tracking (set when navigating here from TranscriptInput "Visualise Workflow")
+  const [inboundPipelineJobId, setInboundPipelineJobId] = useState<string | null>(null)
+  const {
+    job: pipelineInboundJob,
+    isRunning: pipelineInboundRunning,
+    isDone: pipelineInboundDone,
+    isFailed: pipelineInboundFailed,
+  } = useJobProgress(inboundPipelineJobId)
+
   // Simulation job progress tracking (set when navigating here from ToolInputForm)
   const [simJobId, setSimJobId] = useState<string | null>(null)
   const { job: simJob, isRunning: simRunning, isDone: simDone, isFailed: simFailed } = useJobProgress(simJobId)
 
-  // On mount: if ToolInputForm navigated here with { openTab, jobId }, switch to report tab
+  // On mount: read nav state for either a pipeline job or a simulation job
   useEffect(() => {
-    const state = location.state as { openTab?: string; jobId?: string } | null
+    const state = location.state as { openTab?: string; jobId?: string; pipelineJobId?: string } | null
+    if (state?.pipelineJobId) {
+      setInboundPipelineJobId(state.pipelineJobId)
+    }
     if (state?.openTab) {
       focusSimulationTab(state.openTab)
       if (state.jobId) setSimJobId(state.jobId)
-      // Clear nav state so a back-forward doesn't re-trigger
+    }
+    // Clear nav state so a back-forward doesn't re-trigger
+    if (state?.pipelineJobId || state?.openTab) {
       window.history.replaceState({}, document.title, window.location.pathname)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // When the inbound pipeline job completes, bust the Markov cache and refresh
+  useEffect(() => {
+    if (!pipelineInboundDone || !projectId) return
+    clearMarkovCache(projectId)
+    setMarkovRefreshKey((k) => k + 1)
+  }, [pipelineInboundDone, projectId])
 
   // Fetch recommendation for the most recent tool eval when report tab is activated,
   // or when the simulation job finishes (simDone flips true)
@@ -463,8 +484,30 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* State B: pipeline not run yet */}
-              {!markovLoading && !isRealData && projectId && (
+              {/* State B-pipeline: pipeline kicked off from TranscriptInput, job in flight */}
+              {!markovLoading && !isRealData && projectId && inboundPipelineJobId && !pipelineInboundDone && !pipelineInboundFailed && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#F7F4FB]">
+                  <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: BRAND.violet, borderTopColor: 'transparent' }} />
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-black">
+                      {pipelineInboundJob?.current_step ?? 'Building your workflow…'}
+                    </p>
+                    <p className="text-xs text-black/42 mt-1">Generating telemetry, Markov matrix, and baseline simulation</p>
+                  </div>
+                  <div className="w-56 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(94,20,159,0.10)' }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${pipelineInboundJob?.progress_pct ?? 0}%`,
+                        background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* State B: pipeline not run yet (or failed) */}
+              {!markovLoading && !isRealData && projectId && !(inboundPipelineJobId && !pipelineInboundDone && !pipelineInboundFailed) && (
                 editMode && rawTasks.length > 0 ? (
                   /* B2: edit mode — show scrollable node list */
                   <div className="absolute inset-0 overflow-y-auto bg-[#F7F4FB] px-5 py-4">
@@ -535,6 +578,7 @@ export default function Dashboard() {
 
               {/* State C: data loaded — show ReactFlow */}
               {(!projectId || isRealData) && (
+              <>
               <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -552,6 +596,14 @@ export default function Dashboard() {
                 <MiniMap nodeColor={() => '#CFA3E2'} maskColor="rgba(247,244,251,0.7)" />
                 <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
               </ReactFlow>
+              {/* Faded overlay while Markov data reloads after pipeline completes */}
+              {markovLoading && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#F7F4FB]/80 backdrop-blur-[2px]">
+                  <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: BRAND.violet, borderTopColor: 'transparent' }} />
+                  <span className="text-sm font-medium text-black/60">Refreshing graph…</span>
+                </div>
+              )}
+              </>
               )}
 
               {/* ── Edit panel ────────────────────────────────────────── */}

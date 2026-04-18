@@ -1,19 +1,16 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { invite as inviteApi, projects } from '../api/client'
+import { projects } from '../api/client'
 import PublicNavbar from '../components/public/PublicNavbar'
 import PublicFooter from '../components/public/PublicFooter'
 
-type Status = 'validating' | 'ready' | 'invalid' | 'expired' | 'done'
+type Status = 'loading' | 'set-password' | 'error'
 
 export default function AcceptInvite() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const token = searchParams.get('token') ?? ''
 
-  const [status, setStatus] = useState<Status>('validating')
-  const [inviteEmail, setInviteEmail] = useState('')
+  const [status, setStatus] = useState<Status>('loading')
   const [projectId, setProjectId] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -21,46 +18,33 @@ export default function AcceptInvite() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!token) { setStatus('invalid'); return }
+    // Supabase JS client automatically processes the hash fragment from the
+    // invite link and fires onAuthStateChange with event SIGNED_IN.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
+          const pid = session.user.user_metadata?.project_id as string | undefined
+          if (pid) setProjectId(pid)
+          setStatus('set-password')
+        }
+      }
+    )
+    return () => subscription.unsubscribe()
+  }, [])
 
-    inviteApi.validate(token)
-      .then(({ email, project_id }) => {
-        setInviteEmail(email)
-        setProjectId(project_id)
-        setStatus('ready')
-      })
-      .catch((err: Error) => {
-        setStatus(err.message.includes('expired') || err.message.includes('410') ? 'expired' : 'invalid')
-      })
-  }, [token])
-
-  async function handleSignUp() {
+  async function handleSetPassword() {
     if (password.length < 8) { setError('Password must be at least 8 characters'); return }
     if (password !== confirm) { setError('Passwords do not match'); return }
 
     setError(null)
     setLoading(true)
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: inviteEmail,
-        password,
-      })
-      if (signUpError) throw new Error(signUpError.message)
+      const { error: updateError } = await supabase.auth.updateUser({ password })
+      if (updateError) throw new Error(updateError.message)
 
-      // Sign in immediately (in case email confirmation is off)
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: inviteEmail,
-        password,
-      })
-      if (signInError) throw new Error(signInError.message)
+      if (projectId) await projects.claim(projectId)
 
-      // Claim the project and mark invite as consumed
-      await Promise.all([
-        projects.claim(projectId),
-        inviteApi.markUsed(token),
-      ])
-
-      navigate(`/projects/${projectId}/dashboard`)
+      navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
@@ -85,27 +69,25 @@ export default function AcceptInvite() {
                 Axis
               </div>
 
-              {status === 'validating' && (
+              {status === 'loading' && (
                 <div className="mt-14">
                   <h1 className="text-[50px] md:text-[64px] leading-[0.98] font-bold tracking-[-0.05em] text-black">
                     One<br />moment…
                   </h1>
-                  <p className="mt-5 text-[18px] leading-8 text-black/42">Validating your invite link.</p>
+                  <p className="mt-5 text-[18px] leading-8 text-black/42">Setting up your workspace.</p>
                   <div className="mt-10 h-1.5 w-48 rounded-full bg-black/6 overflow-hidden">
                     <div className="h-full w-1/3 rounded-full bg-[#B4308B] animate-pulse" />
                   </div>
                 </div>
               )}
 
-              {(status === 'invalid' || status === 'expired') && (
+              {status === 'error' && (
                 <div className="mt-14">
                   <h1 className="text-[50px] md:text-[56px] leading-[0.98] font-bold tracking-[-0.05em] text-black">
-                    {status === 'expired' ? 'Link expired' : 'Invalid link'}
+                    Invalid link
                   </h1>
                   <p className="mt-5 text-[18px] leading-8 text-black/42">
-                    {status === 'expired'
-                      ? 'This invite link has expired. Please contact us for a new one.'
-                      : 'This invite link is invalid or has already been used.'}
+                    This invite link is invalid or has already been used. Please contact us for a new one.
                   </p>
                   <button
                     onClick={() => navigate('/')}
@@ -116,7 +98,7 @@ export default function AcceptInvite() {
                 </div>
               )}
 
-              {status === 'ready' && (
+              {status === 'set-password' && (
                 <>
                   <h1 className="mt-14 text-[50px] md:text-[64px] leading-[0.98] font-bold tracking-[-0.05em] text-black">
                     Create<br />Account
@@ -126,12 +108,6 @@ export default function AcceptInvite() {
                   </p>
 
                   <div className="mt-14 max-w-[420px] space-y-4">
-                    <input
-                      type="email"
-                      value={inviteEmail}
-                      readOnly
-                      className="w-full h-14 rounded-[14px] border border-black/10 px-5 text-[16px] bg-black/[0.02] text-black/50 outline-none cursor-default"
-                    />
                     <input
                       type="password"
                       placeholder="Password"
@@ -144,7 +120,7 @@ export default function AcceptInvite() {
                       placeholder="Confirm password"
                       value={confirm}
                       onChange={(e) => setConfirm(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSignUp()}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSetPassword()}
                       className="w-full h-14 rounded-[14px] border border-black/10 px-5 text-[16px] outline-none focus:border-[#B4308B]"
                     />
 
@@ -152,7 +128,7 @@ export default function AcceptInvite() {
 
                     <button
                       type="button"
-                      onClick={handleSignUp}
+                      onClick={handleSetPassword}
                       disabled={loading || !password || !confirm}
                       className="mt-5 inline-flex h-14 w-full items-center justify-center rounded-[14px] px-8 text-[18px] font-bold text-white axis-gradient-button disabled:opacity-60"
                     >

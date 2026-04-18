@@ -1,0 +1,2700 @@
+{
+  "metadata": {
+    "states": [
+      "daily_user_signal_scanning",
+      "problem_validation_triangulation",
+      "solution_flow_sketching",
+      "early_engineering_alignment",
+      "prd_creation",
+      "prd_review_iteration",
+      "feature_prioritization_planning",
+      "story_breakdown_handoff",
+      "development_progress_monitoring",
+      "mid_sprint_design_changes",
+      "pre_release_qa_validation",
+      "launch_coordination",
+      "post_launch_analysis",
+      "post_launch_feedback_monitoring",
+      "ab_test_coordination",
+      "task_scheduling_coordination",
+      "END"
+    ],
+    "state_index": {
+      "daily_user_signal_scanning": 0,
+      "problem_validation_triangulation": 1,
+      "solution_flow_sketching": 2,
+      "early_engineering_alignment": 3,
+      "prd_creation": 4,
+      "prd_review_iteration": 5,
+      "feature_prioritization_planning": 6,
+      "story_breakdown_handoff": 7,
+      "development_progress_monitoring": 8,
+      "mid_sprint_design_changes": 9,
+      "pre_release_qa_validation": 10,
+      "launch_coordination": 11,
+      "post_launch_analysis": 12,
+      "post_launch_feedback_monitoring": 13,
+      "ab_test_coordination": 14,
+      "task_scheduling_coordination": 15,
+      "END": 16
+    },
+    "n_states": 17,
+    "n_sequences": 20,
+    "n_transitions_observed": 200,
+    "non_zero_edges": 20,
+    "include_retries": false,
+    "note": "P is row-stochastic. Each row sums to 1.0 (or 0 if state never observed as source)."
+  },
+  "count_matrix": [
+    [
+      0,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      14,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      6
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      14,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      14,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      14,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      4
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      7,
+      0,
+      0,
+      0,
+      3
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      7,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      5,
+      0,
+      2
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      5,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      5
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "probability_matrix": [
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.7,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.3
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.7142857142857143,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.2857142857142857
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.7,
+      0.0,
+      0.0,
+      0.0,
+      0.3
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.7142857142857143,
+      0.0,
+      0.2857142857142857
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "node_durations": {
+    "daily_user_signal_scanning": [
+      32.5,
+      37.3,
+      28.5,
+      34.1,
+      25.7,
+      20.8,
+      25.6,
+      26.0,
+      29.6,
+      29.8,
+      34.0,
+      32.2,
+      38.6,
+      33.9,
+      27.3,
+      31.3,
+      17.8,
+      26.9,
+      26.4,
+      26.7
+    ],
+    "problem_validation_triangulation": [
+      44.3,
+      43.9,
+      42.0,
+      38.9,
+      27.2,
+      37.8,
+      33.4,
+      45.4,
+      44.9,
+      39.2,
+      52.0,
+      58.6,
+      48.2,
+      65.6,
+      39.9,
+      34.7,
+      36.9,
+      41.7,
+      48.4,
+      55.7
+    ],
+    "solution_flow_sketching": [
+      57.2,
+      52.5,
+      66.8,
+      53.7,
+      44.2,
+      53.9,
+      45.7,
+      43.0,
+      71.7,
+      61.1,
+      56.7,
+      57.6,
+      66.5,
+      68.8,
+      50.9,
+      63.4,
+      34.5,
+      46.8,
+      46.2,
+      57.1
+    ],
+    "early_engineering_alignment": [
+      37.2,
+      7.8,
+      21.9,
+      3,
+      13.7,
+      17.2,
+      18.6,
+      20.2,
+      20.1,
+      29.5,
+      43.9,
+      43.0,
+      30.1,
+      15.6,
+      9.4,
+      23.9,
+      19.1,
+      14.4,
+      24.2,
+      23.9
+    ],
+    "prd_creation": [
+      65.1,
+      62.6,
+      56.4,
+      58.5,
+      66.1,
+      48.0,
+      59.1,
+      77.5,
+      90.0,
+      61.3,
+      46.7,
+      44.5,
+      59.7,
+      61.7
+    ],
+    "prd_review_iteration": [
+      33.8,
+      29.2,
+      36.0,
+      33.2,
+      14.9,
+      26.4,
+      35.5,
+      42.1,
+      37.6,
+      30.1,
+      22.6,
+      29.8,
+      24.1,
+      39.3
+    ],
+    "feature_prioritization_planning": [
+      56.0,
+      41.5,
+      45.9,
+      40.8,
+      39.5,
+      24.9,
+      31.0,
+      56.0,
+      30.4,
+      39.5,
+      35.4,
+      36.3,
+      26.8,
+      27.5
+    ],
+    "story_breakdown_handoff": [
+      30.0,
+      30.0,
+      30.0,
+      24.0,
+      24.0,
+      24.0,
+      30.0,
+      37.5,
+      37.5,
+      24.0,
+      24.0,
+      24.0,
+      24.0,
+      30.0
+    ],
+    "development_progress_monitoring": [
+      18.6,
+      12.6,
+      12.7,
+      12.7,
+      14.4,
+      22.1,
+      12.9,
+      13.4,
+      16.8,
+      13.8
+    ],
+    "mid_sprint_design_changes": [
+      21.7,
+      20.0,
+      26.8,
+      6.1,
+      20.0,
+      33.7,
+      14.7,
+      14.1,
+      13.4,
+      36.2
+    ],
+    "pre_release_qa_validation": [
+      36.2,
+      32.7,
+      25.6,
+      26.9,
+      20.9,
+      40.3,
+      23.6,
+      20.4,
+      30.6,
+      18.7
+    ],
+    "launch_coordination": [
+      41.4,
+      55.3,
+      39.1,
+      41.8,
+      37.9,
+      63.7,
+      35.9,
+      37.8,
+      42.6,
+      43.4
+    ],
+    "post_launch_analysis": [
+      44.4,
+      28.0,
+      54.8,
+      36.6,
+      39.2,
+      48.6,
+      23.9
+    ],
+    "post_launch_feedback_monitoring": [
+      19.0,
+      21.7,
+      15.2,
+      15.2,
+      18.6,
+      18.2,
+      16.2
+    ],
+    "ab_test_coordination": [
+      33.6,
+      25.2,
+      23.1,
+      27.0,
+      31.0
+    ],
+    "task_scheduling_coordination": [
+      10.5,
+      17.0,
+      16.6,
+      16.1,
+      6.6
+    ]
+  },
+  "transition_dwell": {
+    "daily_user_signal_scanning,problem_validation_triangulation": [
+      257340.0,
+      257160.0,
+      267480.0,
+      174780.0,
+      92760.0,
+      176940.0,
+      267360.0,
+      263700.0,
+      88860.0,
+      256800.0,
+      349680.0,
+      255120.0,
+      176280.0,
+      168060.0,
+      348840.0,
+      168660.0,
+      344880.0,
+      348900.0,
+      344400.0,
+      342060.0
+    ],
+    "problem_validation_triangulation,solution_flow_sketching": [
+      85860.0,
+      344100.0,
+      164100.0,
+      345900.0,
+      344400.0,
+      78480.0,
+      165540.0,
+      255000.0,
+      260460.0,
+      259140.0,
+      85500.0,
+      85920.0,
+      347220.0,
+      94320.0,
+      348300.0,
+      261600.0,
+      175800.0,
+      340620.0,
+      350520.0,
+      177720.0
+    ],
+    "solution_flow_sketching,early_engineering_alignment": [
+      94020.0,
+      353340.0,
+      4380.0,
+      341340.0,
+      166380.0,
+      86700.0,
+      262560.0,
+      2880.0,
+      4740.0,
+      3960.0,
+      89220.0,
+      173820.0,
+      84420.0,
+      7920.0,
+      261720.0,
+      92460.0,
+      167400.0,
+      341040.0,
+      2820.0,
+      344460.0
+    ],
+    "early_engineering_alignment,prd_creation": [
+      339360.0,
+      960.0,
+      177600.0,
+      263100.0,
+      260520.0,
+      172200.0,
+      2700.0,
+      2820.0,
+      343080.0,
+      342060.0,
+      257640.0,
+      264480.0,
+      265380.0,
+      1500.0
+    ],
+    "prd_creation,prd_review_iteration": [
+      87360.0,
+      8640.0,
+      3720.0,
+      84000.0,
+      352140.0,
+      3000.0,
+      12000.0,
+      4860.0,
+      5400.0,
+      167100.0,
+      3180.0,
+      2880.0,
+      173640.0,
+      3900.0
+    ],
+    "prd_review_iteration,feature_prioritization_planning": [
+      2160.0,
+      1980.0,
+      6360.0,
+      2100.0,
+      1380.0,
+      1800.0,
+      2520.0,
+      2820.0,
+      2400.0,
+      1920.0,
+      1560.0,
+      1980.0,
+      1440.0,
+      2820.0
+    ],
+    "feature_prioritization_planning,story_breakdown_handoff": [
+      3720.0,
+      2520.0,
+      2820.0,
+      2640.0,
+      2640.0,
+      1620.0,
+      2220.0,
+      6660.0,
+      2220.0,
+      2640.0,
+      8880.0,
+      2520.0,
+      1740.0,
+      4140.0
+    ],
+    "story_breakdown_handoff,development_progress_monitoring": [
+      3900.0,
+      6480.0,
+      1560.0,
+      4260.0,
+      6240.0,
+      4680.0,
+      1680.0,
+      2940.0,
+      5640.0,
+      1680.0
+    ],
+    "development_progress_monitoring,mid_sprint_design_changes": [
+      6120.0,
+      1080.0,
+      2220.0,
+      2220.0,
+      840.0,
+      3120.0,
+      900.0,
+      1140.0,
+      2940.0,
+      960.0
+    ],
+    "mid_sprint_design_changes,pre_release_qa_validation": [
+      1560.0,
+      1500.0,
+      1980.0,
+      540.0,
+      3900.0,
+      2100.0,
+      1200.0,
+      1260.0,
+      1260.0,
+      4620.0
+    ],
+    "pre_release_qa_validation,launch_coordination": [
+      4020.0,
+      2160.0,
+      4320.0,
+      1620.0,
+      1380.0,
+      2760.0,
+      1620.0,
+      1440.0,
+      4920.0,
+      1560.0
+    ],
+    "launch_coordination,post_launch_analysis": [
+      2820.0,
+      4380.0,
+      2580.0,
+      2460.0,
+      2460.0,
+      2400.0,
+      2820.0
+    ],
+    "post_launch_analysis,post_launch_feedback_monitoring": [
+      2940.0,
+      4560.0,
+      5820.0,
+      69840.0,
+      4680.0,
+      55920.0,
+      1800.0
+    ],
+    "post_launch_feedback_monitoring,ab_test_coordination": [
+      1320.0,
+      1500.0,
+      1260.0,
+      1200.0,
+      1260.0
+    ],
+    "ab_test_coordination,task_scheduling_coordination": [
+      150000.0,
+      65100.0,
+      141720.0,
+      246300.0,
+      326280.0
+    ]
+  },
+  "edge_list": [
+    {
+      "source": "daily_user_signal_scanning",
+      "target": "problem_validation_triangulation",
+      "probability": 1.0,
+      "count": 20,
+      "time_stats": {
+        "mean": 247503.0,
+        "median": 257250.0,
+        "std": 82817.30139892267,
+        "p90": 348846.0,
+        "n": 20
+      }
+    },
+    {
+      "source": "problem_validation_triangulation",
+      "target": "solution_flow_sketching",
+      "probability": 1.0,
+      "count": 20,
+      "time_stats": {
+        "mean": 228525.0,
+        "median": 257070.0,
+        "std": 103765.36047737703,
+        "p90": 347328.0,
+        "n": 20
+      }
+    },
+    {
+      "source": "solution_flow_sketching",
+      "target": "early_engineering_alignment",
+      "probability": 1.0,
+      "count": 20,
+      "time_stats": {
+        "mean": 144279.0,
+        "median": 93240.0,
+        "std": 127176.42273236027,
+        "p90": 341652.0,
+        "n": 20
+      }
+    },
+    {
+      "source": "early_engineering_alignment",
+      "target": "prd_creation",
+      "probability": 0.7,
+      "count": 14,
+      "time_stats": {
+        "mean": 192385.7142857143,
+        "median": 259080.0,
+        "std": 130044.59002941402,
+        "p90": 341250.0,
+        "n": 14
+      }
+    },
+    {
+      "source": "early_engineering_alignment",
+      "target": "END",
+      "probability": 0.3,
+      "count": 6
+    },
+    {
+      "source": "prd_creation",
+      "target": "prd_review_iteration",
+      "probability": 1.0,
+      "count": 14,
+      "time_stats": {
+        "mean": 65130.0,
+        "median": 7020.0,
+        "std": 99176.84659233727,
+        "p90": 171678.0,
+        "n": 14
+      }
+    },
+    {
+      "source": "prd_review_iteration",
+      "target": "feature_prioritization_planning",
+      "probability": 1.0,
+      "count": 14,
+      "time_stats": {
+        "mean": 2374.285714285714,
+        "median": 2040.0,
+        "std": 1189.1756705845457,
+        "p90": 2820.0,
+        "n": 14
+      }
+    },
+    {
+      "source": "feature_prioritization_planning",
+      "target": "story_breakdown_handoff",
+      "probability": 1.0,
+      "count": 14,
+      "time_stats": {
+        "mean": 3355.714285714286,
+        "median": 2640.0,
+        "std": 1956.8075833784342,
+        "p90": 5904.000000000003,
+        "n": 14
+      }
+    },
+    {
+      "source": "story_breakdown_handoff",
+      "target": "development_progress_monitoring",
+      "probability": 0.7143,
+      "count": 10,
+      "time_stats": {
+        "mean": 3906.0,
+        "median": 4080.0,
+        "std": 1793.0766854766698,
+        "p90": 6264.0,
+        "n": 10
+      }
+    },
+    {
+      "source": "story_breakdown_handoff",
+      "target": "END",
+      "probability": 0.2857,
+      "count": 4
+    },
+    {
+      "source": "development_progress_monitoring",
+      "target": "mid_sprint_design_changes",
+      "probability": 1.0,
+      "count": 10,
+      "time_stats": {
+        "mean": 2154.0,
+        "median": 1680.0,
+        "std": 1555.4819188920198,
+        "p90": 3419.999999999999,
+        "n": 10
+      }
+    },
+    {
+      "source": "mid_sprint_design_changes",
+      "target": "pre_release_qa_validation",
+      "probability": 1.0,
+      "count": 10,
+      "time_stats": {
+        "mean": 1992.0,
+        "median": 1530.0,
+        "std": 1216.3289028877016,
+        "p90": 3971.9999999999995,
+        "n": 10
+      }
+    },
+    {
+      "source": "pre_release_qa_validation",
+      "target": "launch_coordination",
+      "probability": 1.0,
+      "count": 10,
+      "time_stats": {
+        "mean": 2580.0,
+        "median": 1890.0,
+        "std": 1280.968383684781,
+        "p90": 4380.0,
+        "n": 10
+      }
+    },
+    {
+      "source": "launch_coordination",
+      "target": "post_launch_analysis",
+      "probability": 0.7,
+      "count": 7,
+      "time_stats": {
+        "mean": 2845.714285714286,
+        "median": 2580.0,
+        "std": 646.1060758300373,
+        "p90": 3444.0000000000005,
+        "n": 7
+      }
+    },
+    {
+      "source": "launch_coordination",
+      "target": "END",
+      "probability": 0.3,
+      "count": 3
+    },
+    {
+      "source": "post_launch_analysis",
+      "target": "post_launch_feedback_monitoring",
+      "probability": 1.0,
+      "count": 7,
+      "time_stats": {
+        "mean": 20794.285714285714,
+        "median": 4680.0,
+        "std": 26902.75549197934,
+        "p90": 61488.00000000001,
+        "n": 7
+      }
+    },
+    {
+      "source": "post_launch_feedback_monitoring",
+      "target": "ab_test_coordination",
+      "probability": 0.7143,
+      "count": 5,
+      "time_stats": {
+        "mean": 1308.0,
+        "median": 1260.0,
+        "std": 103.22790320451152,
+        "p90": 1428.0,
+        "n": 5
+      }
+    },
+    {
+      "source": "post_launch_feedback_monitoring",
+      "target": "END",
+      "probability": 0.2857,
+      "count": 2
+    },
+    {
+      "source": "ab_test_coordination",
+      "target": "task_scheduling_coordination",
+      "probability": 1.0,
+      "count": 5,
+      "time_stats": {
+        "mean": 185880.0,
+        "median": 150000.0,
+        "std": 90761.25252551334,
+        "p90": 294288.0,
+        "n": 5
+      }
+    },
+    {
+      "source": "task_scheduling_coordination",
+      "target": "END",
+      "probability": 1.0,
+      "count": 5
+    }
+  ],
+  "sequences": [
+    {
+      "deal": "('emp_001', 'deal_132687')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-01-08 08:45"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-01-11 08:14"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-01-12 08:05"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-01-13 10:12"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-01-17 08:28"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-01-18 08:44"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-01-18 09:20"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-01-18 10:22"
+        },
+        {
+          "node": "development_progress_monitoring",
+          "timestamp": "2024-01-18 11:27"
+        },
+        {
+          "node": "mid_sprint_design_changes",
+          "timestamp": "2024-01-18 13:09"
+        },
+        {
+          "node": "pre_release_qa_validation",
+          "timestamp": "2024-01-18 13:35"
+        },
+        {
+          "node": "launch_coordination",
+          "timestamp": "2024-01-18 14:42"
+        },
+        {
+          "node": "post_launch_analysis",
+          "timestamp": "2024-01-18 15:29"
+        },
+        {
+          "node": "post_launch_feedback_monitoring",
+          "timestamp": "2024-01-18 16:18"
+        },
+        {
+          "node": "ab_test_coordination",
+          "timestamp": "2024-01-18 16:40"
+        },
+        {
+          "node": "task_scheduling_coordination",
+          "timestamp": "2024-01-20 10:20"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_001', 'deal_dede91')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-01-10 09:15"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-01-13 08:41"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-01-17 08:16"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-01-21 10:25"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-01-21 10:41"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-01-21 13:05"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-01-21 13:38"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-01-21 14:20"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_001', 'deal_0b727d')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-01-15 08:30"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-01-18 10:48"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-01-20 08:23"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-01-20 09:36"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_001', 'deal_2074d5')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-01-17 09:32"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-01-19 10:05"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-01-23 10:10"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-01-27 08:59"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-01-29 10:19"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-01-29 11:21"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-01-29 13:07"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-01-29 13:54"
+        },
+        {
+          "node": "development_progress_monitoring",
+          "timestamp": "2024-01-29 15:42"
+        },
+        {
+          "node": "mid_sprint_design_changes",
+          "timestamp": "2024-01-29 16:00"
+        },
+        {
+          "node": "pre_release_qa_validation",
+          "timestamp": "2024-01-29 16:25"
+        },
+        {
+          "node": "launch_coordination",
+          "timestamp": "2024-01-29 17:01"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_5e1638')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-01-22 08:55"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-01-23 10:41"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-01-27 10:21"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-01-29 08:34"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-02-01 09:39"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-02-02 08:59"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-02-02 09:34"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-02-02 10:18"
+        },
+        {
+          "node": "development_progress_monitoring",
+          "timestamp": "2024-02-02 10:44"
+        },
+        {
+          "node": "mid_sprint_design_changes",
+          "timestamp": "2024-02-02 11:21"
+        },
+        {
+          "node": "pre_release_qa_validation",
+          "timestamp": "2024-02-02 11:54"
+        },
+        {
+          "node": "launch_coordination",
+          "timestamp": "2024-02-02 13:06"
+        },
+        {
+          "node": "post_launch_analysis",
+          "timestamp": "2024-02-02 14:19"
+        },
+        {
+          "node": "post_launch_feedback_monitoring",
+          "timestamp": "2024-02-02 15:35"
+        },
+        {
+          "node": "ab_test_coordination",
+          "timestamp": "2024-02-02 16:00"
+        },
+        {
+          "node": "task_scheduling_coordination",
+          "timestamp": "2024-02-03 10:05"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_9a508c')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-01-24 09:32"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-01-26 10:41"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-01-27 08:29"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-01-28 08:34"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-01-31 08:56"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-02-04 10:45"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-02-04 11:08"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-02-04 11:52"
+        },
+        {
+          "node": "development_progress_monitoring",
+          "timestamp": "2024-02-04 13:03"
+        },
+        {
+          "node": "mid_sprint_design_changes",
+          "timestamp": "2024-02-04 13:40"
+        },
+        {
+          "node": "pre_release_qa_validation",
+          "timestamp": "2024-02-04 13:49"
+        },
+        {
+          "node": "launch_coordination",
+          "timestamp": "2024-02-04 14:16"
+        },
+        {
+          "node": "post_launch_analysis",
+          "timestamp": "2024-02-04 14:59"
+        },
+        {
+          "node": "post_launch_feedback_monitoring",
+          "timestamp": "2024-02-04 16:36"
+        },
+        {
+          "node": "ab_test_coordination",
+          "timestamp": "2024-02-04 16:57"
+        },
+        {
+          "node": "task_scheduling_coordination",
+          "timestamp": "2024-02-06 08:19"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_7588e5')",
+      "outcome": "no_response",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-01-29 08:40"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-02-01 10:56"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-02-03 08:55"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-02-06 09:51"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-02-08 09:41"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-02-08 10:31"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-02-08 11:01"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-02-08 11:28"
+        },
+        {
+          "node": "development_progress_monitoring",
+          "timestamp": "2024-02-08 13:12"
+        },
+        {
+          "node": "mid_sprint_design_changes",
+          "timestamp": "2024-02-08 13:26"
+        },
+        {
+          "node": "pre_release_qa_validation",
+          "timestamp": "2024-02-08 14:31"
+        },
+        {
+          "node": "launch_coordination",
+          "timestamp": "2024-02-08 14:54"
+        },
+        {
+          "node": "post_launch_analysis",
+          "timestamp": "2024-02-08 15:35"
+        },
+        {
+          "node": "post_launch_feedback_monitoring",
+          "timestamp": "2024-02-09 10:59"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_002', 'deal_4a20b3')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-02-01 09:39"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-02-04 10:54"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-02-07 09:44"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-02-07 10:32"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_003', 'deal_1c47f0')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-02-05 08:50"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-02-06 09:31"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-02-09 09:52"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-02-09 11:11"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_003', 'deal_93bda3')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-02-07 09:32"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-02-10 08:52"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-02-13 08:51"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-02-13 09:57"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_003', 'deal_f971b7')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-02-12 08:35"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-02-16 09:43"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-02-17 09:28"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-02-18 10:15"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-02-18 11:00"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-02-18 14:20"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-02-18 15:02"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-02-18 15:39"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_004', 'deal_22be0a')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-02-14 09:25"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-02-17 08:17"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-02-18 08:09"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-02-20 08:26"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-02-20 09:13"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-02-20 10:34"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-02-20 11:21"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-02-20 13:12"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_004', 'deal_937ce1')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-02-19 08:45"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-02-21 09:43"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-02-25 10:10"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-02-26 09:37"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-03-01 08:55"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-03-01 10:25"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-03-01 11:05"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-03-01 11:42"
+        },
+        {
+          "node": "development_progress_monitoring",
+          "timestamp": "2024-03-01 13:00"
+        },
+        {
+          "node": "mid_sprint_design_changes",
+          "timestamp": "2024-03-01 13:52"
+        },
+        {
+          "node": "pre_release_qa_validation",
+          "timestamp": "2024-03-01 14:27"
+        },
+        {
+          "node": "launch_coordination",
+          "timestamp": "2024-03-01 15:13"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_004', 'deal_34125c')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-02-21 09:56"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-02-23 08:37"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-02-24 10:49"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-02-24 13:01"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_2f1ebf')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-02-26 08:30"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-03-01 09:24"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-03-05 10:09"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-03-08 10:51"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-03-12 09:52"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-03-14 08:17"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-03-14 08:49"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-03-14 09:33"
+        },
+        {
+          "node": "development_progress_monitoring",
+          "timestamp": "2024-03-14 10:01"
+        },
+        {
+          "node": "mid_sprint_design_changes",
+          "timestamp": "2024-03-14 10:16"
+        },
+        {
+          "node": "pre_release_qa_validation",
+          "timestamp": "2024-03-14 10:36"
+        },
+        {
+          "node": "launch_coordination",
+          "timestamp": "2024-03-14 11:03"
+        },
+        {
+          "node": "post_launch_analysis",
+          "timestamp": "2024-03-14 11:44"
+        },
+        {
+          "node": "post_launch_feedback_monitoring",
+          "timestamp": "2024-03-14 13:02"
+        },
+        {
+          "node": "ab_test_coordination",
+          "timestamp": "2024-03-14 13:22"
+        },
+        {
+          "node": "task_scheduling_coordination",
+          "timestamp": "2024-03-17 09:47"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_1fe69b')",
+      "outcome": "no_response",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-02-28 09:22"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-03-01 08:13"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-03-04 08:53"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-03-05 10:34"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-03-08 10:08"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-03-08 11:01"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-03-08 11:27"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-03-08 13:55"
+        },
+        {
+          "node": "development_progress_monitoring",
+          "timestamp": "2024-03-08 14:44"
+        },
+        {
+          "node": "mid_sprint_design_changes",
+          "timestamp": "2024-03-08 15:03"
+        },
+        {
+          "node": "pre_release_qa_validation",
+          "timestamp": "2024-03-08 15:24"
+        },
+        {
+          "node": "launch_coordination",
+          "timestamp": "2024-03-08 15:48"
+        },
+        {
+          "node": "post_launch_analysis",
+          "timestamp": "2024-03-08 16:28"
+        },
+        {
+          "node": "post_launch_feedback_monitoring",
+          "timestamp": "2024-03-09 08:00"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_879c70')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-03-04 08:55"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-03-08 08:43"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-03-10 09:33"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-03-12 08:03"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-03-15 09:31"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-03-15 10:19"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-03-15 10:52"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-03-15 11:34"
+        },
+        {
+          "node": "development_progress_monitoring",
+          "timestamp": "2024-03-15 13:08"
+        },
+        {
+          "node": "mid_sprint_design_changes",
+          "timestamp": "2024-03-15 13:57"
+        },
+        {
+          "node": "pre_release_qa_validation",
+          "timestamp": "2024-03-15 14:18"
+        },
+        {
+          "node": "launch_coordination",
+          "timestamp": "2024-03-15 15:40"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_005', 'deal_065835')",
+      "outcome": "closed_won",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-03-06 09:57"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-03-10 10:52"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-03-14 09:29"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-03-18 08:13"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-03-21 09:56"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-03-23 10:10"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-03-23 10:34"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-03-23 11:03"
+        },
+        {
+          "node": "development_progress_monitoring",
+          "timestamp": "2024-03-23 11:31"
+        },
+        {
+          "node": "mid_sprint_design_changes",
+          "timestamp": "2024-03-23 11:47"
+        },
+        {
+          "node": "pre_release_qa_validation",
+          "timestamp": "2024-03-23 13:04"
+        },
+        {
+          "node": "launch_coordination",
+          "timestamp": "2024-03-23 13:30"
+        },
+        {
+          "node": "post_launch_analysis",
+          "timestamp": "2024-03-23 14:17"
+        },
+        {
+          "node": "post_launch_feedback_monitoring",
+          "timestamp": "2024-03-23 14:47"
+        },
+        {
+          "node": "ab_test_coordination",
+          "timestamp": "2024-03-23 15:08"
+        },
+        {
+          "node": "task_scheduling_coordination",
+          "timestamp": "2024-03-27 09:46"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_006', 'deal_39bbf0')",
+      "outcome": "disqualified",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-03-11 08:40"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-03-15 08:20"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-03-19 09:42"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-03-19 10:29"
+        }
+      ]
+    },
+    {
+      "deal": "('emp_006', 'deal_800fe9')",
+      "outcome": "lost",
+      "sequence": [
+        {
+          "node": "daily_user_signal_scanning",
+          "timestamp": "2024-03-13 09:32"
+        },
+        {
+          "node": "problem_validation_triangulation",
+          "timestamp": "2024-03-17 08:33"
+        },
+        {
+          "node": "solution_flow_sketching",
+          "timestamp": "2024-03-19 09:55"
+        },
+        {
+          "node": "early_engineering_alignment",
+          "timestamp": "2024-03-23 09:36"
+        },
+        {
+          "node": "prd_creation",
+          "timestamp": "2024-03-23 10:01"
+        },
+        {
+          "node": "prd_review_iteration",
+          "timestamp": "2024-03-23 11:06"
+        },
+        {
+          "node": "feature_prioritization_planning",
+          "timestamp": "2024-03-23 11:53"
+        },
+        {
+          "node": "story_breakdown_handoff",
+          "timestamp": "2024-03-23 13:02"
+        }
+      ]
+    }
+  ],
+  "top_transitions": [
+    {
+      "from": "daily_user_signal_scanning",
+      "to": "problem_validation_triangulation",
+      "count": 20
+    },
+    {
+      "from": "problem_validation_triangulation",
+      "to": "solution_flow_sketching",
+      "count": 20
+    },
+    {
+      "from": "solution_flow_sketching",
+      "to": "early_engineering_alignment",
+      "count": 20
+    },
+    {
+      "from": "early_engineering_alignment",
+      "to": "prd_creation",
+      "count": 14
+    },
+    {
+      "from": "prd_creation",
+      "to": "prd_review_iteration",
+      "count": 14
+    },
+    {
+      "from": "prd_review_iteration",
+      "to": "feature_prioritization_planning",
+      "count": 14
+    },
+    {
+      "from": "feature_prioritization_planning",
+      "to": "story_breakdown_handoff",
+      "count": 14
+    },
+    {
+      "from": "story_breakdown_handoff",
+      "to": "development_progress_monitoring",
+      "count": 10
+    },
+    {
+      "from": "development_progress_monitoring",
+      "to": "mid_sprint_design_changes",
+      "count": 10
+    },
+    {
+      "from": "mid_sprint_design_changes",
+      "to": "pre_release_qa_validation",
+      "count": 10
+    },
+    {
+      "from": "pre_release_qa_validation",
+      "to": "launch_coordination",
+      "count": 10
+    },
+    {
+      "from": "launch_coordination",
+      "to": "post_launch_analysis",
+      "count": 7
+    },
+    {
+      "from": "post_launch_analysis",
+      "to": "post_launch_feedback_monitoring",
+      "count": 7
+    },
+    {
+      "from": "post_launch_feedback_monitoring",
+      "to": "ab_test_coordination",
+      "count": 5
+    },
+    {
+      "from": "ab_test_coordination",
+      "to": "task_scheduling_coordination",
+      "count": 5
+    }
+  ],
+  "graph": {
+    "daily_user_signal_scanning": [
+      {
+        "target": "problem_validation_triangulation",
+        "probability": 1.0,
+        "time_samples": [
+          257340.0,
+          257160.0,
+          267480.0,
+          174780.0,
+          92760.0,
+          176940.0,
+          267360.0,
+          263700.0,
+          88860.0,
+          256800.0,
+          349680.0,
+          255120.0,
+          176280.0,
+          168060.0,
+          348840.0,
+          168660.0,
+          344880.0,
+          348900.0,
+          344400.0,
+          342060.0
+        ]
+      }
+    ],
+    "problem_validation_triangulation": [
+      {
+        "target": "solution_flow_sketching",
+        "probability": 1.0,
+        "time_samples": [
+          85860.0,
+          344100.0,
+          164100.0,
+          345900.0,
+          344400.0,
+          78480.0,
+          165540.0,
+          255000.0,
+          260460.0,
+          259140.0,
+          85500.0,
+          85920.0,
+          347220.0,
+          94320.0,
+          348300.0,
+          261600.0,
+          175800.0,
+          340620.0,
+          350520.0,
+          177720.0
+        ]
+      }
+    ],
+    "solution_flow_sketching": [
+      {
+        "target": "early_engineering_alignment",
+        "probability": 1.0,
+        "time_samples": [
+          94020.0,
+          353340.0,
+          4380.0,
+          341340.0,
+          166380.0,
+          86700.0,
+          262560.0,
+          2880.0,
+          4740.0,
+          3960.0,
+          89220.0,
+          173820.0,
+          84420.0,
+          7920.0,
+          261720.0,
+          92460.0,
+          167400.0,
+          341040.0,
+          2820.0,
+          344460.0
+        ]
+      }
+    ],
+    "early_engineering_alignment": [
+      {
+        "target": "prd_creation",
+        "probability": 0.7,
+        "time_samples": [
+          339360.0,
+          960.0,
+          177600.0,
+          263100.0,
+          260520.0,
+          172200.0,
+          2700.0,
+          2820.0,
+          343080.0,
+          342060.0,
+          257640.0,
+          264480.0,
+          265380.0,
+          1500.0
+        ]
+      },
+      {
+        "target": "END",
+        "probability": 0.3,
+        "time_samples": []
+      }
+    ],
+    "prd_creation": [
+      {
+        "target": "prd_review_iteration",
+        "probability": 1.0,
+        "time_samples": [
+          87360.0,
+          8640.0,
+          3720.0,
+          84000.0,
+          352140.0,
+          3000.0,
+          12000.0,
+          4860.0,
+          5400.0,
+          167100.0,
+          3180.0,
+          2880.0,
+          173640.0,
+          3900.0
+        ]
+      }
+    ],
+    "prd_review_iteration": [
+      {
+        "target": "feature_prioritization_planning",
+        "probability": 1.0,
+        "time_samples": [
+          2160.0,
+          1980.0,
+          6360.0,
+          2100.0,
+          1380.0,
+          1800.0,
+          2520.0,
+          2820.0,
+          2400.0,
+          1920.0,
+          1560.0,
+          1980.0,
+          1440.0,
+          2820.0
+        ]
+      }
+    ],
+    "feature_prioritization_planning": [
+      {
+        "target": "story_breakdown_handoff",
+        "probability": 1.0,
+        "time_samples": [
+          3720.0,
+          2520.0,
+          2820.0,
+          2640.0,
+          2640.0,
+          1620.0,
+          2220.0,
+          6660.0,
+          2220.0,
+          2640.0,
+          8880.0,
+          2520.0,
+          1740.0,
+          4140.0
+        ]
+      }
+    ],
+    "story_breakdown_handoff": [
+      {
+        "target": "development_progress_monitoring",
+        "probability": 0.7143,
+        "time_samples": [
+          3900.0,
+          6480.0,
+          1560.0,
+          4260.0,
+          6240.0,
+          4680.0,
+          1680.0,
+          2940.0,
+          5640.0,
+          1680.0
+        ]
+      },
+      {
+        "target": "END",
+        "probability": 0.2857,
+        "time_samples": []
+      }
+    ],
+    "development_progress_monitoring": [
+      {
+        "target": "mid_sprint_design_changes",
+        "probability": 1.0,
+        "time_samples": [
+          6120.0,
+          1080.0,
+          2220.0,
+          2220.0,
+          840.0,
+          3120.0,
+          900.0,
+          1140.0,
+          2940.0,
+          960.0
+        ]
+      }
+    ],
+    "mid_sprint_design_changes": [
+      {
+        "target": "pre_release_qa_validation",
+        "probability": 1.0,
+        "time_samples": [
+          1560.0,
+          1500.0,
+          1980.0,
+          540.0,
+          3900.0,
+          2100.0,
+          1200.0,
+          1260.0,
+          1260.0,
+          4620.0
+        ]
+      }
+    ],
+    "pre_release_qa_validation": [
+      {
+        "target": "launch_coordination",
+        "probability": 1.0,
+        "time_samples": [
+          4020.0,
+          2160.0,
+          4320.0,
+          1620.0,
+          1380.0,
+          2760.0,
+          1620.0,
+          1440.0,
+          4920.0,
+          1560.0
+        ]
+      }
+    ],
+    "launch_coordination": [
+      {
+        "target": "post_launch_analysis",
+        "probability": 0.7,
+        "time_samples": [
+          2820.0,
+          4380.0,
+          2580.0,
+          2460.0,
+          2460.0,
+          2400.0,
+          2820.0
+        ]
+      },
+      {
+        "target": "END",
+        "probability": 0.3,
+        "time_samples": []
+      }
+    ],
+    "post_launch_analysis": [
+      {
+        "target": "post_launch_feedback_monitoring",
+        "probability": 1.0,
+        "time_samples": [
+          2940.0,
+          4560.0,
+          5820.0,
+          69840.0,
+          4680.0,
+          55920.0,
+          1800.0
+        ]
+      }
+    ],
+    "post_launch_feedback_monitoring": [
+      {
+        "target": "ab_test_coordination",
+        "probability": 0.7143,
+        "time_samples": [
+          1320.0,
+          1500.0,
+          1260.0,
+          1200.0,
+          1260.0
+        ]
+      },
+      {
+        "target": "END",
+        "probability": 0.2857,
+        "time_samples": []
+      }
+    ],
+    "ab_test_coordination": [
+      {
+        "target": "task_scheduling_coordination",
+        "probability": 1.0,
+        "time_samples": [
+          150000.0,
+          65100.0,
+          141720.0,
+          246300.0,
+          326280.0
+        ]
+      }
+    ],
+    "task_scheduling_coordination": [
+      {
+        "target": "END",
+        "probability": 1.0,
+        "time_samples": []
+      }
+    ],
+    "END": []
+  }
+}

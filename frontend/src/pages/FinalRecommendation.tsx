@@ -137,7 +137,7 @@ export default function FinalRecommendation() {
       embedded={isFlatClient}
       backPath={isFlatClient ? dashboardBackPath : undefined}
       onNext={() =>
-        navigate(isProjectScoped ? `/projects/${projectId}/transcripts` : dashboardBackPath)
+        navigate(isProjectScoped ? `/projects/${projectId}/dashboard` : dashboardBackPath)
       }
       nextLabel="Back to Dashboard"
       nextDisabled={false}
@@ -347,11 +347,11 @@ export default function FinalRecommendation() {
             </button>
             <button
               onClick={() =>
-                navigate(isProjectScoped ? `/projects/${projectId}/transcripts` : dashboardBackPath)
+                navigate(isProjectScoped ? `/projects/${projectId}/dashboard` : dashboardBackPath)
               }
               className="flex items-center gap-2 border border-black/10 hover:border-black/18 text-black/62 hover:text-black font-medium px-5 py-3 rounded-full text-sm transition-colors"
             >
-              {isProjectScoped ? 'Back to Project' : 'Back to Dashboard'}
+              Back to Dashboard
             </button>
           </div>
         </div>

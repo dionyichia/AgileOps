@@ -8,15 +8,23 @@ Design notes:
   coroutine, which must open its own DB session — never reuse the request
   session after the response has been sent.
 - Scripts are invoked via asyncio.create_subprocess_exec (non-blocking).
+- All pipeline file I/O goes through Supabase Storage. Before spawning a
+  script, required inputs are downloaded to a temp directory; after the
+  script completes, outputs are uploaded back to Storage. The temp directory
+  is always cleaned up regardless of success or failure.
 """
 
 import asyncio
+import json
 import logging
 import re
+import shutil
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.deps import async_session
@@ -25,7 +33,6 @@ from backend.api.services import data_io, ws_manager
 
 logger = logging.getLogger(__name__)
 
-# Project root — scripts are invoked relative to this
 _PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 
@@ -40,10 +47,9 @@ async def create_job(db: AsyncSession, project_id: str, job_type: JobType) -> Jo
     return job
 
 
-# ── DB update helper ───────────────────────────────────────────────────────────
+# ── DB update helpers ──────────────────────────────────────────────────────────
 
 async def _update_job(job_id: str, **fields) -> None:
-    """Update job fields in a fresh session (safe to call from background tasks)."""
     async with async_session() as db:
         job = await db.get(Job, job_id)
         if job is None:
@@ -55,13 +61,7 @@ async def _update_job(job_id: str, **fields) -> None:
 
 
 async def _progress(job_id: str, pct: int, step: str) -> None:
-    """Update job progress and broadcast to connected WebSocket clients."""
-    await _update_job(
-        job_id,
-        status=JobStatus.running,
-        progress_pct=pct,
-        current_step=step,
-    )
+    await _update_job(job_id, status=JobStatus.running, progress_pct=pct, current_step=step)
     await ws_manager.broadcast(job_id, {"type": "progress", "pct": pct, "step": step})
 
 
@@ -92,10 +92,6 @@ async def _fail(job_id: str, error: str) -> None:
 # ── Script runner ──────────────────────────────────────────────────────────────
 
 async def _run_script(args: list[str]) -> tuple[int, str, str]:
-    """
-    Run a Python script as a subprocess.
-    Returns (returncode, stdout, stderr).
-    """
     proc = await asyncio.create_subprocess_exec(
         sys.executable,
         *args,
@@ -112,97 +108,139 @@ async def _run_script(args: list[str]) -> tuple[int, str, str]:
 async def run_transcript_job(job_id: str, transcript_id: str, project_id: str) -> None:
     """
     Parse a transcript with transcript_to_tasks.py and merge into all_tasks.json.
-    Runs as a FastAPI BackgroundTask.
+
+    Downloads the transcript text from Storage (falls back to DB raw_text field),
+    runs the script in a temp directory, then uploads the updated all_tasks.json
+    back to Storage.
     """
-    await _update_job(
-        job_id,
-        status=JobStatus.running,
-        started_at=datetime.now(timezone.utc),
-    )
+    await _update_job(job_id, status=JobStatus.running, started_at=datetime.now(timezone.utc))
+    tmp = tempfile.mkdtemp()
+    tmp_path = Path(tmp)
     try:
         await _progress(job_id, 10, "Reading transcript")
 
-        transcript_path = data_io.transcripts_dir(project_id) / f"{transcript_id}.txt"
-        tasks_path = data_io.project_data_dir(project_id) / "all_tasks.json"
+        # Download transcript text from Storage; fall back to DB raw_text
+        transcript_bytes = await data_io._download(
+            data_io.PIPELINE_BUCKET,
+            f"{project_id}/transcripts/{transcript_id}.txt",
+        )
+        if transcript_bytes is None:
+            async with async_session() as db:
+                t = await db.get(Transcript, transcript_id)
+                transcript_bytes = t.raw_text.encode("utf-8") if t else b""
+
+        transcript_path = tmp_path / f"{transcript_id}.txt"
+        transcript_path.write_bytes(transcript_bytes)
+
+        # Seed existing tasks so the script can merge incrementally
+        tasks_path = tmp_path / "all_tasks.json"
+        existing = await data_io.read_tasks_json(project_id)
+        if existing:
+            tasks_path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
 
         await _progress(job_id, 30, "Sending to Claude for extraction")
 
-        rc, stdout, stderr = await _run_script([
+        rc, _, stderr = await _run_script([
             "backend/scripts/transcript_to_tasks.py",
             "--transcript", str(transcript_path),
             "--tasks",      str(tasks_path),
         ])
-
         if rc != 0:
             raise RuntimeError(stderr or f"transcript_to_tasks.py exited {rc}")
 
         await _progress(job_id, 80, "Updating task graph")
 
-        # Count extracted tasks from the updated file
-        tasks = data_io.read_tasks_json(project_id)
-        n_tasks = len(tasks)
+        tasks = json.loads(tasks_path.read_text(encoding="utf-8"))
+        await data_io.write_tasks_json(project_id, tasks)
 
-        # Persist stats back on the Transcript row
         async with async_session() as db:
             transcript = await db.get(Transcript, transcript_id)
             if transcript:
-                transcript.tasks_extracted = n_tasks
-                transcript.tasks_updated   = n_tasks
+                transcript.tasks_extracted = len(tasks)
+                transcript.tasks_updated   = len(tasks)
                 transcript.processed_at    = datetime.now(timezone.utc)
                 await db.commit()
 
-        await _complete(job_id, {"tasks_in_graph": n_tasks})
+        await _complete(job_id, {"tasks_in_graph": len(tasks)})
 
     except Exception as exc:  # noqa: BLE001
         logger.exception("Transcript job %s failed", job_id)
         await _fail(job_id, str(exc))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 async def run_pipeline_job(job_id: str, project_id: str) -> None:
     """
     Run the full pipeline: syth_data_gen → markov_builder → sim.
-    Runs as a FastAPI BackgroundTask.
+
+    Downloads inputs from Storage to a temp directory, runs the three pipeline
+    scripts, then uploads all output files back to Storage under the project prefix.
     """
-    await _update_job(
-        job_id,
-        status=JobStatus.running,
-        started_at=datetime.now(timezone.utc),
-    )
-    data_dir = data_io.project_data_dir(project_id)
-    telemetry_path     = data_dir / "telemetry.json"
-    transition_path    = data_dir / "transition_matrix.json"
-    simulation_path    = data_dir / "monte_carlo_results.json"
-
-    steps = [
-        (10,  "Generating synthetic telemetry", [
-            "backend/scripts/syth_data_gen.py",
-            "--output_dir",  str(data_dir),
-            "--tasks_path",  str(data_dir / "all_tasks.json"),
-        ]),
-        (40,  "Building Markov transition matrix", [
-            "backend/scripts/markov_builder.py",
-            "--telemetry_path", str(telemetry_path),
-            "--output_path",    str(transition_path),
-        ]),
-        (70,  "Running Monte Carlo simulation", [
-            "backend/scripts/sim.py",
-            "--telemetry_path", str(transition_path),
-            "--output_path",    str(simulation_path),
-        ]),
-    ]
-
+    await _update_job(job_id, status=JobStatus.running, started_at=datetime.now(timezone.utc))
+    tmp = tempfile.mkdtemp()
+    tmp_path = Path(tmp)
     try:
+        prefix = await data_io.active_data_prefix(project_id)
+
+        tasks_bytes = await data_io._download(
+            data_io.PIPELINE_BUCKET, f"{prefix}/all_tasks.json"
+        )
+        if not tasks_bytes:
+            raise RuntimeError("all_tasks.json not found — process a transcript first.")
+
+        tasks_path      = tmp_path / "all_tasks.json"
+        telemetry_path  = tmp_path / "telemetry.json"
+        transition_path = tmp_path / "transition_matrix.json"
+        simulation_path = tmp_path / "monte_carlo_results_original_workflow.json"
+
+        tasks_path.write_bytes(tasks_bytes)
+
+        steps = [
+            (10, "Generating synthetic telemetry", [
+                "backend/scripts/syth_data_gen.py",
+                "--output_dir",  str(tmp_path),
+                "--tasks_path",  str(tasks_path),
+            ]),
+            (40, "Building Markov transition matrix", [
+                "backend/scripts/markov_builder.py",
+                "--telemetry_path", str(telemetry_path),
+                "--output_path",    str(transition_path),
+            ]),
+            (70, "Running Monte Carlo simulation", [
+                "backend/scripts/sim.py",
+                "--telemetry_path", str(transition_path),
+                "--output_path",    str(simulation_path),
+            ]),
+        ]
+
         for pct, step_name, cmd in steps:
             await _progress(job_id, pct, step_name)
             rc, _, stderr = await _run_script(cmd)
             if rc != 0:
                 raise RuntimeError(f"{cmd[0]} failed: {stderr}")
 
+        for filename in [
+            "telemetry.json",
+            "transition_matrix.json",
+            "monte_carlo_results_original_workflow.json",
+        ]:
+            file_path = tmp_path / filename
+            if file_path.exists():
+                await data_io._upload(
+                    data_io.PIPELINE_BUCKET,
+                    f"{project_id}/{filename}",
+                    file_path.read_bytes(),
+                    "application/json",
+                )
+
         await _complete(job_id, {"pipeline": "completed", "project_id": project_id})
 
     except Exception as exc:  # noqa: BLE001
         logger.exception("Pipeline job %s failed", job_id)
         await _fail(job_id, str(exc))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 async def run_simulation_job(
@@ -213,18 +251,15 @@ async def run_simulation_job(
 ) -> None:
     """
     Run parser_scraper → classifier → sim for a given tool evaluation.
-    All intermediate files are written to the project-scoped data directory.
-    Stores a SimulationResult row on completion.
-    Runs as a FastAPI BackgroundTask.
-    """
-    await _update_job(
-        job_id,
-        status=JobStatus.running,
-        started_at=datetime.now(timezone.utc),
-    )
 
+    Downloads shared pipeline inputs from Storage, runs the three simulation
+    scripts in a temp directory, uploads all intermediate and output files back
+    to Storage, and persists a SimulationResult DB row on completion.
+    """
+    await _update_job(job_id, status=JobStatus.running, started_at=datetime.now(timezone.utc))
+    tmp = tempfile.mkdtemp()
+    tmp_path = Path(tmp)
     try:
-        # Fetch tool details from DB
         async with async_session() as db:
             tool_eval = await db.get(ToolEvaluation, tool_evaluation_id)
             if not tool_eval:
@@ -232,15 +267,21 @@ async def run_simulation_job(
             tool_name   = tool_eval.tool_name
             website_url = tool_eval.website_url or ""
 
-        # Slug logic matches parser_scraper.py's slugify()
-        tool_slug = re.sub(r'[^a-z0-9]+', '_', tool_name.lower()).strip('_')
+        tool_slug = re.sub(r"[^a-z0-9]+", "_", tool_name.lower()).strip("_")
 
-        data_dir        = data_io.project_data_dir(project_id)
-        scraped_path    = data_io.scraped_tool_path(project_id, tool_slug)
-        features_path   = data_io.tool_features_path(project_id, tool_slug)
-        tasks_path      = data_dir / "all_tasks.json"
-        transition_path = data_dir / "transition_matrix.json"
-        simulation_path = data_dir / "monte_carlo_results.json"
+        scraped_path    = tmp_path / f"scraped_{tool_slug}.json"
+        features_path   = tmp_path / f"tool_features_{tool_slug}.json"
+        simulation_path = tmp_path / f"monte_carlo_results_{tool_slug}.json"
+
+        # Download shared pipeline inputs
+        for filename in ["all_tasks.json", "transition_matrix.json"]:
+            storage_path = await data_io.resolve_data_path(project_id, filename)
+            file_bytes = await data_io._download(data_io.PIPELINE_BUCKET, storage_path)
+            if file_bytes:
+                (tmp_path / filename).write_bytes(file_bytes)
+
+        tasks_path      = tmp_path / "all_tasks.json"
+        transition_path = tmp_path / "transition_matrix.json"
 
         # Step 1 — scrape product website
         await _progress(job_id, 10, "Scraping product website\u2026")
@@ -255,14 +296,14 @@ async def run_simulation_job(
 
         # Step 2 — classify features into pipeline impact parameters
         await _progress(job_id, 40, "Mapping features to workflow\u2026")
-        rc, _, stderr = await _run_script([
+        rc, stdout, stderr = await _run_script([
             "backend/scripts/classifier.py",
             "--scraped", str(scraped_path),
             "--tasks",   str(tasks_path),
             "--output",  str(features_path),
         ])
         if rc != 0:
-            raise RuntimeError(f"classifier.py failed: {stderr}")
+            raise RuntimeError(f"classifier.py failed: {stderr or stdout}")
 
         # Step 3 — Monte Carlo simulation with tool-specific features
         await _progress(job_id, 65, "Running Monte Carlo simulation\u2026")
@@ -278,16 +319,29 @@ async def run_simulation_job(
         if rc != 0:
             raise RuntimeError(f"sim.py failed: {stderr}")
 
+        # Upload intermediate and output files to Storage
+        for fname, fpath in [
+            (f"scraped_{tool_slug}.json",                scraped_path),
+            (f"tool_features_{tool_slug}.json",          features_path),
+            (f"monte_carlo_results_{tool_slug}.json",    simulation_path),
+        ]:
+            if fpath.exists():
+                await data_io._upload(
+                    data_io.PIPELINE_BUCKET,
+                    f"{project_id}/{fname}",
+                    fpath.read_bytes(),
+                    "application/json",
+                )
+
         # Step 4 — persist to DB
         await _progress(job_id, 85, "Storing results")
 
-        results         = data_io.read_simulation_results(project_id)
+        results         = json.loads(simulation_path.read_text(encoding="utf-8"))
         week_final      = results.get("summary", {}).get("week_final", {})
         work_saved      = float(week_final.get("work_saved_pct", 0.0))
         throughput_lift = float(week_final.get("throughput_lift_pct", 0.0))
 
         async with async_session() as db:
-            from sqlalchemy import select
             existing = await db.execute(
                 select(SimulationResult).where(
                     SimulationResult.tool_evaluation_id == tool_evaluation_id
@@ -316,3 +370,5 @@ async def run_simulation_job(
     except Exception as exc:  # noqa: BLE001
         logger.exception("Simulation job %s failed", job_id)
         await _fail(job_id, str(exc))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)

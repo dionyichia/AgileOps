@@ -1,0 +1,501 @@
+[
+  {
+    "node_id": "daily_user_signal_scanning",
+    "label": "Daily User Signal Scanning",
+    "description": "Scan event dashboards and support conversations to identify potential user problems or product issues. Cross-check quantitative metrics with qualitative feedback to surface problem candidates.",
+    "action_verb": "scan",
+    "inputs": [
+      "user event data",
+      "support tickets",
+      "user conversations",
+      "activation metrics",
+      "feature usage trends"
+    ],
+    "outputs": [
+      "problem candidates",
+      "logged issues in notion"
+    ],
+    "app_cluster": [
+      "amplitude",
+      "intercom",
+      "notion"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 30,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "problem_validation_triangulation",
+    "label": "Problem Validation and Triangulation",
+    "description": "Validate potential problems by analyzing user cohorts and qualitative feedback to determine if an issue represents real user pain or statistical noise. Create prioritized tickets for validated problems.",
+    "action_verb": "validate",
+    "inputs": [
+      "problem candidates",
+      "user cohort data",
+      "feedback tags"
+    ],
+    "outputs": [
+      "validated problems",
+      "linear tickets with severity scores"
+    ],
+    "app_cluster": [
+      "mixpanel",
+      "canny",
+      "intercom",
+      "linear"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 45,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "solution_flow_sketching",
+    "label": "Solution Flow Sketching",
+    "description": "Create rough user flows and wireframes to explore potential solutions, including edge cases and backend considerations. Begin drafting problem statements and success metrics.",
+    "action_verb": "sketch",
+    "inputs": [
+      "validated problems",
+      "linear tickets"
+    ],
+    "outputs": [
+      "rough user flows",
+      "wireframes",
+      "initial prd draft"
+    ],
+    "app_cluster": [
+      "figma",
+      "notion",
+      "linear"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 52,
+      "std_minutes": 8
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "early_engineering_alignment",
+    "label": "Early Engineering Alignment",
+    "description": "Share rough solution proposals with engineering team for quick feasibility checks and technical feedback before investing in detailed specifications.",
+    "action_verb": "converse",
+    "inputs": [
+      "rough proposals",
+      "figma drafts"
+    ],
+    "outputs": [
+      "engineering feedback",
+      "technical feasibility assessment"
+    ],
+    "app_cluster": [
+      "slack",
+      "google calendar"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 22,
+      "std_minutes": 10
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "prd_creation",
+    "label": "PRD Creation and Documentation",
+    "description": "Build comprehensive product requirements document including problem framing, hypotheses, edge cases, rollout plans, and success metrics with supporting data and screenshots.",
+    "action_verb": "produce",
+    "inputs": [
+      "validated problems",
+      "figma wireframes",
+      "historical data"
+    ],
+    "outputs": [
+      "structured prd",
+      "embedded screenshots",
+      "success metrics"
+    ],
+    "app_cluster": [
+      "notion",
+      "figma",
+      "amplitude"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 67,
+      "std_minutes": 8
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "prd_review_iteration",
+    "label": "PRD Review and Iteration",
+    "description": "Consolidate feedback from engineering, design, and data teams on PRD drafts. Resolve contradictions and update specifications through iterative revision cycles.",
+    "action_verb": "iterate",
+    "inputs": [
+      "prd drafts",
+      "team feedback",
+      "notion comments"
+    ],
+    "outputs": [
+      "revised prds",
+      "updated linear tickets",
+      "stakeholder alignment"
+    ],
+    "app_cluster": [
+      "notion",
+      "slack",
+      "jira",
+      "linear"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 35,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "feature_prioritization_planning",
+    "label": "Feature Prioritization and Planning",
+    "description": "Rank validated features using RICE methodology and negotiate tradeoffs with engineering capacity in weekly planning sessions to determine development priorities.",
+    "action_verb": "prioritize",
+    "inputs": [
+      "validated features",
+      "rice scores",
+      "engineering capacity"
+    ],
+    "outputs": [
+      "prioritized backlog",
+      "development commitments"
+    ],
+    "app_cluster": [
+      "jira product discovery",
+      "notion"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 37,
+      "std_minutes": 12
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "story_breakdown_handoff",
+    "label": "Story Breakdown and Engineering Handoff",
+    "description": "Break prioritized epics into detailed user stories and coordinate handoff to engineering team while maintaining daily progress tracking.",
+    "action_verb": "handoff",
+    "inputs": [
+      "prioritized epics",
+      "detailed requirements"
+    ],
+    "outputs": [
+      "user stories",
+      "engineering assignments",
+      "progress dashboards"
+    ],
+    "app_cluster": [
+      "linear",
+      "jira",
+      "slack"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 30,
+      "std_minutes": 0
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "development_progress_monitoring",
+    "label": "Development Progress Monitoring",
+    "description": "Track development progress through daily dashboard reviews and status checks, identifying and addressing blockers as they arise.",
+    "action_verb": "monitor",
+    "inputs": [
+      "development tickets",
+      "progress updates"
+    ],
+    "outputs": [
+      "status reports",
+      "blocker identification"
+    ],
+    "app_cluster": [
+      "jira",
+      "slack"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 17,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "high",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "mid_sprint_design_changes",
+    "label": "Mid-Sprint Design Changes",
+    "description": "Respond to engineering questions and ambiguities during development by adjusting flows and specifications in real-time to maintain development velocity.",
+    "action_verb": "respond",
+    "inputs": [
+      "engineering questions",
+      "implementation blockers"
+    ],
+    "outputs": [
+      "updated flows",
+      "clarified specifications"
+    ],
+    "app_cluster": [
+      "slack",
+      "jira",
+      "figma"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 25,
+      "std_minutes": 7
+    },
+    "automatable_fraction": "low",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "pre_release_qa_validation",
+    "label": "Pre-Release QA and Validation",
+    "description": "Conduct structured testing in staging environment, validate analytics events, and ensure edge cases are covered before release using systematic QA checklists.",
+    "action_verb": "validate",
+    "inputs": [
+      "staging builds",
+      "qa checklists",
+      "analytics setup"
+    ],
+    "outputs": [
+      "qa approval",
+      "validated events",
+      "release readiness"
+    ],
+    "app_cluster": [
+      "datadog",
+      "amplitude",
+      "notion"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 35,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "launch_coordination",
+    "label": "Launch Coordination",
+    "description": "Coordinate feature releases by scheduling rollouts, preparing communications, and orchestrating cross-team launch activities including customer-facing announcements.",
+    "action_verb": "coordinate",
+    "inputs": [
+      "release-ready features",
+      "rollout plans"
+    ],
+    "outputs": [
+      "scheduled releases",
+      "launch communications",
+      "customer announcements"
+    ],
+    "app_cluster": [
+      "launchdarkly",
+      "slack",
+      "notion",
+      "intercom"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 50,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "post_launch_analysis",
+    "label": "Post-Launch Success Analysis",
+    "description": "Build analytics dashboards to measure feature adoption, retention impact, and funnel performance against predefined success metrics from PRD baseline.",
+    "action_verb": "analyze",
+    "inputs": [
+      "launched features",
+      "baseline metrics",
+      "success criteria"
+    ],
+    "outputs": [
+      "performance dashboards",
+      "success assessments",
+      "follow-up tickets"
+    ],
+    "app_cluster": [
+      "looker",
+      "linear"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 50,
+      "std_minutes": 10
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "post_launch_feedback_monitoring",
+    "label": "Post-Launch Feedback Monitoring",
+    "description": "Monitor and categorize user feedback after feature releases, identifying bugs, confusion, and new feature requests with appropriate severity tagging.",
+    "action_verb": "monitor",
+    "inputs": [
+      "user feedback",
+      "support tickets",
+      "feature requests"
+    ],
+    "outputs": [
+      "categorized feedback",
+      "severity-tagged issues",
+      "linear tickets"
+    ],
+    "app_cluster": [
+      "intercom",
+      "canny",
+      "zendesk",
+      "linear"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 22,
+      "std_minutes": 3
+    },
+    "automatable_fraction": "high",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "ab_test_coordination",
+    "label": "A/B Test Setup and Analysis",
+    "description": "Design and execute controlled experiments including variant definition, success metrics setup, and statistical analysis of results to inform product decisions.",
+    "action_verb": "experiment",
+    "inputs": [
+      "experiment hypotheses",
+      "success metrics",
+      "user segments"
+    ],
+    "outputs": [
+      "configured experiments",
+      "statistical results",
+      "decision recommendations"
+    ],
+    "app_cluster": [
+      "optimizely",
+      "amplitude"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 32,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "medium",
+    "sources": [
+      "9c9eb650-7f02-4af0-8eed-45a283350305.txt",
+      "e68ed1e2-3645-4b5b-9ba3-24c5b8527355.txt",
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  },
+  {
+    "node_id": "task_scheduling_coordination",
+    "label": "Task Scheduling and Coordination",
+    "description": "Schedule meetings, coordinate cross-team activities, and automate routine organizational tasks using scheduling tools and automation platforms.",
+    "action_verb": "schedule",
+    "inputs": [
+      "meeting requests",
+      "team availability",
+      "project timelines"
+    ],
+    "outputs": [
+      "scheduled meetings",
+      "automated notifications",
+      "coordinated activities"
+    ],
+    "app_cluster": [
+      "canvas",
+      "notion",
+      "axis"
+    ],
+    "duration_distribution": {
+      "type": "normal",
+      "mean_minutes": 15,
+      "std_minutes": 5
+    },
+    "automatable_fraction": "high",
+    "sources": [
+      "076773bd-f857-41ad-8ed0-88fa7399171a.txt"
+    ]
+  }
+]

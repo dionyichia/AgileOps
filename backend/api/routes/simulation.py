@@ -1,3 +1,5 @@
+import re
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,7 +21,7 @@ async def get_simulation(
 
     Priority:
       1. DB-stored SimulationResult (written by the simulation background job)
-      2. Fallback: read monte_carlo_results.json from disk (manual pipeline runs)
+      2. Fallback: read monte_carlo_results_{slug}.json from disk (manual pipeline runs)
     """
     tool_eval = await db.get(ToolEvaluation, eval_id)
     if not tool_eval or tool_eval.project_id != project_id:
@@ -36,8 +38,9 @@ async def get_simulation(
         work_saved   = sim_result.final_work_saved_pct
         throughput   = sim_result.final_throughput_lift_pct
     else:
-        # Fallback to file on disk (e.g. after a manual pipeline run)
-        results_json = data_io.read_simulation_results(project_id)
+        # Fallback to tool-specific file on disk (e.g. after a manual pipeline run)
+        tool_slug    = re.sub(r"[^a-z0-9]+", "_", tool_eval.tool_name.lower()).strip("_")
+        results_json = await data_io.read_tool_simulation_results(project_id, tool_slug)
         week_final   = results_json.get("summary", {}).get("week_final", {})
         work_saved   = float(week_final.get("work_saved_pct", 0.0))
         throughput   = float(week_final.get("throughput_lift_pct", 0.0))

@@ -70,8 +70,8 @@ async def submit_transcript(
     await db.commit()
     await db.refresh(transcript)
 
-    # Write raw text to disk for the script to read
-    data_io.save_transcript_text(project_id, transcript.id, body.raw_text)
+    # Upload raw text to Storage for the script to download when processing
+    await data_io.save_transcript_text(project_id, transcript.id, body.raw_text)
 
     # Create job row synchronously so we can return the job_id
     job = await job_runner.create_job(db, project_id, JobType.transcript_parse)

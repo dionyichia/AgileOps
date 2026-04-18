@@ -121,7 +121,7 @@ export default function ToolInputForm() {
         setSubmitting(false)
       }
     } else {
-      navigate('/dashboard')
+      navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')
     }
   }
 
@@ -273,7 +273,7 @@ export default function ToolInputForm() {
           <div className="flex items-start gap-4">
             <button
               type="button"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')}
               className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 text-black/70 transition-colors hover:bg-black/[0.03]"
               aria-label="Back to dashboard"
             >
