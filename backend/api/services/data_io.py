@@ -173,3 +173,18 @@ async def save_transcript_text(project_id: str, transcript_id: str, raw_text: st
 def uploads_storage_path(project_id: str, dest_filename: str) -> str:
     """Return the Storage object path for an uploaded file."""
     return f"{project_id}/{dest_filename}"
+
+
+# ── Topology helpers ──────────────────────────────────────────────────────────
+
+async def read_topology(project_id: str) -> dict:
+    """Read workflow_topology.json from Storage. Raises 404 if not yet saved."""
+    result = await _read_json(PIPELINE_BUCKET, f"{project_id}/workflow_topology.json")
+    if result is None:
+        raise HTTPException(status_code=404, detail="No topology saved yet.")
+    return result
+
+
+async def write_topology(project_id: str, topology: dict) -> None:
+    """Write workflow_topology.json to Storage."""
+    await _write_json(PIPELINE_BUCKET, f"{project_id}/workflow_topology.json", topology)

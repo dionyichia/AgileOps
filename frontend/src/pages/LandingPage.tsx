@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   motion,
   useScroll,
@@ -22,25 +24,12 @@ import {
 } from 'lucide-react'
 import {
   TextGenerateEffect,
-  calcTextGenerateDuration,
 } from '../components/ui/text-generate-effect'
 import { NoiseCanvas } from '../components/ui/noise-canvas'
 import PublicNavbar from '../components/public/PublicNavbar'
 import PublicFooter from '../components/public/PublicFooter'
 
-const COLORS = {
-  white: '#FFFFFF',
-  black: '#000000',
-  violet: '#5E149F',
-  orchid: '#B4308B',
-  pink: '#E2409B',
-  coral: '#F75A8C',
-}
-
-const navItems = [
-  { label: 'Why Axis?', href: '#why-axis' },
-  { label: 'How it Works', href: '#how-it-works' },
-]
+gsap.registerPlugin(ScrollTrigger)
 
 const trustedByLogos = [
   {
@@ -60,15 +49,6 @@ const HEADLINE_STAGGER = 0.2
 const HEADLINE_DURATION = 0.5
 const HEADLINE_INITIAL_DELAY = 0.3
 
-const headlineTotalDuration = calcTextGenerateDuration(
-  HEADLINE_TEXT,
-  HEADLINE_STAGGER,
-  HEADLINE_DURATION,
-  HEADLINE_INITIAL_DELAY,
-)
-const subheadlineDelay = headlineTotalDuration + 0.1
-const ctaDelay = subheadlineDelay + 0.35
-const chipsDelay = ctaDelay + 0.4
 const HOW_IT_WORKS_HEADING = 'From interview to recommendation — in four steps.'
 const howItWorksHeadingDelay = 0.15
 const howItWorksHeadingDuration = 0.4
@@ -451,7 +431,9 @@ function StrokeHeading({ text, play }: { text: string; play: boolean }) {
 export default function LandingPage() {
   const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
+  const pageRef = useRef<HTMLDivElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const heroRef = useRef<HTMLElement>(null)
   const stackRef = useRef<HTMLDivElement>(null)
   const howItWorksIntroRef = useRef<HTMLDivElement>(null)
   const whatYouGetRef = useRef<HTMLDivElement>(null)
@@ -493,10 +475,95 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  useEffect(() => {
+    const scope = pageRef.current
+    if (!scope) return
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduceMotion) return
+
+    const ctx = gsap.context(() => {
+      const heroTimeline = gsap.timeline({ defaults: { ease: 'power3.out' } })
+
+      heroTimeline
+        .fromTo(
+          '[data-gsap-hero-subheadline]',
+          { autoAlpha: 0, y: 26, filter: 'blur(10px)' },
+          { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.75 },
+          0.7,
+        )
+        .fromTo(
+          '[data-gsap-hero-cta]',
+          { autoAlpha: 0, y: 26, filter: 'blur(10px)' },
+          { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.72, stagger: 0.1 },
+          0.95,
+        )
+        .fromTo(
+          '[data-gsap-hero-trust]',
+          { autoAlpha: 0, y: 22, filter: 'blur(10px)' },
+          { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.7 },
+          1.15,
+        )
+        .fromTo(
+          '[data-gsap-hero-scroll]',
+          { autoAlpha: 0, y: 12 },
+          { autoAlpha: 1, y: 0, duration: 0.55 },
+          1.55,
+        )
+
+      gsap.utils.toArray<HTMLElement>('[data-gsap-reveal-group]').forEach((group) => {
+        const targets = group.matches('[data-gsap-reveal-item]')
+          ? [group]
+          : gsap.utils.toArray<HTMLElement>('[data-gsap-reveal-item]', group)
+
+        if (!targets.length) return
+
+        gsap.fromTo(
+          targets,
+          {
+            autoAlpha: 0,
+            y: 30,
+            filter: 'blur(12px)',
+          },
+          {
+            autoAlpha: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            duration: 0.8,
+            stagger: 0.1,
+            ease: 'power3.out',
+            clearProps: 'filter',
+            scrollTrigger: {
+              trigger: group,
+              start: 'top 78%',
+              once: true,
+            },
+          },
+        )
+      })
+
+      if (heroRef.current) {
+        gsap.to('[data-gsap-hero-video]', {
+          yPercent: 5,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 1.1,
+          },
+        })
+      }
+    }, scope)
+
+    return () => ctx.revert()
+  }, [])
+
   const goToConsultation = () => navigate('/get-started')
 
   return (
     <div
+      ref={pageRef}
       className="min-h-screen bg-black text-white"
       onMouseMove={e => {
         pageMouseX.set(e.clientX)
@@ -519,6 +586,7 @@ export default function LandingPage() {
         {/* ───── Hero ───── */}
         <div ref={wrapperRef} style={{ height: '200vh' }}>
           <section
+            ref={heroRef}
             className="relative overflow-hidden flex items-center justify-center"
             style={{ position: 'sticky', top: 0, height: '100vh' }}
             onMouseMove={e => {
@@ -531,14 +599,16 @@ export default function LandingPage() {
               className="absolute inset-0"
               style={{ scale: videoScale }}
             >
-              <video
-                src="/hero.mp4"
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover"
-              />
+              <div data-gsap-hero-video className="absolute inset-0">
+                <video
+                  src="/hero.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </div>
             </motion.div>
 
             {/* Dark gradient overlay */}
@@ -572,14 +642,8 @@ export default function LandingPage() {
 
               {/* Subheadline */}
               <motion.p
+                data-gsap-hero-subheadline
                 className="mt-8 max-w-3xl mx-auto text-[22px] leading-[1.35] font-medium text-white/75 text-balance"
-                initial={{ y: 24, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{
-                  duration: 0.5,
-                  ease: 'easeOut',
-                  delay: subheadlineDelay,
-                }}
               >
                 We analyze your team&apos;s workflow and recommend the tools that
                 will <em className="italic font-medium">actually</em> improve
@@ -589,23 +653,17 @@ export default function LandingPage() {
               {/* CTA buttons */}
               <motion.div
                 className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
-                initial={{ y: 24, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{
-                  duration: 0.5,
-                  ease: 'easeOut',
-                  delay: ctaDelay,
-                }}
               >
                 {/* Primary CTA */}
                 <motion.button
+                  data-gsap-hero-cta
                   onClick={goToConsultation}
                   className="bg-white text-black inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-[17px] font-bold"
                   whileHover={{
-                    scale: 1.02,
+                    scale: 1.018,
                     boxShadow: '0 0 28px rgba(247,90,140,0.4)',
                   }}
-                  transition={{ duration: 0, type: 'tween' }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
                 >
                   Get Your Workflow Audit
                   <ArrowRight size={18} />
@@ -613,6 +671,7 @@ export default function LandingPage() {
 
                 {/* Secondary ghost CTA */}
                 <motion.button
+                  data-gsap-hero-cta
                   onClick={() => {
                     document
                       .getElementById('how-it-works')
@@ -620,24 +679,18 @@ export default function LandingPage() {
                   }}
                   className="liquid-glass text-white border border-white/25 rounded-full px-8 py-4 text-[17px] font-bold"
                   whileHover={{
-                    scale: 1.02,
+                    scale: 1.018,
                     boxShadow: '0 0 28px rgba(247,90,140,0.4)',
                   }}
-                  transition={{ duration: 0, type: 'tween' }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
                 >
                   See How It Works
                 </motion.button>
               </motion.div>
 
               <motion.div
+                data-gsap-hero-trust
                 className="mt-16 flex w-full flex-col items-center gap-2"
-                initial={{ y: 24, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{
-                  duration: 0.45,
-                  ease: 'easeOut',
-                  delay: chipsDelay,
-                }}
               >
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
                   Trusted By
@@ -667,11 +720,9 @@ export default function LandingPage() {
 
             {/* Scroll down indicator */}
             <motion.div
+              data-gsap-hero-scroll
               className="absolute bottom-4 md:bottom-8 inset-x-0 z-20 flex flex-col items-center gap-1 pointer-events-none"
               style={{ opacity: scrollIndicatorOpacity }}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: 'easeOut', delay: chipsDelay + 0.8 }}
             >
               <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/30">
                 Scroll down
@@ -691,7 +742,7 @@ export default function LandingPage() {
 
         {/* ───── Why Axis? cards ───── */}
         <section id="why-axis" className="px-6 md:px-10 py-10 md:py-16 scroll-mt-24">
-          <div className="max-w-6xl mx-auto grid gap-6 md:grid-cols-3">
+          <div data-gsap-reveal-group className="max-w-6xl mx-auto grid gap-6 md:grid-cols-3">
             {[
               {
                 title: 'Built around real workflow',
@@ -705,8 +756,9 @@ export default function LandingPage() {
                 title: 'Consultative, not generic',
                 body: 'Your audit is prepared for your team, your stack, and your sales motion.',
               },
-            ].map((item, i) => (
+            ].map((item) => (
               <motion.div
+                data-gsap-reveal-item
                 key={item.title}
                 className="rounded-[24px] border p-7"
                 style={{
@@ -714,10 +766,6 @@ export default function LandingPage() {
                   background: 'rgba(255,255,255,0.04)',
                   boxShadow: '0 18px 40px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.4)',
                 }}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-60px' }}
-                transition={{ duration: 0.5, ease: 'easeOut', delay: i * 0.1 }}
               >
                 <h2 className="text-[22px] leading-tight font-bold text-white text-balance">{item.title}</h2>
                 <p className="mt-4 text-[16px] leading-7 text-white/70 text-balance">{item.body}</p>
@@ -731,6 +779,8 @@ export default function LandingPage() {
           <div ref={stackRef} style={{ position: 'relative' }}>
             <motion.div
               ref={howItWorksIntroRef}
+              data-gsap-reveal-group
+              data-gsap-reveal-item
               className="mx-auto max-w-5xl px-6 md:px-10"
               style={{
                 position: 'sticky',
@@ -739,10 +789,6 @@ export default function LandingPage() {
                 height: `${CARD_H}px`,
                 marginBottom: STACK_STAGE_GAP,
               }}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
             >
               <div className="flex h-full flex-col items-center justify-center text-center">
                 <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-white/50 mb-4">
@@ -776,12 +822,13 @@ export default function LandingPage() {
             <div style={{ height: STACK_STAGE_GAP }} />
           </div>
 
-          <div className="px-6 pb-6 pt-10 text-center md:px-10 md:pb-10">
+          <div data-gsap-reveal-group className="px-6 pb-6 pt-10 text-center md:px-10 md:pb-10">
             <div className="mx-auto flex max-w-2xl flex-col items-center justify-center gap-4">
-              <p className="max-w-2xl text-[18px] leading-8 text-white/70 text-balance">
+              <p data-gsap-reveal-item className="max-w-2xl text-[18px] leading-8 text-white/70 text-balance">
                 Start with a quick consultation and we&apos;ll turn your current workflow into a clear plan.
               </p>
               <button
+                data-gsap-reveal-item
                 onClick={goToConsultation}
                 className="bg-white text-black inline-flex items-center gap-2 rounded-full px-8 py-4 text-[17px] font-bold transition-transform hover:-translate-y-0.5"
               >
@@ -797,11 +844,9 @@ export default function LandingPage() {
           <div className="max-w-[1480px] mx-auto rounded-[32px] px-6 py-10 md:px-12 md:py-14">
             <div className="lg:hidden">
               <motion.div
+                data-gsap-reveal-group
+                data-gsap-reveal-item
                 className="max-w-3xl"
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-60px' }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
               >
                 <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-white/50">
                   What You Get
@@ -815,15 +860,13 @@ export default function LandingPage() {
               </motion.div>
 
               <div className="mt-10 grid gap-5 md:grid-cols-2">
+                <div data-gsap-reveal-group className="contents">
                 {WHAT_YOU_GET_ITEMS.map(({ icon: Icon, title, body }, i) => (
                   <motion.div
+                    data-gsap-reveal-item
                     key={title}
                     className="rounded-[22px] bg-white/[0.04] px-6 py-5 text-white flex flex-col"
                     style={{ boxShadow: '0 16px 40px rgba(0,0,0,0.12)' }}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-60px' }}
-                    transition={{ duration: 0.5, ease: 'easeOut', delay: i * 0.07 }}
                   >
                     <div className={`flex items-start gap-3 ${i === 0 ? 'min-h-[44px]' : 'min-h-[64px]'}`}>
                       <Icon size={20} className="text-white flex-shrink-0 mt-0.5" />
@@ -832,6 +875,7 @@ export default function LandingPage() {
                     <p className="mt-3 text-[14px] leading-6 text-white/70 text-balance">{body}</p>
                   </motion.div>
                 ))}
+                </div>
               </div>
             </div>
 
@@ -840,13 +884,11 @@ export default function LandingPage() {
               className="relative hidden lg:block"
               style={{ height: `calc(${WHAT_YOU_GET_ITEMS.length} * ${WHAT_YOU_GET_STAGE_HEIGHT} + ${WHAT_YOU_GET_END_HOLD})` }}
             >
-              <div className="sticky top-24 grid min-h-[calc(100vh-6rem)] grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-center gap-12 xl:gap-20">
+              <div data-gsap-reveal-group className="sticky top-24 grid min-h-[calc(100vh-6rem)] grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-center gap-12 xl:gap-20">
                 <motion.div
+                  data-gsap-reveal-group
+                  data-gsap-reveal-item
                   className="max-w-3xl"
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-60px' }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
                 >
                   <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-white/50">
                     What You Get
@@ -859,7 +901,7 @@ export default function LandingPage() {
                   </p>
                 </motion.div>
 
-                <div className="relative h-[470px] xl:h-[520px]">
+                <div data-gsap-reveal-item className="relative h-[470px] xl:h-[520px]">
                   <WhatYouGetSlider scrollProgress={whatYouGetProgress} />
                 </div>
               </div>
@@ -871,10 +913,8 @@ export default function LandingPage() {
         <section className="px-6 md:px-10 py-14 md:py-20">
           <div className="max-w-6xl mx-auto grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-start">
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
+              data-gsap-reveal-group
+              data-gsap-reveal-item
             >
               <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-white/50">
                 Why Axis?
@@ -887,23 +927,20 @@ export default function LandingPage() {
               </p>
             </motion.div>
 
-            <div className="grid gap-4">
+            <div data-gsap-reveal-group className="grid gap-4">
               {[
                 'We analyze workflow impact rather than just license counts.',
                 'We focus on whether a tool improves how your team actually works.',
                 'We support better decisions before you commit to a new tool.',
-              ].map((point, i) => (
+              ].map((point) => (
                 <motion.div
+                  data-gsap-reveal-item
                   key={point}
                   className="rounded-[22px] border bg-white/[0.04] px-6 py-5"
                   style={{
                     borderColor: 'rgba(255,255,255,0.08)',
                     boxShadow: '0 18px 40px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.4)',
                   }}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-60px' }}
-                  transition={{ duration: 0.5, ease: 'easeOut', delay: i * 0.1 }}
                 >
                   <p className="text-[16px] leading-7 text-white/70 text-balance">{point}</p>
                 </motion.div>

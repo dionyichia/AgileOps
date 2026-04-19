@@ -289,7 +289,7 @@ export default function ToolInputForm() {
         }
       >
         <main className="flex-1 bg-[#F7F4FB]">
-          <div className="mx-auto max-w-7xl px-6 py-8 animate-fade-in">{layout}</div>
+          <div className="mx-auto max-w-7xl px-6 py-8">{layout}</div>
         </main>
       </ClientWorkspaceShell>
     )

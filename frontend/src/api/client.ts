@@ -339,3 +339,20 @@ export const uploads = {
 export const jobs = {
   get: (jobId: string) => request<Job>(`/jobs/${jobId}`),
 }
+
+// ── Workflow Topology ──────────────────────────────────
+
+export interface WorkflowTopology {
+  positions: Record<string, { x: number; y: number }>
+  edges: Array<Record<string, unknown>>
+}
+
+export const topology = {
+  get: (projectId: string) =>
+    request<WorkflowTopology>(`/projects/${projectId}/topology`),
+  save: (projectId: string, data: WorkflowTopology) =>
+    request<WorkflowTopology>(`/projects/${projectId}/topology`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+}

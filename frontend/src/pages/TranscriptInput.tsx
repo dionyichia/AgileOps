@@ -7,7 +7,7 @@
  * See frontend/FRAMES.md — Frame 2 for full spec.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -37,6 +37,7 @@ import {
   TaskNode,
 } from '../api/client'
 import { useJobProgress } from '../hooks/useJobProgress'
+import { useGsapReveal } from '../hooks/useGsapReveal'
 
 // ── Status badge component ──────────────────────────────
 
@@ -172,6 +173,7 @@ function TaskPreviewModal({ tasks, onClose }: { tasks: TaskNode[]; onClose: () =
 export default function TranscriptInput() {
   const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
+  const rootRef = useRef<HTMLDivElement>(null)
 
   // Project data
   const [project, setProject] = useState<Project | null>(null)
@@ -281,6 +283,14 @@ export default function TranscriptInput() {
   const canSubmit = name.trim() && role.trim() && text.trim() && !submitting && !transcriptJob.isRunning
   const canRunPipeline = transcriptList.length > 0 && !pipelineJob.isRunning
 
+  useGsapReveal(rootRef, [projectId, transcriptList.length, taskGraph.length, transcriptJob.isRunning, pipelineJob.isRunning], {
+    selectors: ['[data-gsap-transcript]'],
+    duration: 0.6,
+    stagger: 0.1,
+    y: 18,
+    blur: 10,
+  })
+
   // ── Render ───────────────────────────────────────────
 
   if (loadError) {
@@ -298,9 +308,9 @@ export default function TranscriptInput() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
+    <div ref={rootRef} className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
       {/* Header */}
-      <header className="border-b border-black/8 bg-white/90 backdrop-blur-sm sticky top-0 z-40">
+      <header data-gsap-transcript className="border-b border-black/8 bg-white/90 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
@@ -322,7 +332,7 @@ export default function TranscriptInput() {
       </header>
 
       {/* Project summary */}
-      <div className="border-b border-black/6 bg-white">
+      <div data-gsap-transcript className="border-b border-black/6 bg-white">
         <div className="max-w-7xl mx-auto px-6 py-5">
           <h1 className="text-[36px] leading-tight font-bold tracking-[-0.04em] text-black">
             {project?.company_name ?? 'Loading...'} — Transcript Input
@@ -337,7 +347,7 @@ export default function TranscriptInput() {
       </div>
 
       {/* Main content */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8 animate-fade-in">
+      <main data-gsap-transcript className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
         <div className="grid lg:grid-cols-5 gap-8">
           {/* ── Left: Transcript form (3 cols) ── */}
           <div className="lg:col-span-3 space-y-6">

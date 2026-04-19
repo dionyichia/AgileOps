@@ -57,7 +57,7 @@ export function TaskNode({ data }: { data: TaskNodeData }) {
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="font-semibold text-[#111111] text-sm leading-snug">{data.label}</div>
         <div className="flex items-center gap-0.5 flex-shrink-0">
-          {data.editMode && data.onEdit && (
+          {data.onEdit && (
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -69,7 +69,7 @@ export function TaskNode({ data }: { data: TaskNodeData }) {
               <Pencil size={13} className="text-[#5E149F]/50 group-hover:text-[#5E149F]" />
             </button>
           )}
-          {!data.editMode && data.onComment && (
+          {data.onComment && (
             <button
               onClick={(e) => {
                 e.stopPropagation()

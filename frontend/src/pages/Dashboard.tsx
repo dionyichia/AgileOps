@@ -1,18 +1,21 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import gsap from 'gsap'
 import { useMarkovData } from '../hooks/pullMarkovData'
 import { clearMarkovCache } from '../hooks/dataLoader'
 import { useIsAdmin } from '../hooks/useIsAdmin'
-import { toolEvals as toolEvalsApi, projects as projectsApi, recommendation as recommendationApi, tasks as tasksApi } from '../api/client'
+import { toolEvals as toolEvalsApi, projects as projectsApi, recommendation as recommendationApi, tasks as tasksApi, topology as topologyApi } from '../api/client'
 import type { ToolEvaluation, Project, RecommendationData, TaskNode as ApiTaskNode } from '../api/client'
 import ReactFlow, {
   useNodesState,
   useEdgesState,
+  addEdge,
   Controls,
   Background,
   BackgroundVariant,
   MiniMap,
 } from 'reactflow'
+import type { Connection, NodeChange, EdgeChange } from 'reactflow'
 import 'reactflow/dist/style.css'
 import {
   Users,
@@ -36,6 +39,7 @@ import {
 import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
 import { nodeTypes } from '../components/workflow/CustomNodes'
 import { useJobProgress } from '../hooks/useJobProgress'
+import { useGsapReveal } from '../hooks/useGsapReveal'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -63,6 +67,9 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const location = useLocation()
   const { projectId } = useParams<{ projectId?: string }>()
+  const rootRef = useRef<HTMLDivElement>(null)
+  const editPanelRef = useRef<HTMLDivElement>(null)
+  const commentPanelRef = useRef<HTMLDivElement>(null)
 
   const [markovRefreshKey, setMarkovRefreshKey] = useState(0)
   const { existingNodes, existingEdges, loading: markovLoading, error: markovError, isRealData, stats: markovStats } =
@@ -75,15 +82,16 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!projectId) return
-    projectsApi.get(projectId).then(setApiProject).catch(() => {})
-    toolEvalsApi.list(projectId).then(setApiToolEvals).catch(() => {})
-    // Fetch tasks for both task-data check and tool stack derivation
+    projectsApi.get(projectId).then(setApiProject).catch(() => { })
+    toolEvalsApi.list(projectId).then(setApiToolEvals).catch(() => { })
+    // Fetch tasks for task-data check, tool stack derivation, and the edit panel
     tasksApi.get(projectId)
       .then((nodes) => {
         setHasTaskData(nodes.length > 0)
         setPipelineTaskNodes(nodes)
+        setRawTasks(nodes)
       })
-      .catch(() => { setHasTaskData(false); setPipelineTaskNodes([]) })
+      .catch(() => { setHasTaskData(false); setPipelineTaskNodes([]); setRawTasks([]) })
   }, [projectId, markovRefreshKey])
 
   // Derive tool list from task app_cluster
@@ -124,6 +132,33 @@ export default function Dashboard() {
   // Simulation job progress tracking (set when navigating here from ToolInputForm)
   const [simJobId, setSimJobId] = useState<string | null>(null)
   const { job: simJob, isRunning: simRunning, isDone: simDone, isFailed: simFailed } = useJobProgress(simJobId)
+
+  useGsapReveal(
+    rootRef,
+    [
+      activeTab,
+      projectId,
+      existingNodes.length,
+      existingEdges.length,
+      apiToolEvals?.length,
+      reportLoading,
+      !!reportRec,
+      markovLoading,
+    ],
+    {
+      selectors: [
+        '[data-gsap-dashboard-header]',
+        '[data-gsap-dashboard-tabs]',
+        '[data-gsap-dashboard-stats]',
+        '[data-gsap-dashboard-panel]',
+        '[data-gsap-dashboard-report]',
+      ],
+      duration: 0.62,
+      stagger: 0.08,
+      y: 18,
+      blur: 10,
+    },
+  )
 
   // On mount: read nav state for either a pipeline job or a simulation job
   useEffect(() => {
@@ -236,6 +271,49 @@ export default function Dashboard() {
     }
   }, [editingNodeId, editDraft, projectId, rawTasks])
 
+  // ── Topology (positions + edges) persistence ────────────────────────────
+  const [topologyPositions, setTopologyPositions] = useState<Record<string, { x: number; y: number }>>({})
+  const [topologyEdges, setTopologyEdges] = useState<ReturnType<typeof useEdgesState>[0] | null>(null)
+  const [topoSaveState, setTopoSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const topoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const nodesRef = useRef<ReturnType<typeof useNodesState>[0]>([])
+  const edgesRef = useRef<ReturnType<typeof useEdgesState>[0]>([])
+
+  useEffect(() => {
+    if (!projectId) return
+    topologyApi.get(projectId)
+      .then((topo) => {
+        if (topo.positions && Object.keys(topo.positions).length) {
+          setTopologyPositions(topo.positions as Record<string, { x: number; y: number }>)
+        }
+        if (topo.edges?.length) {
+          setTopologyEdges(topo.edges as ReturnType<typeof useEdgesState>[0])
+        }
+      })
+      .catch(() => { }) // 404 = no topology saved yet, fine
+  }, [projectId])
+
+  const scheduleSave = useCallback(() => {
+    if (!projectId) return
+    if (topoSaveTimer.current) clearTimeout(topoSaveTimer.current)
+    setTopoSaveState('saving')
+    topoSaveTimer.current = setTimeout(async () => {
+      try {
+        const positions: Record<string, { x: number; y: number }> = {}
+        for (const n of nodesRef.current) positions[n.id] = n.position
+        await topologyApi.save(projectId, {
+          positions,
+          edges: edgesRef.current as Array<Record<string, unknown>>,
+        })
+        setTopologyPositions(positions)
+        setTopoSaveState('saved')
+        setTimeout(() => setTopoSaveState((s) => s === 'saved' ? 'idle' : s), 2000)
+      } catch {
+        setTopoSaveState('error')
+      }
+    }, 800)
+  }, [projectId])
+
   // ── Comments state ───────────────────────────────────────────────────────
   const [comments, setComments] = useState<Record<string, NodeComment[]>>(() => {
     try {
@@ -255,6 +333,73 @@ export default function Dashboard() {
     if (commentingNode && commentInputRef.current) {
       commentInputRef.current.focus()
     }
+  }, [commentingNode])
+
+  useEffect(() => {
+    const scope = rootRef.current
+    if (!scope || markovLoading) return
+
+    const nodeEls = gsap.utils.toArray<HTMLElement>('.react-flow__node', scope)
+    const edgeEls = gsap.utils.toArray<HTMLElement>('.react-flow__edge-path', scope)
+
+    if (!nodeEls.length && !edgeEls.length) return
+
+    const tl = gsap.timeline()
+    tl.fromTo(nodeEls, {
+      autoAlpha: 0,
+      y: 16,
+      scale: 0.96,
+      transformOrigin: '50% 50%',
+    }, {
+      autoAlpha: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.42,
+      stagger: 0.025,
+      ease: 'power3.out',
+      clearProps: 'transform',
+    }).fromTo(edgeEls, {
+      autoAlpha: 0,
+    }, {
+      autoAlpha: 1,
+      duration: 0.28,
+      stagger: 0.008,
+      ease: 'power1.out',
+    }, '-=0.18')
+
+    return () => {
+      tl.kill()
+    }
+  }, [activeTab, existingNodes.length, existingEdges.length, markovLoading, reportRec])
+
+  useEffect(() => {
+    const panel = editPanelRef.current
+    if (!panel) return
+
+    gsap.fromTo(panel, {
+      x: 36,
+      autoAlpha: 0,
+    }, {
+      x: 0,
+      autoAlpha: 1,
+      duration: 0.32,
+      ease: 'power3.out',
+    })
+  }, [editingNodeId])
+
+  useEffect(() => {
+    const panel = commentPanelRef.current
+    if (!panel) return
+
+    gsap.fromTo(panel, {
+      x: 36,
+      autoAlpha: 0,
+    }, {
+      x: 0,
+      autoAlpha: 1,
+      duration: 0.32,
+      ease: 'power3.out',
+    })
   }, [commentingNode])
 
   const handleOpenComment = useCallback((nodeId: string) => {
@@ -288,6 +433,7 @@ export default function Dashboard() {
     () =>
       existingNodes.map((node) => ({
         ...node,
+        position: topologyPositions[node.id] ?? node.position,
         data: {
           ...node.data,
           nodeId: node.id,
@@ -297,11 +443,15 @@ export default function Dashboard() {
           editMode,
         },
       })),
-    [existingNodes, comments, handleOpenComment, handleOpenEdit, editMode],
+    [existingNodes, comments, handleOpenComment, handleOpenEdit, editMode, topologyPositions],
   )
 
-  const [nodes, , onNodesChange] = useNodesState(nodesWithComments)
+  const [nodes, setNodes, onNodesChange] = useNodesState(nodesWithComments)
   const [edges, setEdges, onEdgesChange] = useEdgesState(existingEdges)
+
+  // Keep refs in sync for debounced topology save
+  useEffect(() => { nodesRef.current = nodes }, [nodes])
+  useEffect(() => { edgesRef.current = edges }, [edges])
 
   useEffect(() => {
     onNodesChange(
@@ -310,8 +460,41 @@ export default function Dashboard() {
   }, [nodesWithComments])
 
   useEffect(() => {
-    setEdges(existingEdges)
-  }, [existingEdges])
+    setEdges(topologyEdges ?? existingEdges)
+  }, [existingEdges, topologyEdges])
+
+  // Save topology when nodes are dragged (drag end only) or removed
+  const handleNodesChange = useCallback((changes: NodeChange[]) => {
+    onNodesChange(changes)
+    if (!editMode) return
+    const shouldSave = changes.some(
+      (c) => (c.type === 'position' && !c.dragging) || c.type === 'remove',
+    )
+    if (shouldSave) scheduleSave()
+  }, [editMode, onNodesChange, scheduleSave])
+
+  // Save topology when edges are removed
+  const handleEdgesChange = useCallback((changes: EdgeChange[]) => {
+    onEdgesChange(changes)
+    if (!editMode) return
+    if (changes.some((c) => c.type === 'remove')) scheduleSave()
+  }, [editMode, onEdgesChange, scheduleSave])
+
+  // Add a new edge when user draws a connection
+  const handleConnect = useCallback((connection: Connection) => {
+    if (!editMode) return
+    setEdges((eds) =>
+      addEdge(
+        {
+          ...connection,
+          type: 'smoothstep',
+          style: { stroke: '#5E149F', strokeWidth: 2.5 },
+        },
+        eds,
+      ),
+    )
+    scheduleSave()
+  }, [editMode, setEdges, scheduleSave])
 
   // ── Derived stats ────────────────────────────────────────────────────────
   const taskNodes = existingNodes.filter((n) => n.type === 'taskNode')
@@ -324,7 +507,7 @@ export default function Dashboard() {
   return (
     <ClientWorkspaceShell
       headerLeft={
-        <div className="min-w-0">
+        <div data-gsap-dashboard-header className="min-w-0">
           <div className="flex items-center gap-3">
             <img src="/axis-logo.png" alt="Axis logo" className="h-10 w-10 rounded-2xl object-cover" />
             <h1 className="text-[42px] leading-none font-bold tracking-[-0.045em] text-black">Your Workflow</h1>
@@ -337,9 +520,9 @@ export default function Dashboard() {
         </div>
       }
     >
-      <main className="mx-auto w-full max-w-[1480px] flex-1 space-y-5 px-6 py-5 md:px-10 md:py-6">
+      <main ref={rootRef} className="mx-auto w-full max-w-[1480px] flex-1 space-y-5 px-6 py-5 md:px-10 md:py-6">
         {/* Two fixed tabs */}
-        <div className="-mx-6 border-t-2 md:-mx-10" style={{ borderColor: BRAND.violet }}>
+        <div data-gsap-dashboard-tabs className="-mx-6 border-t-2 md:-mx-10" style={{ borderColor: BRAND.violet }}>
           <div
             className="flex min-h-[44px] border-b-2 bg-white"
             style={{ borderBottomColor: 'rgba(94, 20, 159, 0.22)' }}
@@ -347,9 +530,8 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => setActiveTab('workspace')}
-              className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${
-                activeTab === 'workspace' ? 'bg-[#F4E8FB] text-[#5E149F]' : 'bg-white text-black/70 hover:bg-black/[0.02]'
-              }`}
+              className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab === 'workspace' ? 'bg-[#F4E8FB] text-[#5E149F]' : 'bg-white text-black/70 hover:bg-black/[0.02]'
+                }`}
               style={activeTab === 'workspace' ? { boxShadow: 'inset 0 -3px 0 0 #5E149F' } : undefined}
             >
               <LayoutDashboard size={15} className="shrink-0 text-black/50" />
@@ -358,9 +540,8 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => setActiveTab('report')}
-              className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${
-                activeTab === 'report' ? 'bg-[#F4E8FB] text-[#5E149F]' : 'bg-white text-black/70 hover:bg-black/[0.02]'
-              }`}
+              className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab === 'report' ? 'bg-[#F4E8FB] text-[#5E149F]' : 'bg-white text-black/70 hover:bg-black/[0.02]'
+                }`}
               style={activeTab === 'report' ? { boxShadow: 'inset 0 -3px 0 0 #5E149F' } : undefined}
             >
               <FileText size={15} className="shrink-0 text-black/50" />
@@ -369,35 +550,35 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(94,20,159,0.12)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Workflow Steps</div>
-              <div className="text-2xl font-bold leading-tight text-black">{taskNodes.length || '—'}</div>
-              <div className="text-[11px] text-black/42 mt-0.5">{totalMinutes ? `${totalMinutes} min total cycle` : 'Run pipeline to populate'}</div>
+        <div data-gsap-dashboard-stats className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(94,20,159,0.12)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+            <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Workflow Steps</div>
+            <div className="text-2xl font-bold leading-tight text-black">{taskNodes.length || '—'}</div>
+            <div className="text-[11px] text-black/42 mt-0.5">{totalMinutes ? `${totalMinutes} min total cycle` : 'Run pipeline to populate'}</div>
+          </div>
+          <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(247,90,140,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+            <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.coral }}>Team Size</div>
+            <div className="text-2xl font-bold leading-tight text-black">{apiProject?.team_size ?? '—'}</div>
+            <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-black/42">
+              <Users size={11} style={{ color: BRAND.coral }} />
+              <span className="line-clamp-2 leading-snug">{apiProject?.primary_role ?? 'reps'} · Active seats</span>
             </div>
-            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(247,90,140,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.coral }}>Team Size</div>
-              <div className="text-2xl font-bold leading-tight text-black">{apiProject?.team_size ?? '—'}</div>
-              <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-black/42">
-                <Users size={11} style={{ color: BRAND.coral }} />
-                <span className="line-clamp-2 leading-snug">{apiProject?.primary_role ?? 'reps'} · Active seats</span>
-              </div>
-            </div>
-            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(180,48,139,0.12)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.orchid }}>Tools in Stack</div>
-              <div className="text-2xl font-bold leading-tight text-black">{derivedToolList.length || '—'}</div>
-              <div className="text-[11px] text-black/42 mt-0.5">{derivedToolList.length > 0 ? 'Extracted from workflow tasks' : 'Run pipeline to populate'}</div>
-            </div>
-            <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(226,64,155,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.pink }}>Simulations Run</div>
-              <div className="text-2xl font-bold leading-tight text-black">{apiToolEvals?.length ?? '—'}</div>
-              <div className="text-[11px] text-black/42 mt-0.5">Tool evaluations</div>
-            </div>
+          </div>
+          <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(180,48,139,0.12)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+            <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.orchid }}>Tools in Stack</div>
+            <div className="text-2xl font-bold leading-tight text-black">{derivedToolList.length || '—'}</div>
+            <div className="text-[11px] text-black/42 mt-0.5">{derivedToolList.length > 0 ? 'Extracted from workflow tasks' : 'Run pipeline to populate'}</div>
+          </div>
+          <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(226,64,155,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+            <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.pink }}>Simulations Run</div>
+            <div className="text-2xl font-bold leading-tight text-black">{apiToolEvals?.length ?? '—'}</div>
+            <div className="text-[11px] text-black/42 mt-0.5">Tool evaluations</div>
+          </div>
         </div>
 
-          {/* ── Workspace tab content ───────────────────────────────────── */}
-          {activeTab === 'workspace' && (<>
-          <div className="flex flex-col gap-2">
+        {/* ── Workspace tab content ───────────────────────────────────── */}
+        {activeTab === 'workspace' && (<>
+          <div data-gsap-dashboard-panel className="flex flex-col gap-2">
             <div className="flex justify-end px-1">
               <button
                 type="button"
@@ -408,351 +589,371 @@ export default function Dashboard() {
                 Add new tool
               </button>
             </div>
-          <div className="bg-white border rounded-[24px] overflow-hidden" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
-            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
-              <div className="flex items-center gap-3">
-                <BarChart3 size={16} style={{ color: BRAND.violet }} />
-                <div>
-                  <span className="text-sm font-semibold text-black">Workflow Map</span>
-                  {!editMode && isRealData && (
-                    <span className="ml-2 text-xs text-black/42">
-                      Click <MessageSquare size={10} className="inline" /> on any step to leave feedback
+            <div className="bg-white border rounded-[24px] overflow-hidden" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+              <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
+                <div className="flex items-center gap-3">
+                  <BarChart3 size={16} style={{ color: BRAND.violet }} />
+                  <div>
+                    <span className="text-sm font-semibold text-black">Workflow Map</span>
+                    {isRealData && (
+                      <span className="ml-2 text-xs text-black/42">
+                        Click <Pencil size={10} className="inline" /> to edit a step · <MessageSquare size={10} className="inline" /> to leave feedback
+                      </span>
+                    )}
+                    {editMode && (
+                      <span className="ml-2 text-xs font-medium" style={{ color: BRAND.orchid }}>
+                        · Drag nodes · draw connections · Backspace to delete
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  {/* Edit mode toggle — visible whenever all_tasks.json has data */}
+                  {hasTaskData && projectId && (
+                    <button
+                      type="button"
+                      onClick={toggleEditMode}
+                      className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${editMode
+                          ? 'border-[#B4308B]/30 bg-[#FCEAF4] text-[#B4308B]'
+                          : 'border-black/12 bg-white text-black/55 hover:border-[#B4308B]/30 hover:text-[#B4308B]'
+                        }`}
+                    >
+                      <Pencil size={12} />
+                      {editMode ? 'Done editing' : 'Edit'}
+                    </button>
+                  )}
+                  {/* Graph status badge */}
+                  {markovLoading && projectId && (
+                    <span className="flex items-center gap-1.5 text-xs text-black/42 font-medium">
+                      <span className="w-2 h-2 rounded-full bg-black/20 animate-pulse" />
+                      Loading graph...
                     </span>
                   )}
-                  {editMode && (
-                    <span className="ml-2 text-xs font-medium" style={{ color: BRAND.orchid }}>
-                      Click <Pencil size={10} className="inline" /> on any step to edit
+                  {!markovLoading && isRealData && topoSaveState === 'idle' && (
+                    <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: '#248F63' }}>
+                      <span className="w-2 h-2 rounded-full bg-[#248F63]" />
+                      Ready · {markovStats?.nStates ?? existingNodes.length} nodes
                     </span>
                   )}
+                  {topoSaveState === 'saving' && (
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-black/42">
+                      <span className="w-2 h-2 rounded-full bg-black/20 animate-pulse" />
+                      Saving layout…
+                    </span>
+                  )}
+                  {topoSaveState === 'saved' && (
+                    <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: '#248F63' }}>
+                      <Check size={11} />
+                      Layout saved
+                    </span>
+                  )}
+                  {topoSaveState === 'error' && (
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-red-500">
+                      <AlertCircle size={11} />
+                      Save failed
+                    </span>
+                  )}
+                  {!markovLoading && !isRealData && !projectId && (
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-orange-500">
+                      <span className="w-2 h-2 rounded-full bg-orange-400" />
+                      Fallback
+                    </span>
+                  )}
+                  {!markovLoading && !isRealData && projectId && (
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-amber-600">
+                      <span className="w-2 h-2 rounded-full bg-amber-400" />
+                      Pipeline not run
+                    </span>
+                  )}
+                  <div className="flex items-center gap-3 text-xs text-black/42">
+                    <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ background: BRAND.violet }} /> Success</span>
+                    <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500 inline-block rounded" /> Fail</span>
+                    <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ background: BRAND.coral }} /> Retry</span>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                {/* Edit mode toggle — visible whenever all_tasks.json has data */}
-                {hasTaskData && projectId && (
-                  <button
-                    type="button"
-                    onClick={toggleEditMode}
-                    className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
-                      editMode
-                        ? 'border-[#B4308B]/30 bg-[#FCEAF4] text-[#B4308B]'
-                        : 'border-black/12 bg-white text-black/55 hover:border-[#B4308B]/30 hover:text-[#B4308B]'
-                    }`}
-                  >
-                    <Pencil size={12} />
-                    {editMode ? 'Done editing' : 'Edit'}
-                  </button>
-                )}
-                {/* Graph status badge */}
+
+              <div className="relative" style={{ height: 520 }}>
+                {/* State A: loading */}
                 {markovLoading && projectId && (
-                  <span className="flex items-center gap-1.5 text-xs text-black/42 font-medium">
-                    <span className="w-2 h-2 rounded-full bg-black/20 animate-pulse" />
-                    Loading graph...
-                  </span>
-                )}
-                {!markovLoading && isRealData && (
-                  <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: '#248F63' }}>
-                    <span className="w-2 h-2 rounded-full bg-[#248F63]" />
-                    Ready · {markovStats?.nStates ?? existingNodes.length} nodes
-                  </span>
-                )}
-                {!markovLoading && !isRealData && !projectId && (
-                  <span className="flex items-center gap-1.5 text-xs font-semibold text-orange-500">
-                    <span className="w-2 h-2 rounded-full bg-orange-400" />
-                    Fallback
-                  </span>
-                )}
-                {!markovLoading && !isRealData && projectId && (
-                  <span className="flex items-center gap-1.5 text-xs font-semibold text-amber-600">
-                    <span className="w-2 h-2 rounded-full bg-amber-400" />
-                    Pipeline not run
-                  </span>
-                )}
-                <div className="flex items-center gap-3 text-xs text-black/42">
-                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ background: BRAND.violet }} /> Success</span>
-                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500 inline-block rounded" /> Fail</span>
-                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ background: BRAND.coral }} /> Retry</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative" style={{ height: 520 }}>
-              {/* State A: loading */}
-              {markovLoading && projectId && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#F7F4FB]">
-                  <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: BRAND.violet, borderTopColor: 'transparent' }} />
-                  <span className="text-sm text-black/42">Building workflow graph...</span>
-                </div>
-              )}
-
-              {/* State B-pipeline: pipeline kicked off from TranscriptInput, job in flight */}
-              {!markovLoading && !isRealData && projectId && inboundPipelineJobId && !pipelineInboundDone && !pipelineInboundFailed && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#F7F4FB]">
-                  <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: BRAND.violet, borderTopColor: 'transparent' }} />
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-black">
-                      {pipelineInboundJob?.current_step ?? 'Building your workflow…'}
-                    </p>
-                    <p className="text-xs text-black/42 mt-1">Generating telemetry, Markov matrix, and baseline simulation</p>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#F7F4FB]">
+                    <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: BRAND.violet, borderTopColor: 'transparent' }} />
+                    <span className="text-sm text-black/42">Building workflow graph...</span>
                   </div>
-                  <div className="w-56 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(94,20,159,0.10)' }}>
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${pipelineInboundJob?.progress_pct ?? 0}%`,
-                        background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)`,
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
+                )}
 
-              {/* State B: pipeline not run yet (or failed) */}
-              {!markovLoading && !isRealData && projectId && !(inboundPipelineJobId && !pipelineInboundDone && !pipelineInboundFailed) && (
-                editMode && rawTasks.length > 0 ? (
-                  /* B2: edit mode — show scrollable node list */
-                  <div className="absolute inset-0 overflow-y-auto bg-[#F7F4FB] px-5 py-4">
-                    <p className="text-xs text-black/42 mb-3">
-                      {rawTasks.length} steps extracted from transcripts. Click <Pencil size={10} className="inline" /> to edit any step.
-                    </p>
-                    <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-                      {rawTasks.map((task) => {
-                        const autoLabel = task.automatable_fraction === 'high' ? 'High automation' : task.automatable_fraction === 'medium' ? 'Med automation' : 'Low automation'
-                        const autoCls = task.automatable_fraction === 'high' ? 'text-[#5E149F] bg-[#F4E8FB]' : task.automatable_fraction === 'medium' ? 'text-[#B4308B] bg-[#FCEAF4]' : 'text-[#F75A8C] bg-[#FFE9EF]'
-                        return (
-                          <div
-                            key={task.node_id}
-                            className="bg-white rounded-2xl border px-4 py-3 flex items-start justify-between gap-3"
-                            style={{ borderColor: BRAND.border, boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
-                          >
-                            <div className="min-w-0 flex-1">
-                              <div className="text-sm font-semibold text-black truncate">{task.label}</div>
-                              <div className="flex flex-wrap gap-1 mt-1.5 mb-2">
-                                {task.app_cluster.slice(0, 3).map((t) => (
-                                  <span key={t} className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#F4E8FB] text-[#5E149F] font-medium">{t}</span>
-                                ))}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-[11px] text-black/42">{Math.round(task.duration_distribution.mean_minutes)}min avg</span>
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${autoCls}`}>{autoLabel}</span>
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => handleOpenEdit(task.node_id)}
-                              className="flex-shrink-0 p-1.5 rounded-full hover:bg-[#F4E8FB] transition-colors group"
-                              title="Edit step"
-                            >
-                              <Pencil size={14} className="text-[#5E149F]/40 group-hover:text-[#5E149F]" />
-                            </button>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ) : (
-                  /* B1: no edit mode — original empty state */
+                {/* State B-pipeline: pipeline kicked off from TranscriptInput, job in flight */}
+                {!markovLoading && !isRealData && projectId && inboundPipelineJobId && !pipelineInboundDone && !pipelineInboundFailed && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#F7F4FB]">
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(94,20,159,0.08)' }}>
-                      <GitBranch size={24} style={{ color: BRAND.violet }} />
-                    </div>
+                    <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: BRAND.violet, borderTopColor: 'transparent' }} />
                     <div className="text-center">
-                      <p className="text-sm font-semibold text-black">Your workflow is being prepared</p>
-                      <p className="text-xs text-black/42 mt-1">
-                        {isAdmin
-                          ? 'Submit transcripts and run the pipeline to generate your workflow graph.'
-                          : 'Your Axis consultant is setting up your workflow. Check back soon.'}
+                      <p className="text-sm font-semibold text-black">
+                        {pipelineInboundJob?.current_step ?? 'Building your workflow…'}
                       </p>
+                      <p className="text-xs text-black/42 mt-1">Generating telemetry, Markov matrix, and baseline simulation</p>
                     </div>
-                    {isAdmin && (
+                    <div className="w-56 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(94,20,159,0.10)' }}>
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${pipelineInboundJob?.progress_pct ?? 0}%`,
+                          background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* State B: pipeline not run yet (or failed) */}
+                {!markovLoading && !isRealData && projectId && !(inboundPipelineJobId && !pipelineInboundDone && !pipelineInboundFailed) && (
+                  editMode && rawTasks.length > 0 ? (
+                    /* B2: edit mode — show scrollable node list */
+                    <div className="absolute inset-0 overflow-y-auto bg-[#F7F4FB] px-5 py-4">
+                      <p className="text-xs text-black/42 mb-3">
+                        {rawTasks.length} steps extracted from transcripts. Click <Pencil size={10} className="inline" /> to edit any step.
+                      </p>
+                      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+                        {rawTasks.map((task) => {
+                          const autoLabel = task.automatable_fraction === 'high' ? 'High automation' : task.automatable_fraction === 'medium' ? 'Med automation' : 'Low automation'
+                          const autoCls = task.automatable_fraction === 'high' ? 'text-[#5E149F] bg-[#F4E8FB]' : task.automatable_fraction === 'medium' ? 'text-[#B4308B] bg-[#FCEAF4]' : 'text-[#F75A8C] bg-[#FFE9EF]'
+                          return (
+                            <div
+                              key={task.node_id}
+                              className="bg-white rounded-2xl border px-4 py-3 flex items-start justify-between gap-3"
+                              style={{ borderColor: BRAND.border, boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
+                            >
+                              <div className="min-w-0 flex-1">
+                                <div className="text-sm font-semibold text-black truncate">{task.label}</div>
+                                <div className="flex flex-wrap gap-1 mt-1.5 mb-2">
+                                  {task.app_cluster.slice(0, 3).map((t) => (
+                                    <span key={t} className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#F4E8FB] text-[#5E149F] font-medium">{t}</span>
+                                  ))}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[11px] text-black/42">{Math.round(task.duration_distribution.mean_minutes)}min avg</span>
+                                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${autoCls}`}>{autoLabel}</span>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleOpenEdit(task.node_id)}
+                                className="flex-shrink-0 p-1.5 rounded-full hover:bg-[#F4E8FB] transition-colors group"
+                                title="Edit step"
+                              >
+                                <Pencil size={14} className="text-[#5E149F]/40 group-hover:text-[#5E149F]" />
+                              </button>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    /* B1: no edit mode — original empty state */
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#F7F4FB]">
+                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(94,20,159,0.08)' }}>
+                        <GitBranch size={24} style={{ color: BRAND.violet }} />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-semibold text-black">Your workflow is being prepared</p>
+                        <p className="text-xs text-black/42 mt-1">
+                          {isAdmin
+                            ? 'Submit transcripts and run the pipeline to generate your workflow graph.'
+                            : 'Your Axis consultant is setting up your workflow. Check back soon.'}
+                        </p>
+                      </div>
+                      {isAdmin && (
+                        <button
+                          onClick={() => navigate(`/projects/${projectId}/transcripts`)}
+                          className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-full transition-colors"
+                          style={{ background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)` }}
+                        >
+                          <ChevronRight size={15} />
+                          Go to Transcripts
+                        </button>
+                      )}
+                    </div>
+                  )
+                )}
+
+                {/* State C: data loaded — show ReactFlow */}
+                {(!projectId || isRealData) && (
+                  <>
+                    <ReactFlow
+                      nodes={nodes}
+                      edges={edges}
+                      onNodesChange={handleNodesChange}
+                      onEdgesChange={handleEdgesChange}
+                      onConnect={handleConnect}
+                      nodeTypes={nodeTypes}
+                      nodesDraggable={editMode}
+                      nodesConnectable={editMode}
+                      elementsSelectable={editMode}
+                      deleteKeyCode={editMode ? 'Backspace' : null}
+                      fitView
+                      fitViewOptions={{ padding: 0.3 }}
+                      minZoom={0.3}
+                      maxZoom={1.5}
+                    >
+                      <Controls />
+                      <MiniMap nodeColor={() => '#CFA3E2'} maskColor="rgba(247,244,251,0.7)" />
+                      <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
+                    </ReactFlow>
+                    {/* Faded overlay while Markov data reloads after pipeline completes */}
+                    {markovLoading && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#F7F4FB]/80 backdrop-blur-[2px]">
+                        <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: BRAND.violet, borderTopColor: 'transparent' }} />
+                        <span className="text-sm font-medium text-black/60">Refreshing graph…</span>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* ── Edit panel ────────────────────────────────────────── */}
+                {editingNodeId && editDraft && (
+                  <div ref={editPanelRef} className="absolute top-0 right-0 h-full w-80 bg-white border-l shadow-2xl flex flex-col z-10" style={{ borderColor: BRAND.border }}>
+                    <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: BRAND.border }}>
+                      <div>
+                        <div className="text-xs uppercase tracking-widest font-bold" style={{ color: BRAND.orchid }}>Edit Step</div>
+                        <div className="text-sm font-semibold text-black truncate max-w-[200px]">{editDraft.label}</div>
+                      </div>
+                      <button onClick={() => { setEditingNodeId(null); setEditDraft(null) }} className="p-1.5 rounded-lg hover:bg-black/[0.04] text-black/40 hover:text-black transition-colors">
+                        <X size={16} />
+                      </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+                      {/* Label */}
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-black/42 mb-1">Step Name</label>
+                        <input
+                          value={editDraft.label}
+                          onChange={(e) => { setEditDraft((d) => d ? { ...d, label: e.target.value } : d); setEditDirty(true) }}
+                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
+                          style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
+                        />
+                      </div>
+
+                      {/* Tools / app cluster */}
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-black/42 mb-1">Tools Used</label>
+                        <input
+                          value={editDraft.tools}
+                          onChange={(e) => { setEditDraft((d) => d ? { ...d, tools: e.target.value } : d); setEditDirty(true) }}
+                          placeholder="Salesforce, Slack, ..."
+                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
+                          style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
+                        />
+                        <p className="text-[10px] text-black/38 mt-1">Comma-separated list</p>
+                      </div>
+
+                      {/* Duration */}
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-black/42 mb-1">Avg Duration (min)</label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={editDraft.mean_minutes}
+                          onChange={(e) => { setEditDraft((d) => d ? { ...d, mean_minutes: Number(e.target.value) } : d); setEditDirty(true) }}
+                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
+                          style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
+                        />
+                      </div>
+
+                      {/* Automatable fraction */}
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-black/42 mb-1">Automation Potential</label>
+                        <select
+                          value={editDraft.automatable_fraction}
+                          onChange={(e) => { setEditDraft((d) => d ? { ...d, automatable_fraction: e.target.value } : d); setEditDirty(true) }}
+                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1 bg-white"
+                          style={{ borderColor: BRAND.border }}
+                        >
+                          <option value="high">High</option>
+                          <option value="medium">Medium</option>
+                          <option value="low">Low</option>
+                        </select>
+                      </div>
+
+                      {editSaveError && (
+                        <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-600">
+                          <AlertCircle size={13} className="mt-0.5 flex-shrink-0" />
+                          {editSaveError}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="px-4 py-3 border-t space-y-2" style={{ borderColor: BRAND.border }}>
                       <button
-                        onClick={() => navigate(`/projects/${projectId}/transcripts`)}
-                        className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-full transition-colors"
+                        onClick={handleSaveEdit}
+                        disabled={editSaving || !editDirty}
+                        className="w-full flex items-center justify-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-2xl disabled:opacity-50 transition-opacity"
                         style={{ background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)` }}
                       >
-                        <ChevronRight size={15} />
-                        Go to Transcripts
+                        {editSaving ? (
+                          <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                        ) : (
+                          <Check size={15} />
+                        )}
+                        {editSaving ? 'Saving…' : 'Save Changes'}
                       </button>
-                    )}
+                      <p className="text-center text-[10px] text-black/38">Changes update all_tasks.json. Re-run pipeline to regenerate graph.</p>
+                    </div>
                   </div>
-                )
-              )}
+                )}
 
-              {/* State C: data loaded — show ReactFlow */}
-              {(!projectId || isRealData) && (
-              <>
-              <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                nodeTypes={nodeTypes}
-                nodesDraggable={false}
-                nodesConnectable={false}
-                fitView
-                fitViewOptions={{ padding: 0.3 }}
-                minZoom={0.3}
-                maxZoom={1.5}
-              >
-                <Controls />
-                <MiniMap nodeColor={() => '#CFA3E2'} maskColor="rgba(247,244,251,0.7)" />
-                <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
-              </ReactFlow>
-              {/* Faded overlay while Markov data reloads after pipeline completes */}
-              {markovLoading && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#F7F4FB]/80 backdrop-blur-[2px]">
-                  <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: BRAND.violet, borderTopColor: 'transparent' }} />
-                  <span className="text-sm font-medium text-black/60">Refreshing graph…</span>
-                </div>
-              )}
-              </>
-              )}
-
-              {/* ── Edit panel ────────────────────────────────────────── */}
-              {editingNodeId && editDraft && (
-                <div className="absolute top-0 right-0 h-full w-80 bg-white border-l shadow-2xl flex flex-col z-10" style={{ borderColor: BRAND.border }}>
-                  <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: BRAND.border }}>
-                    <div>
-                      <div className="text-xs uppercase tracking-widest font-bold" style={{ color: BRAND.orchid }}>Edit Step</div>
-                      <div className="text-sm font-semibold text-black truncate max-w-[200px]">{editDraft.label}</div>
-                    </div>
-                    <button onClick={() => { setEditingNodeId(null); setEditDraft(null) }} className="p-1.5 rounded-lg hover:bg-black/[0.04] text-black/40 hover:text-black transition-colors">
-                      <X size={16} />
-                    </button>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-                    {/* Label */}
-                    <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-widest text-black/42 mb-1">Step Name</label>
-                      <input
-                        value={editDraft.label}
-                        onChange={(e) => { setEditDraft((d) => d ? { ...d, label: e.target.value } : d); setEditDirty(true) }}
-                        className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
-                        style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
-                      />
-                    </div>
-
-                    {/* Tools / app cluster */}
-                    <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-widest text-black/42 mb-1">Tools Used</label>
-                      <input
-                        value={editDraft.tools}
-                        onChange={(e) => { setEditDraft((d) => d ? { ...d, tools: e.target.value } : d); setEditDirty(true) }}
-                        placeholder="Salesforce, Slack, ..."
-                        className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
-                        style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
-                      />
-                      <p className="text-[10px] text-black/38 mt-1">Comma-separated list</p>
-                    </div>
-
-                    {/* Duration */}
-                    <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-widest text-black/42 mb-1">Avg Duration (min)</label>
-                      <input
-                        type="number"
-                        min={1}
-                        value={editDraft.mean_minutes}
-                        onChange={(e) => { setEditDraft((d) => d ? { ...d, mean_minutes: Number(e.target.value) } : d); setEditDirty(true) }}
-                        className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
-                        style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
-                      />
-                    </div>
-
-                    {/* Automatable fraction */}
-                    <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-widest text-black/42 mb-1">Automation Potential</label>
-                      <select
-                        value={editDraft.automatable_fraction}
-                        onChange={(e) => { setEditDraft((d) => d ? { ...d, automatable_fraction: e.target.value } : d); setEditDirty(true) }}
-                        className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1 bg-white"
-                        style={{ borderColor: BRAND.border }}
-                      >
-                        <option value="high">High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
-                      </select>
-                    </div>
-
-                    {editSaveError && (
-                      <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-600">
-                        <AlertCircle size={13} className="mt-0.5 flex-shrink-0" />
-                        {editSaveError}
+                {/* ── Comment panel ─────────────────────────────────────── */}
+                {commentingNode && (
+                  <div ref={commentPanelRef} className="absolute top-0 right-0 h-full w-80 bg-white border-l shadow-2xl flex flex-col z-10" style={{ borderColor: BRAND.border }}>
+                    <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: BRAND.border }}>
+                      <div className="min-w-0">
+                        <div className="text-xs uppercase tracking-widest font-bold" style={{ color: BRAND.violet }}>Feedback</div>
+                        <div className="text-sm font-semibold text-black truncate">{commentingNodeLabel}</div>
                       </div>
-                    )}
-                  </div>
+                      <button onClick={() => setCommentingNode(null)} className="p-1.5 rounded-lg hover:bg-black/[0.04] text-black/40 hover:text-black transition-colors">
+                        <X size={16} />
+                      </button>
+                    </div>
 
-                  <div className="px-4 py-3 border-t space-y-2" style={{ borderColor: BRAND.border }}>
-                    <button
-                      onClick={handleSaveEdit}
-                      disabled={editSaving || !editDirty}
-                      className="w-full flex items-center justify-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-2xl disabled:opacity-50 transition-opacity"
-                      style={{ background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)` }}
-                    >
-                      {editSaving ? (
-                        <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                      ) : (
-                        <Check size={15} />
+                    <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+                      {(comments[commentingNode] ?? []).length === 0 && (
+                        <p className="text-xs text-black/40 text-center py-6">No feedback yet. Something look off? Let us know below.</p>
                       )}
-                      {editSaving ? 'Saving…' : 'Save Changes'}
-                    </button>
-                    <p className="text-center text-[10px] text-black/38">Changes update all_tasks.json. Re-run pipeline to regenerate graph.</p>
-                  </div>
-                </div>
-              )}
-
-              {/* ── Comment panel ─────────────────────────────────────── */}
-              {commentingNode && (
-                <div className="absolute top-0 right-0 h-full w-80 bg-white border-l shadow-2xl flex flex-col z-10 animate-fade-in" style={{ borderColor: BRAND.border }}>
-                  <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: BRAND.border }}>
-                    <div className="min-w-0">
-                      <div className="text-xs uppercase tracking-widest font-bold" style={{ color: BRAND.violet }}>Feedback</div>
-                      <div className="text-sm font-semibold text-black truncate">{commentingNodeLabel}</div>
-                    </div>
-                    <button onClick={() => setCommentingNode(null)} className="p-1.5 rounded-lg hover:bg-black/[0.04] text-black/40 hover:text-black transition-colors">
-                      <X size={16} />
-                    </button>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-                    {(comments[commentingNode] ?? []).length === 0 && (
-                      <p className="text-xs text-black/40 text-center py-6">No feedback yet. Something look off? Let us know below.</p>
-                    )}
-                    {(comments[commentingNode] ?? []).map((c) => (
-                      <div key={c.id} className="bg-[#F7F4FB] border rounded-2xl p-3 group" style={{ borderColor: BRAND.border }}>
-                        <p className="text-sm text-black/78 leading-relaxed">{c.text}</p>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-[10px] text-black/38">
-                            {new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                          </span>
-                          <button onClick={() => handleDeleteComment(commentingNode, c.id)} className="text-[10px] text-black/38 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                            Remove
-                          </button>
+                      {(comments[commentingNode] ?? []).map((c) => (
+                        <div key={c.id} className="bg-[#F7F4FB] border rounded-2xl p-3 group" style={{ borderColor: BRAND.border }}>
+                          <p className="text-sm text-black/78 leading-relaxed">{c.text}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-[10px] text-black/38">
+                              {new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                            </span>
+                            <button onClick={() => handleDeleteComment(commentingNode, c.id)} className="text-[10px] text-black/38 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                              Remove
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="px-4 py-3 border-t" style={{ borderColor: BRAND.border }}>
-                    <div className="flex gap-2">
-                      <textarea
-                        ref={commentInputRef}
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmitComment() } }}
-                        placeholder="What needs to change here?"
-                        rows={2}
-                        className="flex-1 bg-[#F7F4FB] border rounded-2xl px-3 py-2 text-sm resize-none transition-colors text-black placeholder:text-black/30 focus:outline-none"
-                        style={{ borderColor: BRAND.border }}
-                      />
-                      <button onClick={handleSubmitComment} disabled={!commentText.trim()} className="self-end p-2.5 disabled:bg-black/10 disabled:text-black/30 text-white rounded-2xl transition-colors" style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}>
-                        <Send size={14} />
-                      </button>
+                      ))}
                     </div>
-                    <p className="text-[10px] text-black/36 mt-1.5">Press Enter to send</p>
+
+                    <div className="px-4 py-3 border-t" style={{ borderColor: BRAND.border }}>
+                      <div className="flex gap-2">
+                        <textarea
+                          ref={commentInputRef}
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmitComment() } }}
+                          placeholder="What needs to change here?"
+                          rows={2}
+                          className="flex-1 bg-[#F7F4FB] border rounded-2xl px-3 py-2 text-sm resize-none transition-colors text-black placeholder:text-black/30 focus:outline-none"
+                          style={{ borderColor: BRAND.border }}
+                        />
+                        <button onClick={handleSubmitComment} disabled={!commentText.trim()} className="self-end p-2.5 disabled:bg-black/10 disabled:text-black/30 text-white rounded-2xl transition-colors" style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}>
+                          <Send size={14} />
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-black/36 mt-1.5">Press Enter to send</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
           </div>
 
           {/* ── Bottom grid: Tool stack + simulations ───────────────────── */}
@@ -818,185 +1019,184 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-          </>)}
+        </>)}
 
-          {/* ── Recommendation Report tab content ────────────────────────── */}
-          {activeTab === 'report' && (
-            <div className="space-y-5">
-              {/* Loading */}
-              {reportLoading && (
-                <div className="flex items-center justify-center py-24">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-black/10" style={{ borderTopColor: BRAND.orchid }} />
+        {/* ── Recommendation Report tab content ────────────────────────── */}
+        {activeTab === 'report' && (
+          <div data-gsap-dashboard-report className="space-y-5">
+            {/* Loading */}
+            {reportLoading && (
+              <div className="flex items-center justify-center py-24">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-black/10" style={{ borderTopColor: BRAND.orchid }} />
+              </div>
+            )}
+
+            {/* No simulations yet */}
+            {!reportLoading && !apiToolEvals?.length && (
+              <div className="flex flex-col items-center justify-center gap-4 rounded-[24px] border bg-[#F7F4FB] py-20 text-center" style={{ borderColor: BRAND.border }}>
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: 'rgba(94,20,159,0.08)' }}>
+                  <FileText size={26} style={{ color: BRAND.violet }} />
                 </div>
-              )}
+                <div>
+                  <p className="text-sm font-semibold text-black">No report yet</p>
+                  <p className="mt-1 text-xs text-black/42">Add a tool from the Workspace tab and run a simulation to generate your recommendation report.</p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('workspace')}
+                  className="flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold text-white axis-gradient-button"
+                >
+                  <Plus size={14} />
+                  Go to Workspace
+                </button>
+              </div>
+            )}
 
-              {/* No simulations yet */}
-              {!reportLoading && !apiToolEvals?.length && (
-                <div className="flex flex-col items-center justify-center gap-4 rounded-[24px] border bg-[#F7F4FB] py-20 text-center" style={{ borderColor: BRAND.border }}>
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: 'rgba(94,20,159,0.08)' }}>
-                    <FileText size={26} style={{ color: BRAND.violet }} />
-                  </div>
+            {/* Report data */}
+            {!reportLoading && reportRec && apiToolEvals?.length && (
+              <>
+                {/* Tool header + confidence */}
+                <div className="flex items-center justify-between rounded-[18px] border bg-white px-5 py-4" style={{ borderColor: BRAND.border }}>
                   <div>
-                    <p className="text-sm font-semibold text-black">No report yet</p>
-                    <p className="mt-1 text-xs text-black/42">Add a tool from the Workspace tab and run a simulation to generate your recommendation report.</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-black/40">Latest Simulation</p>
+                    <p className="mt-0.5 text-[22px] font-bold text-black">{reportRec.tool_name}</p>
+                    <p className="mt-1 text-sm text-black/55">{reportRec.summary}</p>
                   </div>
-                  <button
-                    onClick={() => setActiveTab('workspace')}
-                    className="flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold text-white axis-gradient-button"
-                  >
-                    <Plus size={14} />
-                    Go to Workspace
-                  </button>
+                  <div className="flex flex-col items-center gap-1 rounded-[14px] border px-5 py-3 text-center" style={{ borderColor: 'rgba(94,20,159,0.15)', background: 'rgba(94,20,159,0.04)' }}>
+                    <Award size={18} style={{ color: BRAND.violet }} />
+                    <span className="text-2xl font-bold" style={{ color: BRAND.violet }}>{Math.round(reportRec.confidence_score * 100)}%</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">Confidence</span>
+                  </div>
                 </div>
-              )}
 
-              {/* Report data */}
-              {!reportLoading && reportRec && apiToolEvals?.length && (
-                <>
-                  {/* Tool header + confidence */}
-                  <div className="flex items-center justify-between rounded-[18px] border bg-white px-5 py-4" style={{ borderColor: BRAND.border }}>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-black/40">Latest Simulation</p>
-                      <p className="mt-0.5 text-[22px] font-bold text-black">{reportRec.tool_name}</p>
-                      <p className="mt-1 text-sm text-black/55">{reportRec.summary}</p>
+                {/* Key metrics */}
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div className="rounded-[18px] border bg-white px-4 py-4" style={{ borderColor: 'rgba(94,20,159,0.12)' }}>
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>
+                      <Clock size={12} /> Time Saved / Rep
                     </div>
-                    <div className="flex flex-col items-center gap-1 rounded-[14px] border px-5 py-3 text-center" style={{ borderColor: 'rgba(94,20,159,0.15)', background: 'rgba(94,20,159,0.04)' }}>
-                      <Award size={18} style={{ color: BRAND.violet }} />
-                      <span className="text-2xl font-bold" style={{ color: BRAND.violet }}>{Math.round(reportRec.confidence_score * 100)}%</span>
-                      <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">Confidence</span>
+                    <div className="mt-2 text-2xl font-bold text-black">
+                      {Math.abs(reportRec.employee_impact.time_saved.p10).toFixed(1)}–{Math.abs(reportRec.employee_impact.time_saved.p70).toFixed(1)}
+                      <span className="ml-1 text-sm font-normal text-black/40">hrs/wk</span>
                     </div>
+                    <div className="mt-1 text-xs text-black/42">p10–p70 range across reps</div>
                   </div>
-
-                  {/* Key metrics */}
-                  <div className="grid gap-3 md:grid-cols-3">
-                    <div className="rounded-[18px] border bg-white px-4 py-4" style={{ borderColor: 'rgba(94,20,159,0.12)' }}>
-                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>
-                        <Clock size={12} /> Time Saved / Rep
-                      </div>
-                      <div className="mt-2 text-2xl font-bold text-black">
-                        {Math.abs(reportRec.employee_impact.time_saved.p10).toFixed(1)}–{Math.abs(reportRec.employee_impact.time_saved.p70).toFixed(1)}
-                        <span className="ml-1 text-sm font-normal text-black/40">hrs/wk</span>
-                      </div>
-                      <div className="mt-1 text-xs text-black/42">p10–p70 range across reps</div>
+                  <div className="rounded-[18px] border bg-white px-4 py-4" style={{ borderColor: 'rgba(180,48,139,0.12)' }}>
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.orchid }}>
+                      <Zap size={12} /> Throughput Lift
                     </div>
-                    <div className="rounded-[18px] border bg-white px-4 py-4" style={{ borderColor: 'rgba(180,48,139,0.12)' }}>
-                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.orchid }}>
-                        <Zap size={12} /> Throughput Lift
-                      </div>
-                      <div className="mt-2 text-2xl font-bold text-black">
-                        {Math.abs(reportRec.company_impact.throughput.p10).toFixed(1)}–{Math.abs(reportRec.company_impact.throughput.p70).toFixed(1)}
-                        <span className="ml-1 text-sm font-normal text-black/40">%</span>
-                      </div>
-                      <div className="mt-1 text-xs text-black/42">more deals closed per rep</div>
+                    <div className="mt-2 text-2xl font-bold text-black">
+                      {Math.abs(reportRec.company_impact.throughput.p10).toFixed(1)}–{Math.abs(reportRec.company_impact.throughput.p70).toFixed(1)}
+                      <span className="ml-1 text-sm font-normal text-black/40">%</span>
                     </div>
-                    <div className="rounded-[18px] border bg-white px-4 py-4" style={{ borderColor: 'rgba(247,90,140,0.12)' }}>
-                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.coral }}>
-                        <TrendingUp size={12} /> Revenue Impact
-                      </div>
-                      <div className="mt-2 text-2xl font-bold text-black">
-                        ${(Math.abs(reportRec.company_impact.revenue_impact.p10) / 1000).toFixed(1)}k–${(Math.abs(reportRec.company_impact.revenue_impact.p70) / 1000).toFixed(1)}k
-                      </div>
-                      <div className="mt-1 text-xs text-black/42">projected uplift</div>
-                    </div>
+                    <div className="mt-1 text-xs text-black/42">more deals closed per rep</div>
                   </div>
-
-                  {/* Workflow map */}
-                  <div className="bg-white border rounded-[24px] overflow-hidden" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
-                    <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
-                      <BarChart3 size={16} style={{ color: BRAND.violet }} />
-                      <span className="text-sm font-semibold text-black">Workflow Map</span>
+                  <div className="rounded-[18px] border bg-white px-4 py-4" style={{ borderColor: 'rgba(247,90,140,0.12)' }}>
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.coral }}>
+                      <TrendingUp size={12} /> Revenue Impact
                     </div>
-                    <div style={{ height: 420 }}>
-                      <ReactFlow
-                        nodes={nodes}
-                        edges={edges}
-                        onNodesChange={onNodesChange}
-                        onEdgesChange={onEdgesChange}
-                        nodeTypes={nodeTypes}
-                        nodesDraggable={false}
-                        nodesConnectable={false}
-                        fitView
-                        fitViewOptions={{ padding: 0.3 }}
-                        minZoom={0.3}
-                        maxZoom={1.5}
+                    <div className="mt-2 text-2xl font-bold text-black">
+                      ${(Math.abs(reportRec.company_impact.revenue_impact.p10) / 1000).toFixed(1)}k–${(Math.abs(reportRec.company_impact.revenue_impact.p70) / 1000).toFixed(1)}k
+                    </div>
+                    <div className="mt-1 text-xs text-black/42">projected uplift</div>
+                  </div>
+                </div>
+
+                {/* Workflow map */}
+                <div className="bg-white border rounded-[24px] overflow-hidden" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+                  <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
+                    <BarChart3 size={16} style={{ color: BRAND.violet }} />
+                    <span className="text-sm font-semibold text-black">Workflow Map</span>
+                  </div>
+                  <div style={{ height: 420 }}>
+                    <ReactFlow
+                      nodes={nodes}
+                      edges={edges}
+                      nodeTypes={nodeTypes}
+                      nodesDraggable={false}
+                      nodesConnectable={false}
+                      elementsSelectable={false}
+                      fitView
+                      fitViewOptions={{ padding: 0.3 }}
+                      minZoom={0.3}
+                      maxZoom={1.5}
+                    >
+                      <Controls />
+                      <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
+                    </ReactFlow>
+                  </div>
+                </div>
+
+                {/* Use cases */}
+                {reportRec.use_cases.length > 0 && (
+                  <div className="bg-white border rounded-[24px] p-5" style={{ borderColor: BRAND.border }}>
+                    <h3 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: BRAND.violet }}>Key Use Cases</h3>
+                    <div className="space-y-3">
+                      {reportRec.use_cases.map((uc, i) => (
+                        <div key={i} className="rounded-[16px] border bg-[#F7F4FB] px-4 py-3" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
+                          <p className="text-sm font-semibold text-black">{uc.title}</p>
+                          <p className="mt-0.5 text-xs text-black/55">{uc.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {projectId && apiToolEvals?.[0] && (
+                      <button
+                        onClick={() => navigate(`/projects/${projectId}/recommendation/${apiToolEvals[0].id}`)}
+                        className="mt-4 w-full flex items-center justify-center gap-2 rounded-full py-2.5 text-[13px] font-bold text-white axis-gradient-button"
                       >
-                        <Controls />
-                        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
-                      </ReactFlow>
-                    </div>
+                        <FileText size={14} />
+                        View Full Recommendation
+                      </button>
+                    )}
                   </div>
+                )}
+              </>
+            )}
 
-                  {/* Use cases */}
-                  {reportRec.use_cases.length > 0 && (
-                    <div className="bg-white border rounded-[24px] p-5" style={{ borderColor: BRAND.border }}>
-                      <h3 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: BRAND.violet }}>Key Use Cases</h3>
-                      <div className="space-y-3">
-                        {reportRec.use_cases.map((uc, i) => (
-                          <div key={i} className="rounded-[16px] border bg-[#F7F4FB] px-4 py-3" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
-                            <p className="text-sm font-semibold text-black">{uc.title}</p>
-                            <p className="mt-0.5 text-xs text-black/55">{uc.description}</p>
-                          </div>
-                        ))}
-                      </div>
-                      {projectId && apiToolEvals?.[0] && (
-                        <button
-                          onClick={() => navigate(`/projects/${projectId}/recommendation/${apiToolEvals[0].id}`)}
-                          className="mt-4 w-full flex items-center justify-center gap-2 rounded-full py-2.5 text-[13px] font-bold text-white axis-gradient-button"
-                        >
-                          <FileText size={14} />
-                          View Full Recommendation
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-
-              {/* Simulation job in progress */}
-              {!reportLoading && !reportRec && simJobId && (simRunning || (!simDone && !simFailed)) && (
-                <div className="rounded-[24px] border bg-white p-6 space-y-4" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-black">{simJob?.current_step ?? 'Starting simulation…'}</p>
-                    <span className="text-sm font-semibold tabular-nums" style={{ color: BRAND.violet }}>{simJob?.progress_pct ?? 0}%</span>
-                  </div>
-                  <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(94,20,159,0.10)' }}>
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${simJob?.progress_pct ?? 0}%`,
-                        background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)`,
-                      }}
-                    />
-                  </div>
-                  <p className="text-xs text-black/42">Axis is scraping the product site, classifying features, and running your Monte Carlo simulation. This takes 1–2 minutes.</p>
+            {/* Simulation job in progress */}
+            {!reportLoading && !reportRec && simJobId && (simRunning || (!simDone && !simFailed)) && (
+              <div className="rounded-[24px] border bg-white p-6 space-y-4" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-black">{simJob?.current_step ?? 'Starting simulation…'}</p>
+                  <span className="text-sm font-semibold tabular-nums" style={{ color: BRAND.violet }}>{simJob?.progress_pct ?? 0}%</span>
                 </div>
-              )}
-
-              {/* Simulation job failed */}
-              {!reportLoading && simJobId && simFailed && !reportRec && (
-                <div className="rounded-[24px] border border-red-200 bg-red-50 p-5">
-                  <p className="text-sm font-semibold text-red-600">Simulation failed</p>
-                  <p className="mt-1 text-xs text-red-500">{simJob?.error_message ?? 'An error occurred. Please try again from the Workspace tab.'}</p>
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(94,20,159,0.10)' }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${simJob?.progress_pct ?? 0}%`,
+                      background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)`,
+                    }}
+                  />
                 </div>
-              )}
+                <p className="text-xs text-black/42">Axis is scraping the product site, classifying features, and running your Monte Carlo simulation. This takes 1–2 minutes.</p>
+              </div>
+            )}
 
-              {/* Fetched OK but no recommendation data yet (simulation not run) */}
-              {!reportLoading && apiToolEvals?.length && !reportRec && !simJobId && (
-                <div className="flex flex-col items-center justify-center gap-3 rounded-[24px] border bg-[#F7F4FB] py-16 text-center" style={{ borderColor: BRAND.border }}>
-                  <p className="text-sm font-semibold text-black">Simulation not run yet</p>
-                  <p className="text-xs text-black/42">Run a simulation from the Workspace tab to generate your report.</p>
-                  <button
-                    onClick={() => setActiveTab('workspace')}
-                    className="flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold text-white axis-gradient-button"
-                  >
-                    Go to Workspace
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
+            {/* Simulation job failed */}
+            {!reportLoading && simJobId && simFailed && !reportRec && (
+              <div className="rounded-[24px] border border-red-200 bg-red-50 p-5">
+                <p className="text-sm font-semibold text-red-600">Simulation failed</p>
+                <p className="mt-1 text-xs text-red-500">{simJob?.error_message ?? 'An error occurred. Please try again from the Workspace tab.'}</p>
+              </div>
+            )}
 
-        </main>
+            {/* Fetched OK but no recommendation data yet (simulation not run) */}
+            {!reportLoading && apiToolEvals?.length && !reportRec && !simJobId && (
+              <div className="flex flex-col items-center justify-center gap-3 rounded-[24px] border bg-[#F7F4FB] py-16 text-center" style={{ borderColor: BRAND.border }}>
+                <p className="text-sm font-semibold text-black">Simulation not run yet</p>
+                <p className="text-xs text-black/42">Run a simulation from the Workspace tab to generate your report.</p>
+                <button
+                  onClick={() => setActiveTab('workspace')}
+                  className="flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold text-white axis-gradient-button"
+                >
+                  Go to Workspace
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+      </main>
     </ClientWorkspaceShell>
   )
 }

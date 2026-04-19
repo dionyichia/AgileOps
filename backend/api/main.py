@@ -18,6 +18,7 @@ from backend.api.routes import (
     simulation,
     tasks,
     tools,
+    topology,
     transcripts,
     uploads,
 )
@@ -55,6 +56,7 @@ _api_routers = [
     simulation.router,
     recommendation.router,
     markov.router,
+    topology.router,
     jobs.http_router,
 ]
 for router in _api_routers:

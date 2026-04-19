@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import gsap from 'gsap'
 import ReactFlow, {
   useNodesState,
   useEdgesState,
@@ -17,6 +18,7 @@ import { SkeletonCard, PageLoader } from '../components/ui/Skeleton'
 import { nodeTypes } from '../components/workflow/CustomNodes'
 import { projects as projectsApi, tasks as tasksApi, type Project, type TaskNode } from '../api/client'
 import { useMarkovData } from '../hooks/pullMarkovData'
+import { useGsapReveal } from '../hooks/useGsapReveal'
 
 
 export default function WorkflowReport() {
@@ -27,10 +29,19 @@ export default function WorkflowReport() {
   const [nodes, setNodes, onNodesChange] = useNodesState(existingNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(existingEdges)
   const [selectedTool, setSelectedTool] = useState<string | null>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
 
   // Project + task data from API
   const [project, setProject] = useState<Project | null>(null)
   const [taskNodes, setTaskNodes] = useState<TaskNode[]>([])
+
+  useGsapReveal(rootRef, [projectId, existingNodes.length, existingEdges.length, loading, error], {
+    selectors: ['[data-gsap-reveal-panel]'],
+    duration: 0.62,
+    stagger: 0.1,
+    y: 20,
+    blur: 12,
+  })
 
   useEffect(() => {
     if (!projectId) return
@@ -139,6 +150,43 @@ export default function WorkflowReport() {
     }
   }, [existingEdges])
 
+  useEffect(() => {
+    const scope = rootRef.current
+    if (!scope || loading || (!projectId && !existingNodes.length)) return
+
+    const nodeEls = gsap.utils.toArray<HTMLElement>('.react-flow__node', scope)
+    const edgeEls = gsap.utils.toArray<HTMLElement>('.react-flow__edge-path', scope)
+
+    if (!nodeEls.length && !edgeEls.length) return
+
+    const tl = gsap.timeline()
+    tl.fromTo(nodeEls, {
+      autoAlpha: 0,
+      y: 16,
+      scale: 0.96,
+      transformOrigin: '50% 50%',
+    }, {
+      autoAlpha: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.42,
+      stagger: 0.03,
+      ease: 'power3.out',
+      clearProps: 'transform',
+    }).fromTo(edgeEls, {
+      autoAlpha: 0,
+    }, {
+      autoAlpha: 1,
+      duration: 0.3,
+      stagger: 0.01,
+      ease: 'power1.out',
+    }, '-=0.2')
+
+    return () => {
+      tl.kill()
+    }
+  }, [existingNodes.length, existingEdges.length, loading, projectId])
+
   return (
     <StepLayout
       currentStep={2}
@@ -147,10 +195,10 @@ export default function WorkflowReport() {
       onNext={() => navigate(projectId ? `/projects/${projectId}/tool-input` : '/internal/tool-input')}
       nextLabel="Analyze New Tool"
     >
-      <div className="flex gap-6 h-full">
+      <div ref={rootRef} className="flex gap-6 h-full">
 
         {/* ── Left panel ─────────────────────────────────────────────────────── */}
-        <div className="w-72 flex-shrink-0 space-y-5 overflow-y-auto max-h-[calc(100vh-260px)] pr-1">
+        <div data-gsap-reveal-panel className="w-72 flex-shrink-0 space-y-5 overflow-y-auto max-h-[calc(100vh-260px)] pr-1">
 
           {/* Role Stats */}
           <div
@@ -199,7 +247,7 @@ export default function WorkflowReport() {
         </div>
 
         {/* ── Right panel: React Flow diagram ────────────────────────────────── */}
-        <div className="flex-1 min-w-0">
+        <div data-gsap-reveal-panel className="flex-1 min-w-0">
           <div
             className="bg-white border rounded-[24px] overflow-hidden"
             style={{

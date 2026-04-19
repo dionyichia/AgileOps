@@ -1,5 +1,7 @@
+import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { useGsapReveal } from '../../hooks/useGsapReveal'
 
 interface StepLayoutProps {
   children: React.ReactNode
@@ -34,20 +36,29 @@ export default function StepLayout({
   embedded = false,
 }: StepLayoutProps) {
   const navigate = useNavigate()
+  const rootRef = useRef<HTMLDivElement>(null)
 
   const handleBack = () => navigate(backPath ?? '/dashboard')
+
+  useGsapReveal(rootRef, [compact, nested, embedded], {
+    selectors: ['[data-gsap-shell]', '[data-gsap-reveal]'],
+    duration: 0.6,
+    stagger: 0.09,
+    y: 20,
+    blur: 12,
+  })
 
   if (compact) {
     if (nested) {
       return (
-        <div className="w-full text-black">
+        <div ref={rootRef} className="w-full text-black">
           {children}
         </div>
       )
     }
     return (
-      <div className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
-        <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8 animate-fade-in">
+      <div ref={rootRef} className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
+        <main data-gsap-shell className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
           {children}
         </main>
       </div>
@@ -56,11 +67,11 @@ export default function StepLayout({
 
   if (embedded) {
     return (
-      <div className="flex min-h-0 w-full flex-1 flex-col bg-[#F7F4FB] text-black">
-        <main className="mx-auto min-h-0 w-full max-w-7xl flex-1 animate-fade-in overflow-auto px-6 py-6">
+      <div ref={rootRef} className="flex min-h-0 w-full flex-1 flex-col bg-[#F7F4FB] text-black">
+        <main data-gsap-shell className="mx-auto min-h-0 w-full max-w-7xl flex-1 overflow-auto px-6 py-6">
           {children}
         </main>
-        <footer className="sticky bottom-0 border-t border-black/8 bg-white/95 backdrop-blur-sm">
+        <footer data-gsap-reveal className="sticky bottom-0 border-t border-black/8 bg-white/95 backdrop-blur-sm">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             {showBack ? (
               <button
@@ -91,9 +102,9 @@ export default function StepLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
+    <div ref={rootRef} className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
       {/* Header — logo only, no step indicator */}
-      <header className="border-b border-black/8 bg-white/90 backdrop-blur-sm sticky top-0 z-50">
+      <header data-gsap-reveal className="border-b border-black/8 bg-white/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center">
           <div className="flex items-center gap-3">
             <img
@@ -107,12 +118,12 @@ export default function StepLayout({
       </header>
 
       {/* Content */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8 animate-fade-in">
+      <main data-gsap-shell className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
         {children}
       </main>
 
       {/* Footer nav */}
-      <footer className="border-t border-black/8 bg-white/95 backdrop-blur-sm sticky bottom-0">
+      <footer data-gsap-reveal className="border-t border-black/8 bg-white/95 backdrop-blur-sm sticky bottom-0">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {showBack ? (
             <button

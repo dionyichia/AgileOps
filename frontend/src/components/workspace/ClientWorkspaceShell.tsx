@@ -1,6 +1,8 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Menu } from 'lucide-react'
+import gsap from 'gsap'
+import { useGsapReveal } from '../../hooks/useGsapReveal'
 
 interface ClientWorkspaceShellProps {
   /** Left side of the top bar (titles, back button, logo, etc.) */
@@ -15,10 +17,57 @@ interface ClientWorkspaceShellProps {
 export default function ClientWorkspaceShell({ headerLeft, children }: ClientWorkspaceShellProps) {
   const navigate = useNavigate()
   const [showMenu, setShowMenu] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLElement>(null)
+
+  useGsapReveal(rootRef, [], {
+    selectors: ['[data-gsap-shell-header]', '[data-gsap-shell-content]'],
+    duration: 0.62,
+    stagger: 0.1,
+    y: 18,
+    blur: 10,
+  })
+
+  useEffect(() => {
+    const menu = menuRef.current
+    if (!menu) return
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    if (reduceMotion) return
+
+    if (showMenu) {
+      const items = gsap.utils.toArray<HTMLElement>('[data-gsap-menu-item]', menu)
+
+      gsap.killTweensOf([menu, ...items])
+      gsap.set(menu, { xPercent: 100, autoAlpha: 1, willChange: 'transform' })
+      gsap.set(items, { x: 18, autoAlpha: 0, willChange: 'transform, opacity' })
+
+      const tl = gsap.timeline()
+      tl.to(menu, {
+        xPercent: 0,
+        duration: 0.34,
+        ease: 'power3.out',
+        clearProps: 'willChange',
+      }).to(items, {
+        x: 0,
+        autoAlpha: 1,
+        duration: 0.3,
+        stagger: 0.05,
+        ease: 'power2.out',
+        clearProps: 'willChange',
+      }, '-=0.18')
+
+      return () => {
+        tl.kill()
+      }
+    }
+
+    gsap.set(menu, { clearProps: 'all' })
+  }, [showMenu])
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-black">
-      <header className="sticky top-0 z-40 border-b border-black/5 bg-white/95 backdrop-blur-sm">
+    <div ref={rootRef} className="flex min-h-screen flex-col bg-white text-black">
+      <header data-gsap-shell-header className="sticky top-0 z-40 border-b border-black/5 bg-white/95 backdrop-blur-sm">
         <div className="mx-auto flex w-full max-w-[1480px] items-start justify-between gap-4 px-6 py-4 md:px-10">
           <div className="min-w-0 flex-1">{headerLeft}</div>
           <div className="flex shrink-0 items-center gap-3 pt-1">
@@ -40,10 +89,12 @@ export default function ClientWorkspaceShell({ headerLeft, children }: ClientWor
         </div>
       </header>
 
-      {children}
+      <div data-gsap-shell-content className="flex min-h-0 flex-1 flex-col">
+        {children}
+      </div>
 
       {showMenu && (
-        <aside className="fixed right-0 top-0 z-50 flex h-screen w-[300px] flex-col border-l border-black/15 bg-[#F7F7FB] shadow-2xl">
+        <aside ref={menuRef} className="fixed right-0 top-0 z-50 flex h-screen w-[300px] flex-col border-l border-black/15 bg-[#F7F7FB] shadow-2xl">
           <div className="px-4 py-4">
             <button
               type="button"
@@ -62,6 +113,7 @@ export default function ClientWorkspaceShell({ headerLeft, children }: ClientWor
                   setShowMenu(false)
                   navigate('/dashboard')
                 }}
+                data-gsap-menu-item
                 className="block w-full text-right text-[24px] leading-tight tracking-[-0.015em] text-black hover:text-[#5E149F] md:text-[28px]"
               >
                 Dashboard
@@ -71,6 +123,7 @@ export default function ClientWorkspaceShell({ headerLeft, children }: ClientWor
                   setShowMenu(false)
                   navigate('/simulations')
                 }}
+                data-gsap-menu-item
                 className="block w-full text-right text-[24px] leading-tight tracking-[-0.015em] text-black hover:text-[#5E149F] md:text-[28px]"
               >
                 Simulations
@@ -80,6 +133,7 @@ export default function ClientWorkspaceShell({ headerLeft, children }: ClientWor
                   setShowMenu(false)
                   navigate('/tool-drafts')
                 }}
+                data-gsap-menu-item
                 className="block w-full text-right text-[24px] leading-tight tracking-[-0.015em] text-black hover:text-[#5E149F] md:text-[28px]"
               >
                 Tool Drafts
@@ -89,24 +143,28 @@ export default function ClientWorkspaceShell({ headerLeft, children }: ClientWor
                   setShowMenu(false)
                   navigate('/reports')
                 }}
+                data-gsap-menu-item
                 className="block w-full text-right text-[24px] leading-tight tracking-[-0.015em] text-black hover:text-[#5E149F] md:text-[28px]"
               >
                 Reports
               </button>
               <button
                 onClick={() => setShowMenu(false)}
+                data-gsap-menu-item
                 className="block w-full text-right text-[24px] leading-tight tracking-[-0.015em] text-black hover:text-[#5E149F] md:text-[28px]"
               >
                 Team
               </button>
               <button
                 onClick={() => setShowMenu(false)}
+                data-gsap-menu-item
                 className="block w-full text-right text-[24px] leading-tight tracking-[-0.015em] text-black hover:text-[#5E149F] md:text-[28px]"
               >
                 Settings
               </button>
               <button
                 onClick={() => setShowMenu(false)}
+                data-gsap-menu-item
                 className="block w-full text-right text-[24px] leading-tight tracking-[-0.015em] text-black hover:text-[#5E149F] md:text-[28px]"
               >
                 Help
