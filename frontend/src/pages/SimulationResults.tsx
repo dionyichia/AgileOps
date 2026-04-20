@@ -9,9 +9,10 @@ import ReactFlow, {
   MiniMap,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
-import { TrendingDown, TrendingUp, Minus, DollarSign, Zap, Info, ChevronLeft } from 'lucide-react'
+import { TrendingDown, TrendingUp, Minus, DollarSign, Zap, Info, ChevronLeft, GitBranch } from 'lucide-react'
 import StepLayout from '../components/layout/StepLayout'
 import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
+import CosmoChatWidget from '../components/workspace/CosmoChatWidget'
 import { CLIENT_SIMULATIONS_SEED } from '../data/clientSimulations'
 import { nodeTypes } from '../components/workflow/CustomNodes'
 import { toolTimeMetrics, simulationNodes, simulationEdges } from '../data/mockData'
@@ -27,6 +28,7 @@ import {
   type TaskNode,
 } from '../api/client'
 import { useJobProgress } from '../hooks/useJobProgress'
+import { useMarkovData } from '../hooks/pullMarkovData'
 
 function formatDollar(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
@@ -77,9 +79,20 @@ export default function SimulationResults() {
   const [recData, setRecData] = useState<RecommendationData | null>(null)
   const [simData, setSimData] = useState<SimulationData | null>(null)
   const [taskNodes, setTaskNodes] = useState<TaskNode[]>([])
+  const [apiLoading, setApiLoading] = useState(isProjectScoped)
 
-  const [nodes, , onNodesChange] = useNodesState(simulationNodes)
-  const [edges, , onEdgesChange] = useEdgesState(simulationEdges)
+  // Workflow graph — use real Markov data for project-scoped, mock for flat
+  const { existingNodes: wfNodes, existingEdges: wfEdges } = useMarkovData(
+    isProjectScoped ? projectId : undefined,
+  )
+  const [nodes, setNodes, onNodesChange] = useNodesState(isProjectScoped ? [] : simulationNodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(isProjectScoped ? [] : simulationEdges)
+
+  useEffect(() => {
+    if (!isProjectScoped || wfNodes.length === 0) return
+    setNodes(wfNodes.map((n) => ({ ...n })))
+    setEdges(wfEdges.map((e) => ({ ...e })))
+  }, [isProjectScoped, wfNodes, wfEdges])
 
   // Fetch all project data when project-scoped
   useEffect(() => {
@@ -90,11 +103,14 @@ export default function SimulationResults() {
       }
       return
     }
-    toolEvals.get(projectId!, toolEvalId!).then((te) => setToolName(te.tool_name)).catch(() => {})
-    projectsApi.get(projectId!).then(setProject).catch(() => {})
-    recApi.get(projectId!, toolEvalId!).then(setRecData).catch(() => {})
-    simulationApi.get(projectId!, toolEvalId!).then(setSimData).catch(() => {})
-    tasksApi.get(projectId!).then(setTaskNodes).catch(() => {})
+    setApiLoading(true)
+    Promise.all([
+      toolEvals.get(projectId!, toolEvalId!).then((te) => setToolName(te.tool_name)).catch(() => {}),
+      projectsApi.get(projectId!).then(setProject).catch(() => {}),
+      recApi.get(projectId!, toolEvalId!).then(setRecData).catch(() => {}),
+      simulationApi.get(projectId!, toolEvalId!).then(setSimData).catch(() => {}),
+      tasksApi.get(projectId!).then(setTaskNodes).catch(() => {}),
+    ]).finally(() => setApiLoading(false))
   }, [projectId, toolEvalId, isProjectScoped, evalParam])
 
   // Derive time metrics from task nodes + simulation node savings
@@ -133,7 +149,8 @@ export default function SimulationResults() {
       .sort((a, b) => b.weeklyHrs - a.weeklyHrs)
   }, [isProjectScoped, taskNodes])
 
-  const timeMetrics = derivedTimeMetrics ?? toolTimeMetrics
+  // In project-scoped mode never fall back to mock data
+  const timeMetrics = isProjectScoped ? (derivedTimeMetrics ?? []) : (derivedTimeMetrics ?? toolTimeMetrics)
 
   // Legacy loading sequence (only for flat route)
   useEffect(() => {
@@ -146,14 +163,27 @@ export default function SimulationResults() {
     return () => clearTimeout(t)
   }, [loadStep, legacyDone, isProjectScoped])
 
-  // Determine if we're done loading
-  const done = isProjectScoped
+  // Determine if we're done with the job (separate from API data loading)
+  const jobDone = isProjectScoped
     ? jobProgress.isDone || jobProgress.isFailed || !jobId
     : legacyDone
+  // Only render results once the job is done AND API data has been fetched
+  const done = jobDone && !apiLoading
 
   const totalSaved = timeMetrics
     .filter((m) => m.change === 'decrease')
     .reduce((acc, m) => acc + ((m as any).saved ?? 0), 0)
+  const cosmoDemoContext = useMemo(
+    () => ({
+      tool_name: toolName,
+      role: project?.primary_role ?? 'sales',
+      team_size: project?.team_size ?? null,
+      total_saved_minutes_per_day: totalSaved,
+      tool_stack: (derivedToolList ?? []).slice(0, 10),
+      time_metrics: timeMetrics.slice(0, 8),
+    }),
+    [toolName, project, totalSaved, derivedToolList, timeMetrics],
+  )
 
   const recommendationPath = isProjectScoped
     ? `/projects/${projectId}/recommendation/${toolEvalId}`
@@ -278,13 +308,47 @@ export default function SimulationResults() {
 
     if (isFlatClient) {
       return (
-        <ClientWorkspaceShell headerLeft={flatShellHeader}>
+        <ClientWorkspaceShell headerLeft={flatShellHeader} projectId={projectId}>
           {loadingBody}
         </ClientWorkspaceShell>
       )
     }
 
     return loadingBody
+  }
+
+  // Project-scoped: no simulation data found after loading completed
+  if (isProjectScoped && done && !simData) {
+    const emptyBody = (
+      <div className="flex flex-1 items-center justify-center bg-[#F7F4FB] px-6 py-24">
+        <div className="flex flex-col items-center gap-5 text-center max-w-sm">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: 'rgba(94,20,159,0.08)' }}>
+            <GitBranch size={26} style={{ color: '#5E149F' }} />
+          </div>
+          <div>
+            <p className="text-base font-semibold text-black">No simulation data yet</p>
+            <p className="mt-1 text-sm text-black/50">
+              This tool evaluation hasn't been simulated. Go back to the dashboard and run a simulation.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate(`/projects/${projectId}/dashboard`)}
+            className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white"
+            style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    )
+    if (isFlatClient) {
+      return (
+        <ClientWorkspaceShell headerLeft={flatShellHeader} projectId={projectId}>
+          {emptyBody}
+        </ClientWorkspaceShell>
+      )
+    }
+    return emptyBody
   }
 
   const resultsLayout = (
@@ -355,6 +419,9 @@ export default function SimulationResults() {
             style={{ borderColor: 'rgba(94,20,159,0.10)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
           >
             <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3">Estimated Time Impact</h3>
+            {timeMetrics.length === 0 && (
+              <p className="text-xs text-black/38 py-2">Time impact data not available.</p>
+            )}
             <div className="space-y-3">
               {timeMetrics.map((m) => (
                 <div key={m.tool} className="relative">
@@ -501,9 +568,15 @@ export default function SimulationResults() {
     return (
       <ClientWorkspaceShell headerLeft={flatShellHeader}>
         <div className="flex min-h-0 flex-1 flex-col">{resultsLayout}</div>
+        <CosmoChatWidget page="simulation" demoContext={cosmoDemoContext} />
       </ClientWorkspaceShell>
     )
   }
 
-  return resultsLayout
+  return (
+    <>
+      {resultsLayout}
+      <CosmoChatWidget projectId={projectId} page="simulation" toolEvaluationId={toolEvalId} />
+    </>
+  )
 }

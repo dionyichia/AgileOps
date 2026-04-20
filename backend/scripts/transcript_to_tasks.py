@@ -168,7 +168,7 @@ def run(transcript_path: str, tasks_path: str) -> None:
 
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
-        max_tokens=8192,
+        max_tokens=16384,
         system=SYSTEM_PROMPT,
         messages=[{
             "role": "user",

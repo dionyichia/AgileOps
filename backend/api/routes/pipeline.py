@@ -78,6 +78,14 @@ async def run_simulation(
     }
 
     job = await job_runner.create_job(db, project_id, JobType.simulation)
+    tool_eval.status = "queued"
+    tool_eval.latest_job_id = job.id
+    tool_eval.latest_job_status = "pending"
+    tool_eval.latest_job_progress_pct = 0
+    tool_eval.latest_job_step = "Queued"
+    tool_eval.last_error = None
+    tool_eval.completed_at = None
+    await db.commit()
     background_tasks.add_task(
         job_runner.run_simulation_job,
         job.id,

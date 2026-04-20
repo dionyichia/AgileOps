@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
+  Check,
   Search,
   Plus,
   ChevronRight,
@@ -12,6 +13,7 @@ import {
   MessageSquareDashed,
   Clock,
   CheckCircle2,
+  X,
   AlertCircle,
   Loader2,
   Users,
@@ -20,9 +22,11 @@ import {
 } from 'lucide-react'
 import {
   projects as projectsApi,
+  taskEditRequests as taskEditRequestsApi,
   transcripts as transcriptsApi,
   pipeline as pipelineApi,
   type Project,
+  type TaskEditRequest,
   type Transcript,
 } from '../api/client'
 
@@ -57,6 +61,8 @@ export default function InternalDashboard() {
 
   // Transcripts keyed by project id — fetched on first expand
   const [projectTranscripts, setProjectTranscripts] = useState<Record<string, Transcript[] | 'loading'>>({})
+  const [projectTaskEdits, setProjectTaskEdits] = useState<Record<string, TaskEditRequest[] | 'loading'>>({})
+  const [reviewingRequestId, setReviewingRequestId] = useState<string | null>(null)
 
   // Track projects with a pipeline job running
   const [runningPipeline, setRunningPipeline] = useState<Set<string>>(new Set())
@@ -79,6 +85,16 @@ export default function InternalDashboard() {
       .catch(() => setProjectTranscripts(prev => ({ ...prev, [expandedProject]: [] })))
   }, [expandedProject]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (!expandedProject) return
+    if (projectTaskEdits[expandedProject] !== undefined) return
+
+    setProjectTaskEdits(prev => ({ ...prev, [expandedProject]: 'loading' }))
+    taskEditRequestsApi.list(expandedProject)
+      .then((requests) => setProjectTaskEdits(prev => ({ ...prev, [expandedProject]: requests })))
+      .catch(() => setProjectTaskEdits(prev => ({ ...prev, [expandedProject]: [] })))
+  }, [expandedProject]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleRunPipeline = async (e: React.MouseEvent, projectId: string) => {
     e.stopPropagation()
     if (runningPipeline.has(projectId)) return
@@ -99,6 +115,27 @@ export default function InternalDashboard() {
   )
 
   const totalReps = projectsList.reduce((sum, p) => sum + (p.team_size ?? 0), 0)
+
+  const handleReviewTaskEdit = async (projectId: string, requestId: string, action: 'approve' | 'reject') => {
+    setReviewingRequestId(requestId)
+    try {
+      const updated = action === 'approve'
+        ? await taskEditRequestsApi.approve(projectId, requestId)
+        : await taskEditRequestsApi.reject(projectId, requestId)
+
+      setProjectTaskEdits((prev) => {
+        const current = Array.isArray(prev[projectId]) ? prev[projectId] : []
+        return {
+          ...prev,
+          [projectId]: current.map((request) => request.id === requestId ? updated : request),
+        }
+      })
+    } catch (err) {
+      console.error(`Failed to ${action} task edit request:`, err)
+    } finally {
+      setReviewingRequestId(null)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
@@ -195,6 +232,10 @@ export default function InternalDashboard() {
             const tsEntry = projectTranscripts[project.id]
             const transcriptList: Transcript[] = Array.isArray(tsEntry) ? tsEntry : []
             const tsLoading = tsEntry === 'loading'
+            const taskEditEntry = projectTaskEdits[project.id]
+            const taskEditRequests = Array.isArray(taskEditEntry) ? taskEditEntry : []
+            const taskEditLoading = taskEditEntry === 'loading'
+            const pendingTaskEditCount = taskEditRequests.filter((request) => request.status === 'pending').length
             const initials = project.company_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2)
 
             return (
@@ -301,6 +342,92 @@ export default function InternalDashboard() {
                                   )}
                                 </div>
                               ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            Card Edit Requests {!taskEditLoading && `(${pendingTaskEditCount} pending)`}
+                          </h4>
+                          {taskEditLoading ? (
+                            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                              <Loader2 size={12} className="animate-spin" /> Loading…
+                            </div>
+                          ) : taskEditRequests.length === 0 ? (
+                            <p className="text-xs text-slate-600">No pending client edit requests.</p>
+                          ) : (
+                            <div className="space-y-2">
+                              {taskEditRequests.map((request) => {
+                                const changedFields = [
+                                  request.current_task.label !== request.proposed_task.label ? 'Step name' : null,
+                                  request.current_task.duration_distribution.mean_minutes !== request.proposed_task.duration_distribution.mean_minutes ? 'Duration' : null,
+                                  request.current_task.automatable_fraction !== request.proposed_task.automatable_fraction ? 'Automation' : null,
+                                  JSON.stringify(request.current_task.app_cluster) !== JSON.stringify(request.proposed_task.app_cluster) ? 'Tools' : null,
+                                  request.current_task.role_type !== request.proposed_task.role_type ? 'Role type' : null,
+                                  request.current_task.workflow_type !== request.proposed_task.workflow_type ? 'Workflow type' : null,
+                                ].filter(Boolean)
+
+                                return (
+                                  <div key={request.id} className="rounded-lg border border-slate-800 bg-[#111827] px-3 py-3">
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="min-w-0">
+                                        <div className="text-xs font-semibold text-slate-100 truncate">{request.current_task.label}</div>
+                                        <div className="mt-1 text-[10px] text-slate-500">
+                                          {request.submitter_email} · {new Date(request.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        </div>
+                                      </div>
+                                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${request.status === 'pending' ? 'bg-amber-500/10 text-amber-300' : request.status === 'approved' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'}`}>
+                                        {request.status}
+                                      </span>
+                                    </div>
+
+                                    <div className="mt-2 text-[10px] text-slate-500">
+                                      Changed: {changedFields.length ? changedFields.join(', ') : 'metadata'}
+                                    </div>
+
+                                    <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
+                                      <div className="rounded-md bg-[#0B0F1E] px-2 py-2">
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Current</div>
+                                        <div className="mt-1 text-slate-300">{request.current_task.label}</div>
+                                        <div className="text-slate-500">{Math.round(request.current_task.duration_distribution.mean_minutes)} min · {request.current_task.automatable_fraction}</div>
+                                      </div>
+                                      <div className="rounded-md bg-[#0B0F1E] px-2 py-2">
+                                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Proposed</div>
+                                        <div className="mt-1 text-slate-100">{request.proposed_task.label}</div>
+                                        <div className="text-slate-400">{Math.round(request.proposed_task.duration_distribution.mean_minutes)} min · {request.proposed_task.automatable_fraction}</div>
+                                      </div>
+                                    </div>
+
+                                    {request.review_note && (
+                                      <div className="mt-2 text-[10px] text-slate-500">
+                                        Review note: {request.review_note}
+                                      </div>
+                                    )}
+
+                                    {request.status === 'pending' && (
+                                      <div className="mt-3 flex items-center gap-2">
+                                        <button
+                                          onClick={() => handleReviewTaskEdit(project.id, request.id, 'approve')}
+                                          disabled={reviewingRequestId === request.id}
+                                          className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
+                                        >
+                                          {reviewingRequestId === request.id ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                                          Approve
+                                        </button>
+                                        <button
+                                          onClick={() => handleReviewTaskEdit(project.id, request.id, 'reject')}
+                                          disabled={reviewingRequestId === request.id}
+                                          className="inline-flex items-center gap-1 rounded-md bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-300 transition-colors hover:bg-rose-500/20 disabled:opacity-50"
+                                        >
+                                          {reviewingRequestId === request.id ? <Loader2 size={12} className="animate-spin" /> : <X size={12} />}
+                                          Reject
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                )
+                              })}
                             </div>
                           )}
                         </div>

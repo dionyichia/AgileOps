@@ -59,6 +59,7 @@ class Project(Base):
     transcripts      = relationship("Transcript",       back_populates="project", cascade="all, delete-orphan")
     jobs             = relationship("Job",              back_populates="project", cascade="all, delete-orphan")
     tool_evaluations = relationship("ToolEvaluation",   back_populates="project", cascade="all, delete-orphan")
+    task_edit_requests = relationship("TaskEditRequest", back_populates="project", cascade="all, delete-orphan")
     uploads          = relationship("UploadedFile",     back_populates="project", cascade="all, delete-orphan")
 
 
@@ -115,18 +116,44 @@ class Job(Base):
 class ToolEvaluation(Base):
     __tablename__ = "tool_evaluations"
 
-    id          = Column(String(36), primary_key=True, default=_uuid)
-    project_id  = Column(String(36), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True)
-    use_case    = Column(String(50), nullable=False)   # e.g. "adoption" | "compare"
-    tool_name   = Column(Text, nullable=False)
-    website_url = Column(Text)
-    docs_url    = Column(Text)
-    status      = Column(String(20), nullable=False, default="pending")
-    created_at  = Column(DateTime(timezone=True), nullable=False, default=_now)
+    id                      = Column(String(36), primary_key=True, default=_uuid)
+    project_id              = Column(String(36), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True)
+    use_case                = Column(String(50), nullable=False, default="")
+    tool_name               = Column(Text, nullable=False)
+    website_url             = Column(Text)
+    docs_url                = Column(Text)
+    status                  = Column(String(20), nullable=False, default="draft")
+    latest_job_id           = Column(String(36), ForeignKey("jobs.id", ondelete="SET NULL"))
+    latest_job_status       = Column(String(20))
+    latest_job_progress_pct = Column(Integer)
+    latest_job_step         = Column(Text)
+    last_error              = Column(Text)
+    completed_at            = Column(DateTime(timezone=True))
+    created_at              = Column(DateTime(timezone=True), nullable=False, default=_now)
 
     project           = relationship("Project",          back_populates="tool_evaluations")
     uploads           = relationship("UploadedFile",     back_populates="tool_evaluation")
     simulation_result = relationship("SimulationResult", back_populates="tool_evaluation", uselist=False, cascade="all, delete-orphan")
+
+
+class TaskEditRequest(Base):
+    __tablename__ = "task_edit_requests"
+
+    id                = Column(String(36), primary_key=True, default=_uuid)
+    project_id        = Column(String(36), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True)
+    node_id           = Column(Text, nullable=False, index=True)
+    status            = Column(String(20), nullable=False, default="pending", index=True)
+    submitter_user_id = Column(String(36), nullable=False, index=True)
+    submitter_email   = Column(Text, nullable=False)
+    reviewer_user_id  = Column(String(36))
+    reviewer_email    = Column(Text)
+    current_task      = Column(JSON, nullable=False)
+    proposed_task     = Column(JSON, nullable=False)
+    review_note       = Column(Text)
+    created_at        = Column(DateTime(timezone=True), nullable=False, default=_now)
+    reviewed_at       = Column(DateTime(timezone=True))
+
+    project = relationship("Project", back_populates="task_edit_requests")
 
 
 class UploadedFile(Base):
@@ -148,11 +175,14 @@ class UploadedFile(Base):
 class SimulationResult(Base):
     __tablename__ = "simulation_results"
 
-    id                        = Column(String(36), primary_key=True, default=_uuid)
-    tool_evaluation_id        = Column(String(36), ForeignKey("tool_evaluations.id", ondelete="CASCADE"), nullable=False, unique=True)
-    results_json              = Column(JSON, nullable=False)
-    final_work_saved_pct      = Column(Float, nullable=False)
-    final_throughput_lift_pct = Column(Float, nullable=False)
-    created_at                = Column(DateTime(timezone=True), nullable=False, default=_now)
+    id                            = Column(String(36), primary_key=True, default=_uuid)
+    tool_evaluation_id            = Column(String(36), ForeignKey("tool_evaluations.id", ondelete="CASCADE"), nullable=False, unique=True)
+    results_json                  = Column(JSON, nullable=False)
+    baseline_transition_matrix_json = Column(JSON)
+    tool_transition_matrix_json   = Column(JSON)
+    workflow_diff_json            = Column(JSON)
+    final_work_saved_pct          = Column(Float, nullable=False)
+    final_throughput_lift_pct     = Column(Float, nullable=False)
+    created_at                    = Column(DateTime(timezone=True), nullable=False, default=_now)
 
     tool_evaluation = relationship("ToolEvaluation", back_populates="simulation_result")

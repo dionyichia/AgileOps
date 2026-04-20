@@ -8,6 +8,7 @@ interface TaskNodeData {
   automatable: 'high' | 'medium' | 'low'
   isNew?: boolean
   commentCount?: number
+  hasPendingEdit?: boolean
   onComment?: (nodeId: string) => void
   onEdit?: (nodeId: string) => void
   editMode?: boolean
@@ -55,7 +56,14 @@ export function TaskNode({ data }: { data: TaskNodeData }) {
       )}
 
       <div className="flex items-start justify-between gap-2 mb-2">
-        <div className="font-semibold text-[#111111] text-sm leading-snug">{data.label}</div>
+        <div className="min-w-0">
+          <div className="font-semibold text-[#111111] text-sm leading-snug">{data.label}</div>
+          {data.hasPendingEdit && (
+            <span className="mt-1 inline-flex items-center rounded-full bg-[#FFF4DB] px-2 py-0.5 text-[10px] font-bold tracking-wide text-[#9A6700]">
+              Pending review
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-0.5 flex-shrink-0">
           {data.onEdit && (
             <button

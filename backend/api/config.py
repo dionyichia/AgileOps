@@ -22,6 +22,8 @@ elif DATABASE_URL.startswith("postgresql://"):
 SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
 SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "")  # service_role key — keep secret
+ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+COSMO_MODEL: str = os.getenv("COSMO_MODEL", "claude-sonnet-4-20250514")
 
 # Frontend base URL — used for constructing Supabase invite redirect URLs
 SITE_URL: str = os.getenv("SITE_URL", "http://localhost:5173")

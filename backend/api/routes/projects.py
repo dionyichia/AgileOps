@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.api.deps import AuthUser, get_current_user, get_db
 from backend.api.models.db import Project
 from backend.api.schemas.api import ProjectCreate, ProjectOut, ProjectUpdate
+from backend.api.services.project_access import require_owned_project
 
 router = APIRouter(tags=["projects"])
 
@@ -46,20 +47,22 @@ async def create_project(
 
 
 @router.get("/projects/{project_id}", response_model=ProjectOut)
-async def get_project(project_id: str, db: AsyncSession = Depends(get_db)):
-    project = await db.get(Project, project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-    return project
+async def get_project(
+    project_id: str,
+    current_user: AuthUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    return await require_owned_project(project_id, current_user, db)
 
 
 @router.patch("/projects/{project_id}", response_model=ProjectOut)
 async def update_project(
-    project_id: str, body: ProjectUpdate, db: AsyncSession = Depends(get_db)
+    project_id: str,
+    body: ProjectUpdate,
+    current_user: AuthUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    project = await db.get(Project, project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
+    project = await require_owned_project(project_id, current_user, db)
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(project, field, value)
     await db.commit()
@@ -86,9 +89,11 @@ async def claim_project(
 
 
 @router.delete("/projects/{project_id}", status_code=204)
-async def delete_project(project_id: str, db: AsyncSession = Depends(get_db)):
-    project = await db.get(Project, project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
+async def delete_project(
+    project_id: str,
+    current_user: AuthUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    project = await require_owned_project(project_id, current_user, db)
     await db.delete(project)
     await db.commit()

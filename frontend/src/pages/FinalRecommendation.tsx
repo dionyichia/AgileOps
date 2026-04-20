@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { TrendingUp, Users, Building2, CheckCircle2, Download, Star, ChevronLeft } from 'lucide-react'
 import StepLayout from '../components/layout/StepLayout'
 import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
+import CosmoChatWidget from '../components/workspace/CosmoChatWidget'
 import { CLIENT_SIMULATIONS_SEED } from '../data/clientSimulations'
 import { PageLoader } from '../components/ui/Skeleton'
 import { recommendationData } from '../data/mockData'
@@ -90,6 +91,25 @@ export default function FinalRecommendation() {
         return 'Apollo.io'
       }
     })()
+  const cosmoDemoContext = useMemo(
+    () => ({
+      tool_name: toolName,
+      role: project?.primary_role ?? 'sales',
+      summary,
+      confidence_score: conf,
+      employee_impact: {
+        time_saved: timeSaved,
+        velocity,
+      },
+      company_impact: {
+        throughput,
+        revenue,
+        net_revenue: netRevenue,
+      },
+      use_cases: useCases.slice(0, 6),
+    }),
+    [toolName, project, summary, conf, timeSaved, velocity, throughput, revenue, netRevenue, useCases],
+  )
 
   const dashboardBackPath =
     evalParam != null && evalParam !== ''
@@ -119,7 +139,7 @@ export default function FinalRecommendation() {
   if (loading) {
     if (isFlatClient) {
       return (
-        <ClientWorkspaceShell headerLeft={flatShellHeader}>
+        <ClientWorkspaceShell headerLeft={flatShellHeader} projectId={projectId}>
           <div className="flex flex-1 items-center justify-center bg-[#F7F4FB] py-24">
             <PageLoader message="Loading recommendation..." />
           </div>
@@ -364,11 +384,17 @@ export default function FinalRecommendation() {
     return (
       <ClientWorkspaceShell headerLeft={flatShellHeader}>
         <div className="flex min-h-0 flex-1 flex-col">{layout}</div>
+        <CosmoChatWidget page="recommendation" demoContext={cosmoDemoContext} />
       </ClientWorkspaceShell>
     )
   }
 
-  return layout
+  return (
+    <>
+      {layout}
+      <CosmoChatWidget projectId={projectId} page="recommendation" toolEvaluationId={toolEvalId} />
+    </>
+  )
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────────

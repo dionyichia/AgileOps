@@ -110,6 +110,30 @@ export interface TaskNode {
   duration_distribution: { type: string; mean_minutes: number; std_minutes: number }
   automatable_fraction: string
   sources?: string[]
+  role_type?: string
+  workflow_type?: string
+}
+
+export interface TaskEditRequest {
+  id: string
+  project_id: string
+  node_id: string
+  status: 'pending' | 'approved' | 'rejected'
+  submitter_user_id: string
+  submitter_email: string
+  reviewer_user_id: string | null
+  reviewer_email: string | null
+  current_task: TaskNode
+  proposed_task: TaskNode
+  review_note: string | null
+  created_at: string
+  reviewed_at: string | null
+}
+
+export interface TaskEditRequestCreate {
+  node_id: string
+  current_task: TaskNode
+  proposed_task: TaskNode
 }
 
 export interface Job {
@@ -154,7 +178,7 @@ export interface ConsultationPayload {
 
 export const consultation = {
   submit: (data: ConsultationPayload) =>
-    request<{ project_id: string; invite_token: string }>('/consultation', {
+    request<{ project_id: string }>('/consultation', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -211,6 +235,26 @@ export const tasks = {
     request<void>(`/projects/${projectId}/tasks/reset`, { method: 'POST' }),
 }
 
+export const taskEditRequests = {
+  list: (projectId: string, status?: 'pending' | 'approved' | 'rejected') =>
+    request<TaskEditRequest[]>(`/projects/${projectId}/task-edit-requests${status ? `?status=${status}` : ''}`),
+  create: (projectId: string, body: TaskEditRequestCreate) =>
+    request<TaskEditRequest>(`/projects/${projectId}/task-edit-requests`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  approve: (projectId: string, requestId: string, reviewNote?: string) =>
+    request<TaskEditRequest>(`/projects/${projectId}/task-edit-requests/${requestId}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ review_note: reviewNote ?? null }),
+    }),
+  reject: (projectId: string, requestId: string, reviewNote?: string) =>
+    request<TaskEditRequest>(`/projects/${projectId}/task-edit-requests/${requestId}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ review_note: reviewNote ?? null }),
+    }),
+}
+
 // ── Pipeline ───────────────────────────────────────────
 
 export const pipeline = {
@@ -228,14 +272,20 @@ export const pipeline = {
 export interface ToolEvaluation {
   id: string
   project_id: string
-  use_case: string
   tool_name: string
   website_url: string | null
+  docs_url?: string | null
+  status: 'draft' | 'queued' | 'running' | 'completed' | 'failed'
+  latest_job_id?: string | null
+  latest_job_status?: string | null
+  latest_job_progress_pct?: number | null
+  latest_job_step?: string | null
+  last_error?: string | null
+  completed_at?: string | null
   created_at: string
 }
 
 export interface ToolEvaluationCreate {
-  use_case: string
   tool_name: string
   website_url?: string
 }
@@ -260,6 +310,9 @@ export interface SimulationData {
   n_weeks: number
   final_work_saved_pct: number
   final_throughput_lift_pct: number
+  baseline_transition_matrix_json?: Record<string, unknown> | null
+  tool_transition_matrix_json?: Record<string, unknown> | null
+  workflow_diff_json?: Record<string, unknown> | null
 }
 
 export const simulation = {
@@ -289,6 +342,48 @@ export interface RecommendationData {
 export const recommendation = {
   get: (projectId: string, evalId: string) =>
     request<RecommendationData>(`/projects/${projectId}/recommendation/${evalId}`),
+}
+
+// ── Cosmo Chat ─────────────────────────────────────────
+
+export interface CosmoMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export interface CosmoChatRequest {
+  page: 'dashboard' | 'simulation' | 'recommendation'
+  tool_evaluation_id?: string | null
+  messages: CosmoMessage[]
+}
+
+export interface CosmoDemoChatRequest {
+  page: 'dashboard' | 'simulation' | 'recommendation'
+  context: Record<string, unknown>
+  messages: CosmoMessage[]
+}
+
+export interface CosmoChatResponse {
+  reply: string
+  model: string
+  scope: {
+    project_id?: string | null
+    page?: string | null
+    tool_evaluation_id?: string | null
+  }
+}
+
+export const cosmo = {
+  chat: (projectId: string, data: CosmoChatRequest) =>
+    request<CosmoChatResponse>(`/projects/${projectId}/cosmo/chat`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  demoChat: (data: CosmoDemoChatRequest) =>
+    request<CosmoChatResponse>('/cosmo/demo-chat', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 }
 
 // ── File Uploads ───────────────────────────────────────

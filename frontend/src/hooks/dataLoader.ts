@@ -369,6 +369,31 @@ export interface LoadedMarkovData {
 
 const _cache: Record<string, LoadedMarkovData> = {}
 
+export function buildLoadedMarkovData(
+  data: TransitionMatrixJSON,
+  tasksRaw: AllTasksNode[] = [],
+): LoadedMarkovData {
+  const tasksLookup: Record<string, AllTasksNode> | undefined =
+    tasksRaw.length > 0
+      ? Object.fromEntries(tasksRaw.map((t) => [t.node_id, t]))
+      : undefined
+
+  const { nodes, finalNodeId } = buildNodes(data, tasksLookup)
+  const edges = buildEdges(data, finalNodeId)
+
+  return {
+    nodes,
+    edges,
+    raw: data,
+    stats: {
+      nSequences: data.metadata.n_sequences,
+      nStates: data.metadata.n_states,
+      nTransitions: data.metadata.n_transitions_observed,
+      topTransitions: data.top_transitions,
+    },
+  }
+}
+
 export async function loadMarkovData(projectId?: string): Promise<LoadedMarkovData> {
   const url = getDataUrl(projectId)
   if (_cache[url]) return _cache[url]
@@ -383,27 +408,7 @@ export async function loadMarkovData(projectId?: string): Promise<LoadedMarkovDa
   if (!res.ok) throw new Error(`Failed to fetch markov data: ${res.statusText}`)
 
   const data: TransitionMatrixJSON = await res.json()
-
-  // Build lookup: node_id → task metadata (only when we have real task data)
-  const tasksLookup: Record<string, AllTasksNode> | undefined =
-    tasksRaw.length > 0
-      ? Object.fromEntries((tasksRaw as AllTasksNode[]).map((t) => [t.node_id, t]))
-      : undefined
-
-  const { nodes, finalNodeId } = buildNodes(data, tasksLookup)
-  const edges = buildEdges(data, finalNodeId)
-
-  const result: LoadedMarkovData = {
-    nodes,
-    edges,
-    raw: data,
-    stats: {
-      nSequences: data.metadata.n_sequences,
-      nStates:    data.metadata.n_states,
-      nTransitions: data.metadata.n_transitions_observed,
-      topTransitions: data.top_transitions,
-    },
-  }
+  const result = buildLoadedMarkovData(data, tasksRaw as AllTasksNode[])
 
   _cache[url] = result
   return result

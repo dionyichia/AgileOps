@@ -2,23 +2,21 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.api.deps import get_db
-from backend.api.models.db import Project, ToolEvaluation
+from backend.api.deps import AuthUser, get_current_user, get_db
+from backend.api.models.db import ToolEvaluation
 from backend.api.schemas.api import ToolEvaluationCreate, ToolEvaluationOut
+from backend.api.services.project_access import require_owned_project
 
 router = APIRouter(tags=["tools"])
 
 
-async def _get_project_or_404(project_id: str, db: AsyncSession) -> Project:
-    project = await db.get(Project, project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-    return project
-
-
 @router.get("/projects/{project_id}/tools", response_model=list[ToolEvaluationOut])
-async def list_tool_evals(project_id: str, db: AsyncSession = Depends(get_db)):
-    await _get_project_or_404(project_id, db)
+async def list_tool_evals(
+    project_id: str,
+    current_user: AuthUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await require_owned_project(project_id, current_user, db)
     result = await db.execute(
         select(ToolEvaluation)
         .where(ToolEvaluation.project_id == project_id)
@@ -29,8 +27,12 @@ async def list_tool_evals(project_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.get("/projects/{project_id}/tools/{eval_id}", response_model=ToolEvaluationOut)
 async def get_tool_eval(
-    project_id: str, eval_id: str, db: AsyncSession = Depends(get_db)
+    project_id: str,
+    eval_id: str,
+    current_user: AuthUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
+    await require_owned_project(project_id, current_user, db)
     tool_eval = await db.get(ToolEvaluation, eval_id)
     if not tool_eval or tool_eval.project_id != project_id:
         raise HTTPException(status_code=404, detail="Tool evaluation not found")
@@ -41,9 +43,10 @@ async def get_tool_eval(
 async def create_tool_eval(
     project_id: str,
     body: ToolEvaluationCreate,
+    current_user: AuthUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    await _get_project_or_404(project_id, db)
+    await require_owned_project(project_id, current_user, db)
     tool_eval = ToolEvaluation(project_id=project_id, **body.model_dump())
     db.add(tool_eval)
     await db.commit()

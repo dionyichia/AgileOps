@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -131,7 +131,6 @@ class JobOut(BaseModel):
 # ── Tool Evaluations ───────────────────────────────────────────────────────────
 
 class ToolEvaluationCreate(BaseModel):
-    use_case: str
     tool_name: str
     website_url: Optional[str] = None
     docs_url: Optional[str] = None
@@ -140,11 +139,16 @@ class ToolEvaluationCreate(BaseModel):
 class ToolEvaluationOut(BaseModel):
     id: str
     project_id: str
-    use_case: str
     tool_name: str
     website_url: Optional[str]
     docs_url: Optional[str]
     status: str
+    latest_job_id: Optional[str] = None
+    latest_job_status: Optional[str] = None
+    latest_job_progress_pct: Optional[int] = None
+    latest_job_step: Optional[str] = None
+    last_error: Optional[str] = None
+    completed_at: Optional[datetime] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -184,6 +188,36 @@ class TaskNodeOut(BaseModel):
     duration_distribution: DurationDistribution
     automatable_fraction: str
     sources: Optional[List[str]] = None
+    role_type: Optional[str] = None
+    workflow_type: Optional[str] = None
+
+
+class TaskEditRequestCreate(BaseModel):
+    node_id: str
+    current_task: TaskNodeOut
+    proposed_task: TaskNodeOut
+
+
+class TaskEditReview(BaseModel):
+    review_note: Optional[str] = None
+
+
+class TaskEditRequestOut(BaseModel):
+    id: str
+    project_id: str
+    node_id: str
+    status: str
+    submitter_user_id: str
+    submitter_email: str
+    reviewer_user_id: Optional[str]
+    reviewer_email: Optional[str]
+    current_task: TaskNodeOut
+    proposed_task: TaskNodeOut
+    review_note: Optional[str]
+    created_at: datetime
+    reviewed_at: Optional[datetime]
+
+    model_config = {"from_attributes": True}
 
 
 # ── Simulation Results ─────────────────────────────────────────────────────────
@@ -195,6 +229,9 @@ class SimulationDataOut(BaseModel):
     n_weeks: int
     final_work_saved_pct: float
     final_throughput_lift_pct: float
+    baseline_transition_matrix_json: Optional[Dict[str, Any]] = None
+    tool_transition_matrix_json: Optional[Dict[str, Any]] = None
+    workflow_diff_json: Optional[Dict[str, Any]] = None
 
 
 # ── Recommendation ─────────────────────────────────────────────────────────────
@@ -228,3 +265,28 @@ class RecommendationOut(BaseModel):
     employee_impact: EmployeeImpact
     company_impact: CompanyImpact
     use_cases: List[UseCase]
+
+
+# ── Cosmo Chat ────────────────────────────────────────────────────────────────
+
+class CosmoChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
+
+class CosmoChatRequest(BaseModel):
+    page: Literal["dashboard", "simulation", "recommendation"]
+    tool_evaluation_id: Optional[str] = None
+    messages: List[CosmoChatMessage] = Field(default_factory=list)
+
+
+class CosmoDemoChatRequest(BaseModel):
+    page: Literal["dashboard", "simulation", "recommendation"]
+    context: Dict[str, Any] = Field(default_factory=dict)
+    messages: List[CosmoChatMessage] = Field(default_factory=list)
+
+
+class CosmoChatResponse(BaseModel):
+    reply: str
+    model: str
+    scope: Dict[str, Optional[str]]

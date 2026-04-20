@@ -1,7 +1,5 @@
 const STORAGE_KEY = 'axisToolDrafts'
 
-export type ToolDraftUseCase = 'adoption' | 'compare'
-
 export interface SerializedFileEntry {
   link: string
   fileName: string | null
@@ -10,7 +8,6 @@ export interface SerializedFileEntry {
 export interface ToolDraft {
   id: string
   savedAt: string
-  useCase: ToolDraftUseCase
   toolName: string
   website: string
   docs: SerializedFileEntry

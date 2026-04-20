@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useGsapReveal } from '../../hooks/useGsapReveal'
 
@@ -36,9 +36,10 @@ export default function StepLayout({
   embedded = false,
 }: StepLayoutProps) {
   const navigate = useNavigate()
+  const { projectId } = useParams<{ projectId?: string }>()
   const rootRef = useRef<HTMLDivElement>(null)
 
-  const handleBack = () => navigate(backPath ?? '/dashboard')
+  const handleBack = () => navigate(backPath ?? (projectId ? `/projects/${projectId}/dashboard` : '/dashboard'))
 
   useGsapReveal(rootRef, [compact, nested, embedded], {
     selectors: ['[data-gsap-shell]', '[data-gsap-reveal]'],

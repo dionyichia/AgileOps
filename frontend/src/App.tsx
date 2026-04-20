@@ -46,6 +46,7 @@ export default function App() {
 
         {/* Project-scoped routes (production) */}
         <Route path="/projects/:projectId/dashboard" element={<Dashboard />} />
+        <Route path="/projects/:projectId/dashboard/simulations/:toolEvalId" element={<Dashboard />} />
         {/* Transcript upload — admin only */}
         <Route path="/projects/:projectId/transcripts" element={<AdminRoute><TranscriptInput /></AdminRoute>} />
         <Route path="/projects/:projectId/workflow-report" element={<WorkflowReport />} />

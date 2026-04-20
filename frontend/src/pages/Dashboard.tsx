@@ -2,10 +2,10 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import gsap from 'gsap'
 import { useMarkovData } from '../hooks/pullMarkovData'
-import { clearMarkovCache } from '../hooks/dataLoader'
+import { buildLoadedMarkovData, clearMarkovCache } from '../hooks/dataLoader'
 import { useIsAdmin } from '../hooks/useIsAdmin'
-import { toolEvals as toolEvalsApi, projects as projectsApi, recommendation as recommendationApi, tasks as tasksApi, topology as topologyApi } from '../api/client'
-import type { ToolEvaluation, Project, RecommendationData, TaskNode as ApiTaskNode } from '../api/client'
+import { taskEditRequests as taskEditRequestsApi, toolEvals as toolEvalsApi, projects as projectsApi, recommendation as recommendationApi, simulation as simulationApi, tasks as tasksApi, topology as topologyApi } from '../api/client'
+import type { ToolEvaluation, Project, RecommendationData, SimulationData, TaskEditRequest, TaskNode as ApiTaskNode } from '../api/client'
 import ReactFlow, {
   useNodesState,
   useEdgesState,
@@ -31,15 +31,18 @@ import {
   GitBranch,
   Zap,
   Award,
+  Loader2,
   Pencil,
   Check,
   AlertCircle,
   Clock,
 } from 'lucide-react'
 import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
+import CosmoChatWidget from '../components/workspace/CosmoChatWidget'
 import { nodeTypes } from '../components/workflow/CustomNodes'
 import { useJobProgress } from '../hooks/useJobProgress'
 import { useGsapReveal } from '../hooks/useGsapReveal'
+import type { TransitionMatrixJSON } from '../schema.tsx'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -66,19 +69,19 @@ const BRAND = {
 export default function Dashboard() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { projectId } = useParams<{ projectId?: string }>()
+  const { projectId, toolEvalId } = useParams<{ projectId?: string; toolEvalId?: string }>()
   const rootRef = useRef<HTMLDivElement>(null)
   const editPanelRef = useRef<HTMLDivElement>(null)
   const commentPanelRef = useRef<HTMLDivElement>(null)
 
   const [markovRefreshKey, setMarkovRefreshKey] = useState(0)
-  const { existingNodes, existingEdges, loading: markovLoading, error: markovError, isRealData, stats: markovStats } =
+  const { existingNodes, existingEdges, loading: markovLoading, isRealData, stats: markovStats } =
     useMarkovData(projectId, markovRefreshKey)
   const isAdmin = useIsAdmin()
   const [apiProject, setApiProject] = useState<Project | null>(null)
   const [apiToolEvals, setApiToolEvals] = useState<ToolEvaluation[] | null>(null)
-  const [hasTaskData, setHasTaskData] = useState(false)
   const [pipelineTaskNodes, setPipelineTaskNodes] = useState<ApiTaskNode[]>([])
+  const [taskEditRequests, setTaskEditRequests] = useState<TaskEditRequest[]>([])
 
   useEffect(() => {
     if (!projectId) return
@@ -87,11 +90,13 @@ export default function Dashboard() {
     // Fetch tasks for task-data check, tool stack derivation, and the edit panel
     tasksApi.get(projectId)
       .then((nodes) => {
-        setHasTaskData(nodes.length > 0)
         setPipelineTaskNodes(nodes)
         setRawTasks(nodes)
       })
-      .catch(() => { setHasTaskData(false); setPipelineTaskNodes([]); setRawTasks([]) })
+      .catch(() => { setPipelineTaskNodes([]); setRawTasks([]) })
+    taskEditRequestsApi.list(projectId)
+      .then(setTaskEditRequests)
+      .catch(() => setTaskEditRequests([]))
   }, [projectId, markovRefreshKey])
 
   // Derive tool list from task app_cluster
@@ -110,28 +115,29 @@ export default function Dashboard() {
       .sort((a, b) => b.weeklyHrs - a.weeklyHrs)
   }, [pipelineTaskNodes])
 
-  // Two fixed tabs: workspace | report
-  const [activeTab, setActiveTab] = useState<"workspace" | "report">("workspace")
-  const [reportRec, setReportRec] = useState<RecommendationData | null>(null)
-  const [reportLoading, setReportLoading] = useState(false)
-
-  const focusSimulationTab = useCallback((_simId: string) => {
-    setActiveTab("report")
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }, [])
+  const selectedToolEval = useMemo(
+    () => apiToolEvals?.find((toolEval) => toolEval.id === toolEvalId) ?? null,
+    [apiToolEvals, toolEvalId],
+  )
+  const activeTab = toolEvalId ? `simulation:${toolEvalId}` : 'workspace'
+  const [selectedRecommendation, setSelectedRecommendation] = useState<RecommendationData | null>(null)
+  const [selectedSimulation, setSelectedSimulation] = useState<SimulationData | null>(null)
+  const [selectedSimulationLoading, setSelectedSimulationLoading] = useState(false)
 
   // Pipeline job tracking (set when navigating here from TranscriptInput "Visualise Workflow")
   const [inboundPipelineJobId, setInboundPipelineJobId] = useState<string | null>(null)
   const {
     job: pipelineInboundJob,
-    isRunning: pipelineInboundRunning,
     isDone: pipelineInboundDone,
     isFailed: pipelineInboundFailed,
   } = useJobProgress(inboundPipelineJobId)
 
-  // Simulation job progress tracking (set when navigating here from ToolInputForm)
-  const [simJobId, setSimJobId] = useState<string | null>(null)
-  const { job: simJob, isRunning: simRunning, isDone: simDone, isFailed: simFailed } = useJobProgress(simJobId)
+  const activeSimulationJobId = selectedToolEval?.latest_job_id ?? null
+  const {
+    job: activeSimulationJob,
+    isDone: activeSimulationDone,
+    isFailed: activeSimulationFailed,
+  } = useJobProgress(activeSimulationJobId)
 
   useGsapReveal(
     rootRef,
@@ -141,8 +147,8 @@ export default function Dashboard() {
       existingNodes.length,
       existingEdges.length,
       apiToolEvals?.length,
-      reportLoading,
-      !!reportRec,
+      selectedSimulationLoading,
+      !!selectedRecommendation,
       markovLoading,
     ],
     {
@@ -151,7 +157,7 @@ export default function Dashboard() {
         '[data-gsap-dashboard-tabs]',
         '[data-gsap-dashboard-stats]',
         '[data-gsap-dashboard-panel]',
-        '[data-gsap-dashboard-report]',
+        '[data-gsap-dashboard-simulation]',
       ],
       duration: 0.62,
       stagger: 0.08,
@@ -162,19 +168,14 @@ export default function Dashboard() {
 
   // On mount: read nav state for either a pipeline job or a simulation job
   useEffect(() => {
-    const state = location.state as { openTab?: string; jobId?: string; pipelineJobId?: string } | null
+    const state = location.state as { pipelineJobId?: string; recentSimulationId?: string } | null
     if (state?.pipelineJobId) {
       setInboundPipelineJobId(state.pipelineJobId)
     }
-    if (state?.openTab) {
-      focusSimulationTab(state.openTab)
-      if (state.jobId) setSimJobId(state.jobId)
-    }
-    // Clear nav state so a back-forward doesn't re-trigger
-    if (state?.pipelineJobId || state?.openTab) {
+    if (state?.pipelineJobId || state?.recentSimulationId) {
       window.history.replaceState({}, document.title, window.location.pathname)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.state, location.pathname])
 
   // When the inbound pipeline job completes, bust the Markov cache and refresh
   useEffect(() => {
@@ -183,17 +184,38 @@ export default function Dashboard() {
     setMarkovRefreshKey((k) => k + 1)
   }, [pipelineInboundDone, projectId])
 
-  // Fetch recommendation for the most recent tool eval when report tab is activated,
-  // or when the simulation job finishes (simDone flips true)
   useEffect(() => {
-    if (activeTab !== "report" || !projectId || !apiToolEvals?.length) return
-    const latestEval = apiToolEvals[0]
-    setReportLoading(true)
-    recommendationApi.get(projectId, latestEval.id)
-      .then(setReportRec)
-      .catch(() => setReportRec(null))
-      .finally(() => setReportLoading(false))
-  }, [activeTab, projectId, apiToolEvals, simDone])
+    if (!projectId || !toolEvalId) {
+      setSelectedRecommendation(null)
+      setSelectedSimulation(null)
+      setSelectedSimulationLoading(false)
+      return
+    }
+
+    setSelectedSimulationLoading(true)
+    Promise.all([
+      recommendationApi.get(projectId, toolEvalId).catch(() => null),
+      simulationApi.get(projectId, toolEvalId).catch(() => null),
+    ])
+      .then(([recommendation, simulation]) => {
+        setSelectedRecommendation(recommendation)
+        setSelectedSimulation(simulation)
+      })
+      .finally(() => setSelectedSimulationLoading(false))
+  }, [projectId, toolEvalId, selectedToolEval?.status])
+
+  useEffect(() => {
+    if (!projectId || !apiToolEvals?.some((toolEval) => toolEval.status === 'queued' || toolEval.status === 'running')) return
+    const intervalId = window.setInterval(() => {
+      toolEvalsApi.list(projectId).then(setApiToolEvals).catch(() => {})
+    }, 2000)
+    return () => window.clearInterval(intervalId)
+  }, [projectId, apiToolEvals])
+
+  useEffect(() => {
+    if (!projectId || (!activeSimulationDone && !activeSimulationFailed)) return
+    toolEvalsApi.list(projectId).then(setApiToolEvals).catch(() => {})
+  }, [projectId, activeSimulationDone, activeSimulationFailed])
 
 
   // ── Edit mode state ──────────────────────────────────────────────────────
@@ -205,9 +227,12 @@ export default function Dashboard() {
     tools: string
     mean_minutes: number
     automatable_fraction: string
+    role_type: string
+    workflow_type: string
   } | null>(null)
   const [editSaving, setEditSaving] = useState(false)
   const [editSaveError, setEditSaveError] = useState<string | null>(null)
+  const [editSaveSuccess, setEditSaveSuccess] = useState<string | null>(null)
   const [editDirty, setEditDirty] = useState(false)
 
   const toggleEditMode = useCallback(async () => {
@@ -229,8 +254,18 @@ export default function Dashboard() {
     setEditMode(true)
   }, [editMode, projectId])
 
-  const handleOpenEdit = useCallback((nodeId: string) => {
-    const task = rawTasks.find((t) => t.node_id === nodeId)
+  const handleOpenEdit = useCallback(async (nodeId: string) => {
+    let tasks = rawTasks
+    if (!tasks.length && projectId) {
+      try {
+        tasks = await tasksApi.get(projectId)
+        setRawTasks(tasks)
+      } catch {
+        tasks = []
+      }
+    }
+
+    const task = tasks.find((t) => t.node_id === nodeId)
     if (!task) return
     setEditingNodeId(nodeId)
     setEditDraft({
@@ -238,32 +273,42 @@ export default function Dashboard() {
       tools: task.app_cluster.join(', '),
       mean_minutes: task.duration_distribution.mean_minutes,
       automatable_fraction: task.automatable_fraction,
+      role_type: task.role_type ?? '',
+      workflow_type: task.workflow_type ?? '',
     })
     setEditSaveError(null)
+    setEditSaveSuccess(null)
     setEditDirty(false)
-  }, [rawTasks])
+  }, [projectId, rawTasks])
 
   const handleSaveEdit = useCallback(async () => {
     if (!editingNodeId || !editDraft || !projectId) return
+    const currentTask = rawTasks.find((t) => t.node_id === editingNodeId)
+    if (!currentTask) {
+      setEditSaveError('We could not load the source task for this step.')
+      return
+    }
     setEditSaving(true)
     setEditSaveError(null)
-    const updated = rawTasks.map((t) => {
-      if (t.node_id !== editingNodeId) return t
-      return {
-        ...t,
-        label: editDraft.label.trim(),
-        app_cluster: editDraft.tools.split(',').map((s) => s.trim()).filter(Boolean),
-        duration_distribution: { ...t.duration_distribution, mean_minutes: editDraft.mean_minutes },
-        automatable_fraction: editDraft.automatable_fraction,
-      }
-    })
+    setEditSaveSuccess(null)
+    const proposedTask: ApiTaskNode = {
+      ...currentTask,
+      label: editDraft.label.trim(),
+      app_cluster: editDraft.tools.split(',').map((s) => s.trim()).filter(Boolean),
+      duration_distribution: { ...currentTask.duration_distribution, mean_minutes: editDraft.mean_minutes },
+      automatable_fraction: editDraft.automatable_fraction,
+      role_type: editDraft.role_type.trim() || undefined,
+      workflow_type: editDraft.workflow_type.trim() || undefined,
+    }
     try {
-      await tasksApi.update(projectId, updated)
-      setRawTasks(updated)
+      const created = await taskEditRequestsApi.create(projectId, {
+        node_id: editingNodeId,
+        current_task: currentTask,
+        proposed_task: proposedTask,
+      })
+      setTaskEditRequests((prev) => [created, ...prev])
       setEditDirty(false)
-      // Bust the cache so the next load picks up the updated all_tasks metadata
-      clearMarkovCache(projectId)
-      setMarkovRefreshKey((k) => k + 1)
+      setEditSaveSuccess('Submitted for admin review. Approved changes will update the workflow.')
     } catch (err) {
       setEditSaveError(err instanceof Error ? err.message : 'Save failed')
     } finally {
@@ -313,6 +358,15 @@ export default function Dashboard() {
       }
     }, 800)
   }, [projectId])
+
+  const pendingRequestByNodeId = useMemo(() => {
+    const pairs = taskEditRequests
+      .filter((request) => request.status === 'pending')
+      .map((request) => [request.node_id, request] as const)
+    return Object.fromEntries(pairs)
+  }, [taskEditRequests])
+  const canPersistTaskEdits = !!projectId
+  const hasEditableTaskData = rawTasks.length > 0
 
   // ── Comments state ───────────────────────────────────────────────────────
   const [comments, setComments] = useState<Record<string, NodeComment[]>>(() => {
@@ -370,7 +424,7 @@ export default function Dashboard() {
     return () => {
       tl.kill()
     }
-  }, [activeTab, existingNodes.length, existingEdges.length, markovLoading, reportRec])
+  }, [activeTab, existingNodes.length, existingEdges.length, markovLoading, selectedRecommendation])
 
   useEffect(() => {
     const panel = editPanelRef.current
@@ -438,12 +492,13 @@ export default function Dashboard() {
           ...node.data,
           nodeId: node.id,
           commentCount: (comments[node.id] ?? []).length,
+          hasPendingEdit: !!pendingRequestByNodeId[node.id],
           onComment: handleOpenComment,
-          onEdit: handleOpenEdit,
+          onEdit: canPersistTaskEdits ? handleOpenEdit : undefined,
           editMode,
         },
       })),
-    [existingNodes, comments, handleOpenComment, handleOpenEdit, editMode, topologyPositions],
+    [canPersistTaskEdits, existingNodes, comments, handleOpenComment, handleOpenEdit, editMode, pendingRequestByNodeId, topologyPositions],
   )
 
   const [nodes, setNodes, onNodesChange] = useNodesState(nodesWithComments)
@@ -503,9 +558,69 @@ export default function Dashboard() {
   const commentingNodeLabel = commentingNode
     ? (existingNodes.find((n) => n.id === commentingNode)?.data as { label?: string } | undefined)?.label ?? commentingNode
     : ''
+  const editingNodePendingRequest = editingNodeId ? pendingRequestByNodeId[editingNodeId] : null
+  const selectedSimulationLabel = selectedToolEval ? `${selectedToolEval.tool_name} Simulation` : 'Simulation'
+  const baselineWorkflow = useMemo(
+    () => (
+      selectedSimulation?.baseline_transition_matrix_json
+        ? buildLoadedMarkovData(
+            selectedSimulation.baseline_transition_matrix_json as unknown as TransitionMatrixJSON,
+            pipelineTaskNodes,
+          )
+        : null
+    ),
+    [selectedSimulation?.baseline_transition_matrix_json, pipelineTaskNodes],
+  )
+  const toolWorkflow = useMemo(
+    () => (
+      selectedSimulation?.tool_transition_matrix_json
+        ? buildLoadedMarkovData(
+            selectedSimulation.tool_transition_matrix_json as unknown as TransitionMatrixJSON,
+            pipelineTaskNodes,
+          )
+        : null
+    ),
+    [selectedSimulation?.tool_transition_matrix_json, pipelineTaskNodes],
+  )
+  const cosmoDemoContext = useMemo(
+    () => ({
+      active_tab: activeTab === 'workspace' ? 'workspace' : 'simulation',
+      workflow_stats: {
+        node_count: taskNodes.length,
+        edge_count: existingEdges.length,
+        total_minutes: totalMinutes,
+      },
+      tools: derivedToolList.slice(0, 10),
+      nodes: existingNodes.slice(0, 12).map((node) => ({
+        id: node.id,
+        label: (node.data as { label?: string }).label ?? node.id,
+        minutes: (node.data as { minutes?: number }).minutes ?? null,
+      })),
+      selected_simulation: selectedToolEval
+        ? {
+            tool_name: selectedToolEval.tool_name,
+            recommendation_summary: selectedRecommendation?.summary ?? null,
+            work_saved_pct: selectedSimulation?.final_work_saved_pct ?? null,
+            throughput_lift_pct: selectedSimulation?.final_throughput_lift_pct ?? null,
+          }
+        : null,
+    }),
+    [
+      activeTab,
+      taskNodes.length,
+      existingEdges.length,
+      totalMinutes,
+      derivedToolList,
+      existingNodes,
+      selectedToolEval,
+      selectedRecommendation,
+      selectedSimulation,
+    ],
+  )
 
   return (
     <ClientWorkspaceShell
+      projectId={projectId}
       headerLeft={
         <div data-gsap-dashboard-header className="min-w-0">
           <div className="flex items-center gap-3">
@@ -515,7 +630,7 @@ export default function Dashboard() {
           <p className="mt-2 text-[20px] leading-snug text-black/88">
             {activeTab === 'workspace'
               ? "Your team's current workflow overview and tool insights"
-              : 'Simulation results and tool recommendation'}
+              : `${selectedToolEval?.tool_name ?? 'Tool'} simulation results and workflow comparison`}
           </p>
         </div>
       }
@@ -529,7 +644,7 @@ export default function Dashboard() {
           >
             <button
               type="button"
-              onClick={() => setActiveTab('workspace')}
+              onClick={() => navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')}
               className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab === 'workspace' ? 'bg-[#F4E8FB] text-[#5E149F]' : 'bg-white text-black/70 hover:bg-black/[0.02]'
                 }`}
               style={activeTab === 'workspace' ? { boxShadow: 'inset 0 -3px 0 0 #5E149F' } : undefined}
@@ -537,16 +652,18 @@ export default function Dashboard() {
               <LayoutDashboard size={15} className="shrink-0 text-black/50" />
               <span className="whitespace-nowrap">Workspace</span>
             </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('report')}
-              className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab === 'report' ? 'bg-[#F4E8FB] text-[#5E149F]' : 'bg-white text-black/70 hover:bg-black/[0.02]'
-                }`}
-              style={activeTab === 'report' ? { boxShadow: 'inset 0 -3px 0 0 #5E149F' } : undefined}
-            >
-              <FileText size={15} className="shrink-0 text-black/50" />
-              <span className="whitespace-nowrap">Recommendation Report</span>
-            </button>
+            {selectedToolEval && (
+              <button
+                type="button"
+                onClick={() => navigate(`/projects/${projectId}/dashboard/simulations/${selectedToolEval.id}`)}
+                className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab !== 'workspace' ? 'bg-[#F4E8FB] text-[#5E149F]' : 'bg-white text-black/70 hover:bg-black/[0.02]'
+                  }`}
+                style={activeTab !== 'workspace' ? { boxShadow: 'inset 0 -3px 0 0 #5E149F' } : undefined}
+              >
+                <FileText size={15} className="shrink-0 text-black/50" />
+                <span className="whitespace-nowrap">{selectedSimulationLabel}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -595,9 +712,14 @@ export default function Dashboard() {
                   <BarChart3 size={16} style={{ color: BRAND.violet }} />
                   <div>
                     <span className="text-sm font-semibold text-black">Workflow Map</span>
-                    {isRealData && (
+                    {isRealData && canPersistTaskEdits && (
                       <span className="ml-2 text-xs text-black/42">
                         Click <Pencil size={10} className="inline" /> to edit a step · <MessageSquare size={10} className="inline" /> to leave feedback
+                      </span>
+                    )}
+                    {isRealData && !canPersistTaskEdits && (
+                      <span className="ml-2 text-xs text-black/42">
+                        Open a project-scoped dashboard to submit workflow edits.
                       </span>
                     )}
                     {editMode && (
@@ -608,8 +730,8 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  {/* Edit mode toggle — visible whenever all_tasks.json has data */}
-                  {hasTaskData && projectId && (
+                  {/* Edit mode toggle — visible whenever this project has editable task data */}
+                  {canPersistTaskEdits && hasEditableTaskData && (
                     <button
                       type="button"
                       onClick={toggleEditMode}
@@ -873,10 +995,48 @@ export default function Dashboard() {
                         </select>
                       </div>
 
+                      {/* Role type */}
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-black/42 mb-1">Role Type</label>
+                        <input
+                          value={editDraft.role_type}
+                          onChange={(e) => { setEditDraft((d) => d ? { ...d, role_type: e.target.value } : d); setEditDirty(true) }}
+                          placeholder="e.g. SDR, AE, CSM, All"
+                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
+                          style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
+                        />
+                      </div>
+
+                      {/* Workflow type */}
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-widest text-black/42 mb-1">Workflow Type</label>
+                        <input
+                          value={editDraft.workflow_type}
+                          onChange={(e) => { setEditDraft((d) => d ? { ...d, workflow_type: e.target.value } : d); setEditDirty(true) }}
+                          placeholder="e.g. outbound, closing, onboarding"
+                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
+                          style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
+                        />
+                      </div>
+
                       {editSaveError && (
                         <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-600">
                           <AlertCircle size={13} className="mt-0.5 flex-shrink-0" />
                           {editSaveError}
+                        </div>
+                      )}
+
+                      {editSaveSuccess && (
+                        <div className="flex items-start gap-2 rounded-xl border px-3 py-2 text-xs" style={{ borderColor: '#CDECDD', background: '#F1FBF6', color: '#248F63' }}>
+                          <Check size={13} className="mt-0.5 flex-shrink-0" />
+                          {editSaveSuccess}
+                        </div>
+                      )}
+
+                      {editingNodePendingRequest && (
+                        <div className="flex items-start gap-2 rounded-xl border px-3 py-2 text-xs" style={{ borderColor: '#F7DE9A', background: '#FFF9EA', color: '#9A6700' }}>
+                          <Clock size={13} className="mt-0.5 flex-shrink-0" />
+                          This step already has a pending change request from {new Date(editingNodePendingRequest.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.
                         </div>
                       )}
                     </div>
@@ -884,7 +1044,7 @@ export default function Dashboard() {
                     <div className="px-4 py-3 border-t space-y-2" style={{ borderColor: BRAND.border }}>
                       <button
                         onClick={handleSaveEdit}
-                        disabled={editSaving || !editDirty}
+                        disabled={editSaving || !editDirty || !!editingNodePendingRequest}
                         className="w-full flex items-center justify-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-2xl disabled:opacity-50 transition-opacity"
                         style={{ background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)` }}
                       >
@@ -893,9 +1053,9 @@ export default function Dashboard() {
                         ) : (
                           <Check size={15} />
                         )}
-                        {editSaving ? 'Saving…' : 'Save Changes'}
+                        {editSaving ? 'Submitting…' : 'Submit For Review'}
                       </button>
-                      <p className="text-center text-[10px] text-black/38">Changes update all_tasks.json. Re-run pipeline to regenerate graph.</p>
+                      <p className="text-center text-[10px] text-black/38">Client edits stay pending until an admin approves them. Approved changes then update all_tasks.json.</p>
                     </div>
                   </div>
                 )}
@@ -1002,15 +1162,33 @@ export default function Dashboard() {
                       key={e.id}
                       type="button"
                       onClick={() => projectId
-                        ? navigate(`/projects/${projectId}/simulation/${e.id}`)
-                        : focusSimulationTab(e.id)
+                        ? navigate(`/projects/${projectId}/dashboard/simulations/${e.id}`)
+                        : navigate(`/simulation?eval=${encodeURIComponent(e.id)}`)
                       }
                       className="group flex w-full items-center justify-between rounded-2xl border bg-[#FBFAFD] px-4 py-3 transition-colors hover:border-black/12"
                       style={{ borderColor: BRAND.border }}
                     >
                       <div className="text-left">
                         <div className="text-sm font-medium text-black">{e.tool_name}</div>
-                        <div className="mt-0.5 text-xs text-black/42">{e.created_at.slice(0, 10)}</div>
+                        <div className="mt-0.5 flex items-center gap-2 text-xs text-black/42">
+                          <span>{e.created_at.slice(0, 10)}</span>
+                          {(e.status === 'queued' || e.status === 'running') && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[#F4E8FB] px-2 py-0.5 font-semibold text-[#5E149F]">
+                              <Loader2 size={10} className="animate-spin" />
+                              Simulating…
+                            </span>
+                          )}
+                          {e.status === 'failed' && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 font-semibold text-red-500">
+                              Failed
+                            </span>
+                          )}
+                        </div>
+                        {(e.status === 'queued' || e.status === 'running') && (
+                          <div className="mt-1 text-[11px] text-black/45">
+                            {e.latest_job_step ?? 'Queued'}{typeof e.latest_job_progress_pct === 'number' ? ` · ${e.latest_job_progress_pct}%` : ''}
+                          </div>
+                        )}
                       </div>
                       <ChevronRight size={14} className="text-black/32" />
                     </button>
@@ -1021,61 +1199,74 @@ export default function Dashboard() {
           </div>
         </>)}
 
-        {/* ── Recommendation Report tab content ────────────────────────── */}
-        {activeTab === 'report' && (
-          <div data-gsap-dashboard-report className="space-y-5">
-            {/* Loading */}
-            {reportLoading && (
-              <div className="flex items-center justify-center py-24">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-black/10" style={{ borderTopColor: BRAND.orchid }} />
-              </div>
-            )}
-
-            {/* No simulations yet */}
-            {!reportLoading && !apiToolEvals?.length && (
+        {activeTab !== 'workspace' && (
+          <div data-gsap-dashboard-simulation className="space-y-5">
+            {!selectedToolEval && (
               <div className="flex flex-col items-center justify-center gap-4 rounded-[24px] border bg-[#F7F4FB] py-20 text-center" style={{ borderColor: BRAND.border }}>
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: 'rgba(94,20,159,0.08)' }}>
                   <FileText size={26} style={{ color: BRAND.violet }} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-black">No report yet</p>
-                  <p className="mt-1 text-xs text-black/42">Add a tool from the Workspace tab and run a simulation to generate your recommendation report.</p>
+                  <p className="text-sm font-semibold text-black">Simulation not found</p>
+                  <p className="mt-1 text-xs text-black/42">Select a simulation from the dashboard list to open its tab.</p>
                 </div>
-                <button
-                  onClick={() => setActiveTab('workspace')}
-                  className="flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold text-white axis-gradient-button"
-                >
-                  <Plus size={14} />
-                  Go to Workspace
-                </button>
               </div>
             )}
 
-            {/* Report data */}
-            {!reportLoading && reportRec && apiToolEvals?.length && (
+            {selectedToolEval && selectedSimulationLoading && (
+              <div className="flex items-center justify-center py-24">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-black/10" style={{ borderTopColor: BRAND.orchid }} />
+              </div>
+            )}
+
+            {selectedToolEval && !selectedSimulation && (selectedToolEval.status === 'queued' || selectedToolEval.status === 'running') && (
+              <div className="rounded-[24px] border bg-white p-6 space-y-4" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-black">{activeSimulationJob?.current_step ?? selectedToolEval.latest_job_step ?? 'Starting simulation…'}</p>
+                  <span className="text-sm font-semibold tabular-nums" style={{ color: BRAND.violet }}>{activeSimulationJob?.progress_pct ?? selectedToolEval.latest_job_progress_pct ?? 0}%</span>
+                </div>
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(94,20,159,0.10)' }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${activeSimulationJob?.progress_pct ?? selectedToolEval.latest_job_progress_pct ?? 0}%`,
+                      background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)`,
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-black/42">You’re back in the workspace while Axis runs the analysis. This tab will fill in automatically once the simulation finishes.</p>
+              </div>
+            )}
+
+            {selectedToolEval && selectedToolEval.status === 'failed' && !selectedSimulation && (
+              <div className="rounded-[24px] border border-red-200 bg-red-50 p-5">
+                <p className="text-sm font-semibold text-red-600">Simulation failed</p>
+                <p className="mt-1 text-xs text-red-500">{selectedToolEval.last_error ?? activeSimulationJob?.error_message ?? 'An error occurred. Please try again from the Workspace tab.'}</p>
+              </div>
+            )}
+
+            {selectedToolEval && selectedSimulation && selectedRecommendation && (
               <>
-                {/* Tool header + confidence */}
                 <div className="flex items-center justify-between rounded-[18px] border bg-white px-5 py-4" style={{ borderColor: BRAND.border }}>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-black/40">Latest Simulation</p>
-                    <p className="mt-0.5 text-[22px] font-bold text-black">{reportRec.tool_name}</p>
-                    <p className="mt-1 text-sm text-black/55">{reportRec.summary}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-black/40">Simulation</p>
+                    <p className="mt-0.5 text-[22px] font-bold text-black">{selectedRecommendation.tool_name}</p>
+                    <p className="mt-1 text-sm text-black/55">{selectedRecommendation.summary}</p>
                   </div>
                   <div className="flex flex-col items-center gap-1 rounded-[14px] border px-5 py-3 text-center" style={{ borderColor: 'rgba(94,20,159,0.15)', background: 'rgba(94,20,159,0.04)' }}>
                     <Award size={18} style={{ color: BRAND.violet }} />
-                    <span className="text-2xl font-bold" style={{ color: BRAND.violet }}>{Math.round(reportRec.confidence_score * 100)}%</span>
+                    <span className="text-2xl font-bold" style={{ color: BRAND.violet }}>{Math.round(selectedRecommendation.confidence_score * 100)}%</span>
                     <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40">Confidence</span>
                   </div>
                 </div>
 
-                {/* Key metrics */}
                 <div className="grid gap-3 md:grid-cols-3">
                   <div className="rounded-[18px] border bg-white px-4 py-4" style={{ borderColor: 'rgba(94,20,159,0.12)' }}>
                     <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>
                       <Clock size={12} /> Time Saved / Rep
                     </div>
                     <div className="mt-2 text-2xl font-bold text-black">
-                      {Math.abs(reportRec.employee_impact.time_saved.p10).toFixed(1)}–{Math.abs(reportRec.employee_impact.time_saved.p70).toFixed(1)}
+                      {Math.abs(selectedRecommendation.employee_impact.time_saved.p10).toFixed(1)}–{Math.abs(selectedRecommendation.employee_impact.time_saved.p70).toFixed(1)}
                       <span className="ml-1 text-sm font-normal text-black/40">hrs/wk</span>
                     </div>
                     <div className="mt-1 text-xs text-black/42">p10–p70 range across reps</div>
@@ -1085,7 +1276,7 @@ export default function Dashboard() {
                       <Zap size={12} /> Throughput Lift
                     </div>
                     <div className="mt-2 text-2xl font-bold text-black">
-                      {Math.abs(reportRec.company_impact.throughput.p10).toFixed(1)}–{Math.abs(reportRec.company_impact.throughput.p70).toFixed(1)}
+                      {Math.abs(selectedRecommendation.company_impact.throughput.p10).toFixed(1)}–{Math.abs(selectedRecommendation.company_impact.throughput.p70).toFixed(1)}
                       <span className="ml-1 text-sm font-normal text-black/40">%</span>
                     </div>
                     <div className="mt-1 text-xs text-black/42">more deals closed per rep</div>
@@ -1095,52 +1286,76 @@ export default function Dashboard() {
                       <TrendingUp size={12} /> Revenue Impact
                     </div>
                     <div className="mt-2 text-2xl font-bold text-black">
-                      ${(Math.abs(reportRec.company_impact.revenue_impact.p10) / 1000).toFixed(1)}k–${(Math.abs(reportRec.company_impact.revenue_impact.p70) / 1000).toFixed(1)}k
+                      ${(Math.abs(selectedRecommendation.company_impact.revenue_impact.p10) / 1000).toFixed(1)}k–${(Math.abs(selectedRecommendation.company_impact.revenue_impact.p70) / 1000).toFixed(1)}k
                     </div>
                     <div className="mt-1 text-xs text-black/42">projected uplift</div>
                   </div>
                 </div>
 
-                {/* Workflow map */}
-                <div className="bg-white border rounded-[24px] overflow-hidden" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
-                  <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
-                    <BarChart3 size={16} style={{ color: BRAND.violet }} />
-                    <span className="text-sm font-semibold text-black">Workflow Map</span>
+                <div className="grid gap-5 xl:grid-cols-2">
+                  <div className="bg-white border rounded-[24px] overflow-hidden" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+                    <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
+                      <BarChart3 size={16} style={{ color: BRAND.violet }} />
+                      <span className="text-sm font-semibold text-black">Baseline Workflow</span>
+                    </div>
+                    <div style={{ height: 420 }}>
+                      <ReactFlow
+                        nodes={(baselineWorkflow ?? { nodes: nodes }).nodes}
+                        edges={(baselineWorkflow ?? { edges: edges }).edges}
+                        nodeTypes={nodeTypes}
+                        nodesDraggable={false}
+                        nodesConnectable={false}
+                        elementsSelectable={false}
+                        fitView
+                        fitViewOptions={{ padding: 0.3 }}
+                        minZoom={0.3}
+                        maxZoom={1.5}
+                      >
+                        <Controls />
+                        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
+                      </ReactFlow>
+                    </div>
                   </div>
-                  <div style={{ height: 420 }}>
-                    <ReactFlow
-                      nodes={nodes}
-                      edges={edges}
-                      nodeTypes={nodeTypes}
-                      nodesDraggable={false}
-                      nodesConnectable={false}
-                      elementsSelectable={false}
-                      fitView
-                      fitViewOptions={{ padding: 0.3 }}
-                      minZoom={0.3}
-                      maxZoom={1.5}
-                    >
-                      <Controls />
-                      <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
-                    </ReactFlow>
+
+                  <div className="bg-white border rounded-[24px] overflow-hidden" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+                    <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
+                      <Zap size={16} style={{ color: BRAND.coral }} />
+                      <span className="text-sm font-semibold text-black">With {selectedToolEval.tool_name}</span>
+                    </div>
+                    <div style={{ height: 420 }}>
+                      <ReactFlow
+                        nodes={(toolWorkflow ?? baselineWorkflow ?? { nodes: nodes }).nodes}
+                        edges={(toolWorkflow ?? baselineWorkflow ?? { edges: edges }).edges}
+                        nodeTypes={nodeTypes}
+                        nodesDraggable={false}
+                        nodesConnectable={false}
+                        elementsSelectable={false}
+                        fitView
+                        fitViewOptions={{ padding: 0.3 }}
+                        minZoom={0.3}
+                        maxZoom={1.5}
+                      >
+                        <Controls />
+                        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
+                      </ReactFlow>
+                    </div>
                   </div>
                 </div>
 
-                {/* Use cases */}
-                {reportRec.use_cases.length > 0 && (
+                {selectedRecommendation.use_cases.length > 0 && (
                   <div className="bg-white border rounded-[24px] p-5" style={{ borderColor: BRAND.border }}>
                     <h3 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: BRAND.violet }}>Key Use Cases</h3>
                     <div className="space-y-3">
-                      {reportRec.use_cases.map((uc, i) => (
+                      {selectedRecommendation.use_cases.map((uc, i) => (
                         <div key={i} className="rounded-[16px] border bg-[#F7F4FB] px-4 py-3" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
                           <p className="text-sm font-semibold text-black">{uc.title}</p>
                           <p className="mt-0.5 text-xs text-black/55">{uc.description}</p>
                         </div>
                       ))}
                     </div>
-                    {projectId && apiToolEvals?.[0] && (
+                    {projectId && (
                       <button
-                        onClick={() => navigate(`/projects/${projectId}/recommendation/${apiToolEvals[0].id}`)}
+                        onClick={() => navigate(`/projects/${projectId}/recommendation/${selectedToolEval.id}`)}
                         className="mt-4 w-full flex items-center justify-center gap-2 rounded-full py-2.5 text-[13px] font-bold text-white axis-gradient-button"
                       >
                         <FileText size={14} />
@@ -1151,52 +1366,16 @@ export default function Dashboard() {
                 )}
               </>
             )}
-
-            {/* Simulation job in progress */}
-            {!reportLoading && !reportRec && simJobId && (simRunning || (!simDone && !simFailed)) && (
-              <div className="rounded-[24px] border bg-white p-6 space-y-4" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-black">{simJob?.current_step ?? 'Starting simulation…'}</p>
-                  <span className="text-sm font-semibold tabular-nums" style={{ color: BRAND.violet }}>{simJob?.progress_pct ?? 0}%</span>
-                </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(94,20,159,0.10)' }}>
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${simJob?.progress_pct ?? 0}%`,
-                      background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)`,
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-black/42">Axis is scraping the product site, classifying features, and running your Monte Carlo simulation. This takes 1–2 minutes.</p>
-              </div>
-            )}
-
-            {/* Simulation job failed */}
-            {!reportLoading && simJobId && simFailed && !reportRec && (
-              <div className="rounded-[24px] border border-red-200 bg-red-50 p-5">
-                <p className="text-sm font-semibold text-red-600">Simulation failed</p>
-                <p className="mt-1 text-xs text-red-500">{simJob?.error_message ?? 'An error occurred. Please try again from the Workspace tab.'}</p>
-              </div>
-            )}
-
-            {/* Fetched OK but no recommendation data yet (simulation not run) */}
-            {!reportLoading && apiToolEvals?.length && !reportRec && !simJobId && (
-              <div className="flex flex-col items-center justify-center gap-3 rounded-[24px] border bg-[#F7F4FB] py-16 text-center" style={{ borderColor: BRAND.border }}>
-                <p className="text-sm font-semibold text-black">Simulation not run yet</p>
-                <p className="text-xs text-black/42">Run a simulation from the Workspace tab to generate your report.</p>
-                <button
-                  onClick={() => setActiveTab('workspace')}
-                  className="flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold text-white axis-gradient-button"
-                >
-                  Go to Workspace
-                </button>
-              </div>
-            )}
           </div>
         )}
 
       </main>
+      <CosmoChatWidget
+        projectId={projectId}
+        page={activeTab === 'workspace' ? 'dashboard' : 'simulation'}
+        toolEvaluationId={selectedToolEval?.id ?? null}
+        demoContext={!projectId ? cosmoDemoContext : undefined}
+      />
     </ClientWorkspaceShell>
   )
 }

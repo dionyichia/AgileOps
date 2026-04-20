@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useLocation, useSearchParams } from 'react-router-dom'
-import { Upload, Link2, FileText, Globe, Briefcase, CheckCircle2, Loader2, ArrowRight, ChevronLeft } from 'lucide-react'
+import { Upload, Link2, FileText, Globe, Briefcase, Loader2, ArrowRight, ChevronLeft } from 'lucide-react'
 import StepLayout from '../components/layout/StepLayout'
 import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
 import { toolEvals, pipeline as pipelineApi, uploads } from '../api/client'
 import { getToolDraft, upsertToolDraft, type ToolDraft, type SerializedFileEntry } from '../lib/toolDraftStorage'
-
-type UseCase = 'adoption' | 'compare'
 
 interface FileEntry {
   file: File | null
@@ -30,7 +28,6 @@ export default function ToolInputForm() {
   const [searchParams, setSearchParams] = useSearchParams()
   const draftParam = searchParams.get('draft')
   const isClientToolInput = pathname === '/toolinput'
-  const [useCase, setUseCase] = useState<UseCase>('adoption')
   const [toolName, setToolName] = useState('')
   const [docs, setDocs] = useState<FileEntry>(emptyFile())
   const [api, setApi] = useState<FileEntry>(emptyFile())
@@ -43,7 +40,6 @@ export default function ToolInputForm() {
     if (!isClientToolInput || !draftParam) return
     const d = getToolDraft(draftParam)
     if (!d) return
-    setUseCase(d.useCase)
     setToolName(d.toolName)
     setWebsite(d.website)
     setDocs(deserializeFileEntry(d.docs))
@@ -74,7 +70,6 @@ export default function ToolInputForm() {
     const draft: ToolDraft = {
       id,
       savedAt: new Date().toISOString(),
-      useCase,
       toolName: toolName.trim(),
       website: website.trim(),
       docs: serializeFileEntry(docs),
@@ -88,14 +83,13 @@ export default function ToolInputForm() {
 
   const handleNext = async () => {
     // Always save to localStorage for legacy route compatibility
-    localStorage.setItem('axisToolInput', JSON.stringify({ useCase, toolName, website }))
+    localStorage.setItem('axisToolInput', JSON.stringify({ toolName, website }))
 
     if (projectId) {
       // Project-scoped: save to API, upload files, trigger simulation, navigate
       setSubmitting(true)
       try {
         const toolEval = await toolEvals.create(projectId, {
-          use_case: useCase,
           tool_name: toolName.trim(),
           website_url: website || undefined,
         })
@@ -110,9 +104,9 @@ export default function ToolInputForm() {
           await Promise.all(fileUploads)
         }
 
-        const { job_id } = await pipelineApi.simulate(projectId, toolEval.id)
+        await pipelineApi.simulate(projectId, toolEval.id)
         navigate(`/projects/${projectId}/dashboard`, {
-          state: { openTab: toolEval.id, jobId: job_id },
+          state: { recentSimulationId: toolEval.id },
         })
       } catch (err) {
         console.error('Failed to create tool evaluation:', err)
@@ -140,45 +134,9 @@ export default function ToolInputForm() {
       compact={isClientToolInput}
       nested={isClientToolInput}
       hideNextButton={isClientToolInput}
-      backPath={isClientToolInput ? '/dashboard' : undefined}
+      backPath={projectId ? `/projects/${projectId}/dashboard` : (isClientToolInput ? '/dashboard' : undefined)}
     >
       <div className="mx-auto max-w-2xl space-y-8">
-        {/* Use Case */}
-        <div>
-          <label className="block text-sm font-semibold text-black/42 mb-3">Use Case</label>
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { id: 'adoption' as UseCase, label: 'Increase adoption of existing tool', icon: CheckCircle2, desc: 'Understand how to get your team to use a tool you already pay for.' },
-              { id: 'compare'  as UseCase, label: 'Compare tools for a use case',       icon: Briefcase,    desc: 'Evaluate multiple tools side-by-side for a specific need.' },
-            ].map(({ id, label, icon: Icon, desc }) => (
-              <button
-                key={id}
-                onClick={() => setUseCase(id)}
-                className={`p-4 rounded-xl border text-left transition-all ${
-                  useCase === id
-                    ? 'border-[#5E149F]/25 bg-white'
-                    : 'border-black/8 bg-white hover:border-black/14'
-                }`}
-                style={{
-                  boxShadow: useCase === id ? '0 20px 40px rgba(94,20,159,0.10)' : '0 14px 28px rgba(15,23,42,0.04)',
-                  background: useCase === id
-                    ? 'linear-gradient(180deg, #FFFFFF 0%, #FCF7FF 100%)'
-                    : 'linear-gradient(180deg, #FFFFFF 0%, #FFF8FC 100%)',
-                }}
-              >
-                <Icon size={18} className={useCase === id ? 'text-[#F75A8C] mb-2' : 'text-black/32 mb-2'} />
-                <div className={`text-sm font-semibold mb-1 ${useCase === id ? 'text-[#5E149F]' : 'text-black'}`}>{label}</div>
-                <div className="text-xs text-black/52 leading-snug">{desc}</div>
-                {id === 'adoption' && (
-                  <span className="inline-block mt-2 text-[10px] font-bold tracking-widest text-[#B4308B] bg-[#FCEAF4] border border-[#B4308B]/12 px-2 py-1 rounded-full">
-                    RECOMMENDED
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Tool name */}
         <div>
           <label className="block text-sm font-semibold text-black/72 mb-2">
@@ -269,6 +227,7 @@ export default function ToolInputForm() {
   if (isClientToolInput) {
     return (
       <ClientWorkspaceShell
+        projectId={projectId}
         headerLeft={
           <div className="flex items-start gap-4">
             <button

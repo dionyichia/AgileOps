@@ -29,7 +29,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.deps import async_session
 from backend.api.models.db import Job, JobStatus, JobType, SimulationResult, Transcript, ToolEvaluation
-from backend.api.services import data_io, ws_manager
+from backend.api.services import data_io, simulation_matrix, ws_manager
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +87,17 @@ async def _fail(job_id: str, error: str) -> None:
     )
     await ws_manager.broadcast(job_id, {"type": "failed", "error": error})
     await ws_manager.close_all(job_id)
+
+
+async def _update_tool_eval(tool_evaluation_id: str, **fields) -> None:
+    async with async_session() as db:
+        tool_eval = await db.get(ToolEvaluation, tool_evaluation_id)
+        if tool_eval is None:
+            logger.error("_update_tool_eval: tool evaluation %s not found", tool_evaluation_id)
+            return
+        for key, value in fields.items():
+            setattr(tool_eval, key, value)
+        await db.commit()
 
 
 # ── Script runner ──────────────────────────────────────────────────────────────
@@ -257,6 +268,16 @@ async def run_simulation_job(
     to Storage, and persists a SimulationResult DB row on completion.
     """
     await _update_job(job_id, status=JobStatus.running, started_at=datetime.now(timezone.utc))
+    await _update_tool_eval(
+        tool_evaluation_id,
+        status="running",
+        latest_job_id=job_id,
+        latest_job_status=JobStatus.running.value,
+        latest_job_progress_pct=0,
+        latest_job_step="Starting simulation…",
+        last_error=None,
+        completed_at=None,
+    )
     tmp = tempfile.mkdtemp()
     tmp_path = Path(tmp)
     try:
@@ -264,54 +285,82 @@ async def run_simulation_job(
             tool_eval = await db.get(ToolEvaluation, tool_evaluation_id)
             if not tool_eval:
                 raise RuntimeError("Tool evaluation not found")
-            tool_name   = tool_eval.tool_name
+            tool_name = tool_eval.tool_name
             website_url = tool_eval.website_url or ""
 
         tool_slug = re.sub(r"[^a-z0-9]+", "_", tool_name.lower()).strip("_")
 
-        scraped_path    = tmp_path / f"scraped_{tool_slug}.json"
-        features_path   = tmp_path / f"tool_features_{tool_slug}.json"
+        scraped_path = tmp_path / f"scraped_{tool_slug}.json"
+        features_path = tmp_path / f"tool_features_{tool_slug}.json"
         simulation_path = tmp_path / f"monte_carlo_results_{tool_slug}.json"
+        tool_matrix_path = tmp_path / f"transition_matrix_{tool_slug}.json"
 
-        # Download shared pipeline inputs
         for filename in ["all_tasks.json", "transition_matrix.json"]:
             storage_path = await data_io.resolve_data_path(project_id, filename)
             file_bytes = await data_io._download(data_io.PIPELINE_BUCKET, storage_path)
             if file_bytes:
                 (tmp_path / filename).write_bytes(file_bytes)
 
-        tasks_path      = tmp_path / "all_tasks.json"
+        tasks_path = tmp_path / "all_tasks.json"
         transition_path = tmp_path / "transition_matrix.json"
 
-        # Step 1 — scrape product website
-        await _progress(job_id, 10, "Scraping product website\u2026")
+        await _progress(job_id, 10, "Scraping product website…")
+        await _update_tool_eval(
+            tool_evaluation_id,
+            latest_job_status=JobStatus.running.value,
+            latest_job_progress_pct=10,
+            latest_job_step="Scraping product website…",
+        )
         rc, _, stderr = await _run_script([
             "backend/scripts/parser_scraper.py",
-            "--tool",   tool_name,
-            "--url",    website_url,
+            "--tool", tool_name,
+            "--url", website_url,
             "--output", str(scraped_path),
         ])
         if rc != 0:
             raise RuntimeError(f"parser_scraper.py failed: {stderr}")
 
-        # Step 2 — classify features into pipeline impact parameters
-        await _progress(job_id, 40, "Mapping features to workflow\u2026")
+        await _progress(job_id, 40, "Mapping features to workflow…")
+        await _update_tool_eval(
+            tool_evaluation_id,
+            latest_job_status=JobStatus.running.value,
+            latest_job_progress_pct=40,
+            latest_job_step="Mapping features to workflow…",
+        )
         rc, stdout, stderr = await _run_script([
             "backend/scripts/classifier.py",
             "--scraped", str(scraped_path),
-            "--tasks",   str(tasks_path),
-            "--output",  str(features_path),
+            "--tasks", str(tasks_path),
+            "--output", str(features_path),
         ])
         if rc != 0:
             raise RuntimeError(f"classifier.py failed: {stderr or stdout}")
 
-        # Step 3 — Monte Carlo simulation with tool-specific features
-        await _progress(job_id, 65, "Running Monte Carlo simulation\u2026")
+        await _progress(job_id, 55, "Building tool-adjusted workflow…")
+        await _update_tool_eval(
+            tool_evaluation_id,
+            latest_job_status=JobStatus.running.value,
+            latest_job_progress_pct=55,
+            latest_job_step="Building tool-adjusted workflow…",
+        )
+        baseline_matrix = json.loads(transition_path.read_text(encoding="utf-8"))
+        tool_features = json.loads(features_path.read_text(encoding="utf-8"))
+        tool_transition_matrix = simulation_matrix.build_tool_transition_matrix(baseline_matrix, tool_features)
+        workflow_diff = simulation_matrix.build_workflow_diff(baseline_matrix, tool_transition_matrix, tool_features)
+        tool_matrix_path.write_text(json.dumps(tool_transition_matrix, indent=2), encoding="utf-8")
+
+        await _progress(job_id, 65, "Running Monte Carlo simulation…")
+        await _update_tool_eval(
+            tool_evaluation_id,
+            latest_job_status=JobStatus.running.value,
+            latest_job_progress_pct=65,
+            latest_job_step="Running Monte Carlo simulation…",
+        )
         cmd = [
             "backend/scripts/sim.py",
             "--telemetry_path", str(transition_path),
-            "--output_path",    str(simulation_path),
-            "--tool_features",  str(features_path),
+            "--output_path", str(simulation_path),
+            "--tool_features", str(features_path),
         ]
         for key, value in sim_kwargs.items():
             cmd += [f"--{key}", str(value)]
@@ -319,11 +368,11 @@ async def run_simulation_job(
         if rc != 0:
             raise RuntimeError(f"sim.py failed: {stderr}")
 
-        # Upload intermediate and output files to Storage
         for fname, fpath in [
-            (f"scraped_{tool_slug}.json",                scraped_path),
-            (f"tool_features_{tool_slug}.json",          features_path),
-            (f"monte_carlo_results_{tool_slug}.json",    simulation_path),
+            (f"scraped_{tool_slug}.json", scraped_path),
+            (f"tool_features_{tool_slug}.json", features_path),
+            (f"transition_matrix_{tool_slug}.json", tool_matrix_path),
+            (f"monte_carlo_results_{tool_slug}.json", simulation_path),
         ]:
             if fpath.exists():
                 await data_io._upload(
@@ -333,12 +382,17 @@ async def run_simulation_job(
                     "application/json",
                 )
 
-        # Step 4 — persist to DB
         await _progress(job_id, 85, "Storing results")
+        await _update_tool_eval(
+            tool_evaluation_id,
+            latest_job_status=JobStatus.running.value,
+            latest_job_progress_pct=85,
+            latest_job_step="Storing results…",
+        )
 
-        results         = json.loads(simulation_path.read_text(encoding="utf-8"))
-        week_final      = results.get("summary", {}).get("week_final", {})
-        work_saved      = float(week_final.get("work_saved_pct", 0.0))
+        results = json.loads(simulation_path.read_text(encoding="utf-8"))
+        week_final = results.get("summary", {}).get("week_final", {})
+        work_saved = float(week_final.get("work_saved_pct", 0.0))
         throughput_lift = float(week_final.get("throughput_lift_pct", 0.0))
 
         async with async_session() as db:
@@ -349,26 +403,50 @@ async def run_simulation_job(
             )
             sim_result = existing.scalar_one_or_none()
             if sim_result:
-                sim_result.results_json              = results
-                sim_result.final_work_saved_pct      = work_saved
+                sim_result.results_json = results
+                sim_result.baseline_transition_matrix_json = baseline_matrix
+                sim_result.tool_transition_matrix_json = tool_transition_matrix
+                sim_result.workflow_diff_json = workflow_diff
+                sim_result.final_work_saved_pct = work_saved
                 sim_result.final_throughput_lift_pct = throughput_lift
             else:
                 sim_result = SimulationResult(
-                    tool_evaluation_id        = tool_evaluation_id,
-                    results_json              = results,
-                    final_work_saved_pct      = work_saved,
-                    final_throughput_lift_pct = throughput_lift,
+                    tool_evaluation_id=tool_evaluation_id,
+                    results_json=results,
+                    baseline_transition_matrix_json=baseline_matrix,
+                    tool_transition_matrix_json=tool_transition_matrix,
+                    workflow_diff_json=workflow_diff,
+                    final_work_saved_pct=work_saved,
+                    final_throughput_lift_pct=throughput_lift,
                 )
                 db.add(sim_result)
             await db.commit()
 
+        await _update_tool_eval(
+            tool_evaluation_id,
+            status="completed",
+            latest_job_id=job_id,
+            latest_job_status=JobStatus.completed.value,
+            latest_job_progress_pct=100,
+            latest_job_step="Done",
+            last_error=None,
+            completed_at=datetime.now(timezone.utc),
+        )
         await _complete(job_id, {
-            "work_saved_pct":      work_saved,
+            "work_saved_pct": work_saved,
             "throughput_lift_pct": throughput_lift,
         })
 
     except Exception as exc:  # noqa: BLE001
         logger.exception("Simulation job %s failed", job_id)
+        await _update_tool_eval(
+            tool_evaluation_id,
+            status="failed",
+            latest_job_id=job_id,
+            latest_job_status=JobStatus.failed.value,
+            latest_job_step="Simulation failed",
+            last_error=str(exc),
+        )
         await _fail(job_id, str(exc))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

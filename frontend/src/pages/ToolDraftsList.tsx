@@ -74,9 +74,6 @@ export default function ToolDraftsList() {
                         minute: '2-digit',
                       })}
                     </div>
-                    <div className="mt-1 text-[11px] font-medium uppercase tracking-wide text-black/38">
-                      {d.useCase === 'adoption' ? 'Adoption' : 'Compare'}
-                    </div>
                   </div>
                   <ChevronRight size={18} className="ml-2 shrink-0 text-black/30" />
                 </button>

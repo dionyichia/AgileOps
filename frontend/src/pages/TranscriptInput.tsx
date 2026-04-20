@@ -18,7 +18,6 @@ import {
   Loader2,
   Play,
   Plus,
-  RotateCcw,
   Send,
   Table2,
   Trash2,
@@ -26,6 +25,9 @@ import {
   CheckCircle2,
   Circle,
   AlertCircle,
+  Check,
+  Pencil,
+  Save,
 } from 'lucide-react'
 import {
   projects as projectsApi,
@@ -66,10 +68,37 @@ interface PipelineStep {
 }
 
 const PIPELINE_STAGES: PipelineStep[] = [
-  { label: 'Generating synthetic telemetry', pctRange: [0, 30] },
-  { label: 'Building Markov transition matrix', pctRange: [30, 60] },
-  { label: 'Running Monte Carlo simulation', pctRange: [60, 100] },
+  { label: 'Generating synthetic telemetry ~15s', pctRange: [0, 30] },
+  { label: 'Building workflow graph ~20s', pctRange: [30, 60] },
+  { label: 'Running Monte Carlo simulation ~30-60s', pctRange: [60, 100] },
 ]
+
+const TRANSCRIPT_STEP_LABELS: Record<string, string> = {
+  'Reading transcript': 'Reading transcript... ~5s',
+  'Sending to Claude for extraction': 'Extracting tasks with Claude... ~30-60s',
+  'Updating task graph': 'Updating task graph... ~5s',
+  Done: 'Transcript complete',
+}
+
+interface EditableTaskDraft {
+  label: string
+  tools: string
+  mean_minutes: number
+  automatable_fraction: TaskNode['automatable_fraction']
+  role_type: string
+  workflow_type: string
+}
+
+function toTaskDraft(task: TaskNode): EditableTaskDraft {
+  return {
+    label: task.label,
+    tools: task.app_cluster.join(', '),
+    mean_minutes: task.duration_distribution.mean_minutes,
+    automatable_fraction: task.automatable_fraction,
+    role_type: task.role_type ?? '',
+    workflow_type: task.workflow_type ?? '',
+  }
+}
 
 function PipelineProgress({ progressPct, currentStep }: { progressPct: number; currentStep: string | null }) {
   return (
@@ -80,20 +109,20 @@ function PipelineProgress({ progressPct, currentStep }: { progressPct: number; c
         return (
           <div key={i} className="flex items-center gap-3">
             {done ? (
-              <CheckCircle2 size={16} className="text-sea-400 flex-shrink-0" />
+              <CheckCircle2 size={16} className="text-[#248F63] flex-shrink-0" />
             ) : active ? (
-              <Loader2 size={16} className="text-cerulean animate-spin flex-shrink-0" />
+              <Loader2 size={16} className="text-[#5E149F] animate-spin flex-shrink-0" />
             ) : (
-              <Circle size={16} className="text-slate-600 flex-shrink-0" />
+              <Circle size={16} className="text-black/28 flex-shrink-0" />
             )}
-            <span className={`text-sm ${done ? 'text-slate-300' : active ? 'text-cerulean-300' : 'text-slate-500'}`}>
+            <span className={`text-sm ${done ? 'text-black/52' : active ? 'text-[#5E149F]' : 'text-black/36'}`}>
               Stage {i + 1}/3: {stage.label}
             </span>
           </div>
         )
       })}
       {currentStep && (
-        <p className="text-xs text-slate-500 ml-7">{currentStep}</p>
+        <p className="text-xs text-black/40 ml-7">{currentStep}</p>
       )}
     </div>
   )
@@ -101,7 +130,68 @@ function PipelineProgress({ progressPct, currentStep }: { progressPct: number; c
 
 // ── Task preview modal ──────────────────────────────────
 
-function TaskPreviewModal({ tasks, onClose }: { tasks: TaskNode[]; onClose: () => void }) {
+function TaskPreviewModal({
+  tasks,
+  onClose,
+  onSaveTask,
+}: {
+  tasks: TaskNode[]
+  onClose: () => void
+  onSaveTask: (nodeId: string, draft: EditableTaskDraft) => Promise<TaskNode[]>
+}) {
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set(tasks.slice(0, 5).map((task) => task.node_id)))
+  const [drafts, setDrafts] = useState<Record<string, EditableTaskDraft>>(() =>
+    Object.fromEntries(tasks.map((task) => [task.node_id, toTaskDraft(task)])),
+  )
+  const [savingIds, setSavingIds] = useState<Record<string, boolean>>({})
+  const [saveErrors, setSaveErrors] = useState<Record<string, string | null>>({})
+  const [saveSuccessIds, setSaveSuccessIds] = useState<Record<string, boolean>>({})
+
+  const toggleExpanded = (nodeId: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(nodeId)) next.delete(nodeId)
+      else next.add(nodeId)
+      return next
+    })
+  }
+
+  const handleDraftChange = (nodeId: string, patch: Partial<EditableTaskDraft>) => {
+    setDrafts((prev) => ({
+      ...prev,
+      [nodeId]: { ...prev[nodeId], ...patch },
+    }))
+    setSaveErrors((prev) => ({ ...prev, [nodeId]: null }))
+    setSaveSuccessIds((prev) => ({ ...prev, [nodeId]: false }))
+  }
+
+  const handleSaveTask = async (nodeId: string) => {
+    const draft = drafts[nodeId]
+    if (!draft) return
+    setSavingIds((prev) => ({ ...prev, [nodeId]: true }))
+    setSaveErrors((prev) => ({ ...prev, [nodeId]: null }))
+    setSaveSuccessIds((prev) => ({ ...prev, [nodeId]: false }))
+
+    try {
+      const updatedTasks = await onSaveTask(nodeId, draft)
+      const updatedTask = updatedTasks.find((task) => task.node_id === nodeId)
+      if (updatedTask) {
+        setDrafts((prev) => ({ ...prev, [nodeId]: toTaskDraft(updatedTask) }))
+      }
+      setSaveSuccessIds((prev) => ({ ...prev, [nodeId]: true }))
+      window.setTimeout(() => {
+        setSaveSuccessIds((prev) => ({ ...prev, [nodeId]: false }))
+      }, 1600)
+    } catch (err) {
+      setSaveErrors((prev) => ({
+        ...prev,
+        [nodeId]: err instanceof Error ? err.message : 'Failed to save task',
+      }))
+    } finally {
+      setSavingIds((prev) => ({ ...prev, [nodeId]: false }))
+    }
+  }
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
@@ -115,50 +205,134 @@ function TaskPreviewModal({ tasks, onClose }: { tasks: TaskNode[]; onClose: () =
           </button>
         </div>
         <div className="overflow-auto flex-1 px-6 py-4">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-slate-500 border-b border-slate-800">
-                <th className="pb-2 font-medium">Task</th>
-                <th className="pb-2 font-medium">Tools</th>
-                <th className="pb-2 font-medium">Avg Duration</th>
-                <th className="pb-2 font-medium">Automatable</th>
-                <th className="pb-2 font-medium">Sources</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tasks.map((t) => (
-                <tr key={t.node_id} className="border-b border-slate-800/50">
-                  <td className="py-3 pr-4">
-                    <div className="text-white font-medium">{t.label}</div>
-                    <div className="text-slate-500 text-xs mt-0.5 line-clamp-2">{t.description}</div>
-                  </td>
-                  <td className="py-3 pr-4">
-                    <div className="flex flex-wrap gap-1">
-                      {t.app_cluster.map((app) => (
-                        <span key={app} className="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded text-xs">
-                          {app}
-                        </span>
-                      ))}
+          <div className="space-y-3">
+            {tasks.map((task, index) => {
+              const expanded = expandedIds.has(task.node_id)
+              const draft = drafts[task.node_id] ?? toTaskDraft(task)
+              const isSaving = !!savingIds[task.node_id]
+              const saveError = saveErrors[task.node_id]
+              const isSaved = !!saveSuccessIds[task.node_id]
+
+              return (
+                <div key={task.node_id} className="rounded-2xl border border-slate-800 bg-[#0B1220] overflow-hidden">
+                  <button
+                    onClick={() => toggleExpanded(task.node_id)}
+                    className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-slate-900/60 transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Task {index + 1}</span>
+                        <span className="text-[10px] text-slate-600">{task.sources?.length ?? 0} sources</span>
+                      </div>
+                      <div className="mt-1 text-sm font-medium text-white truncate">{draft.label}</div>
+                      <div className="mt-1 text-xs text-slate-500 line-clamp-2">{task.description}</div>
                     </div>
-                  </td>
-                  <td className="py-3 pr-4 text-slate-300">
-                    {t.duration_distribution.mean_minutes}m
-                  </td>
-                  <td className="py-3 pr-4">
-                    <span className={`text-xs font-medium ${
-                      t.automatable_fraction === 'high' ? 'text-sea-400' :
-                      t.automatable_fraction === 'medium' ? 'text-gold-400' : 'text-slate-400'
-                    }`}>
-                      {t.automatable_fraction}
-                    </span>
-                  </td>
-                  <td className="py-3 text-slate-500 text-xs">
-                    {t.sources?.length ?? 0}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      {isSaved && (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-emerald-300">
+                          <Check size={12} />
+                          Saved
+                        </span>
+                      )}
+                      <span className="text-xs text-slate-400">{expanded ? 'Collapse' : 'Expand'}</span>
+                      <ChevronRight size={14} className={`text-slate-500 transition-transform ${expanded ? 'rotate-90' : ''}`} />
+                    </div>
+                  </button>
+
+                  {expanded && (
+                    <div className="border-t border-slate-800 px-4 py-4 space-y-4">
+                      <div className="grid md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">Step Name</label>
+                          <input
+                            value={draft.label}
+                            onChange={(e) => handleDraftChange(task.node_id, { label: e.target.value })}
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#B4308B]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">Tools Used</label>
+                          <input
+                            value={draft.tools}
+                            onChange={(e) => handleDraftChange(task.node_id, { tools: e.target.value })}
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#B4308B]"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">Avg Duration (min)</label>
+                          <input
+                            type="number"
+                            min={1}
+                            value={draft.mean_minutes}
+                            onChange={(e) => handleDraftChange(task.node_id, { mean_minutes: Number(e.target.value) })}
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#B4308B]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">Automation Potential</label>
+                          <select
+                            value={draft.automatable_fraction}
+                            onChange={(e) => handleDraftChange(task.node_id, { automatable_fraction: e.target.value as TaskNode['automatable_fraction'] })}
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#B4308B]"
+                          >
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">Role Type</label>
+                          <input
+                            value={draft.role_type}
+                            onChange={(e) => handleDraftChange(task.node_id, { role_type: e.target.value })}
+                            placeholder="e.g. SDR, AE, CSM"
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#B4308B]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">Workflow Type</label>
+                          <input
+                            value={draft.workflow_type}
+                            onChange={(e) => handleDraftChange(task.node_id, { workflow_type: e.target.value })}
+                            placeholder="e.g. outbound, closing"
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#B4308B]"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-xs text-slate-500 flex items-center gap-2">
+                          <Pencil size={12} />
+                          Admin edits save directly to this project's task graph.
+                        </div>
+                        <button
+                          onClick={() => handleSaveTask(task.node_id)}
+                          disabled={isSaving}
+                          className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                          style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}
+                        >
+                          {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                          {isSaving ? 'Saving...' : 'Save Task'}
+                        </button>
+                      </div>
+
+                      {saveError && (
+                        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+                          {saveError}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
           {tasks.length === 0 && (
             <p className="text-center py-8 text-slate-500">No tasks extracted yet. Submit a transcript to get started.</p>
           )}
@@ -198,6 +372,9 @@ export default function TranscriptInput() {
   // UI state
   const [expandedTranscript, setExpandedTranscript] = useState<string | null>(null)
   const [showTaskPreview, setShowTaskPreview] = useState(false)
+  const [teamSizeDraft, setTeamSizeDraft] = useState('')
+  const [teamSizeSaving, setTeamSizeSaving] = useState(false)
+  const transcriptFormLocked = submitting || transcriptJob.isRunning
 
   // ── Load project data ────────────────────────────────
 
@@ -212,6 +389,7 @@ export default function TranscriptInput() {
           tasksApi.get(projectId).catch(() => [] as TaskNode[]),
         ])
         setProject(proj)
+        setTeamSizeDraft(proj.team_size != null ? String(proj.team_size) : '')
         setTranscriptList(txList)
         setTaskGraph(taskList)
       } catch (err) {
@@ -227,13 +405,44 @@ export default function TranscriptInput() {
     transcriptsApi.list(projectId).then(setTranscriptList).catch(() => {})
     tasksApi.get(projectId).then(setTaskGraph).catch(() => {})
     projectsApi.get(projectId).then(setProject).catch(() => {})
+    setName('')
+    setRole('')
+    setText('')
   }, [projectId, transcriptJob.isDone])
 
   // Refresh project when pipeline job completes
   useEffect(() => {
     if (!projectId || !pipelineJob.isDone) return
     projectsApi.get(projectId).then(setProject).catch(() => {})
-  }, [projectId, pipelineJob.isDone])
+    navigate(`/projects/${projectId}/dashboard`, { state: { pipelineJobId } })
+  }, [navigate, pipelineJob.isDone, pipelineJobId, projectId])
+
+  const getTranscriptStepLabel = (step: string | null | undefined) => {
+    if (!step) return 'Extracting tasks with Claude... ~30-60s'
+    return TRANSCRIPT_STEP_LABELS[step] ?? step
+  }
+
+  const handleSaveTaskPreviewEdit = async (nodeId: string, draft: EditableTaskDraft) => {
+    if (!projectId) return taskGraph
+    const updatedTasks = taskGraph.map((task) => {
+      if (task.node_id !== nodeId) return task
+      return {
+        ...task,
+        label: draft.label.trim(),
+        app_cluster: draft.tools.split(',').map((item) => item.trim()).filter(Boolean),
+        duration_distribution: {
+          ...task.duration_distribution,
+          mean_minutes: draft.mean_minutes,
+        },
+        automatable_fraction: draft.automatable_fraction,
+        role_type: draft.role_type.trim() || undefined,
+        workflow_type: draft.workflow_type.trim() || undefined,
+      }
+    })
+    const savedTasks = await tasksApi.update(projectId, updatedTasks)
+    setTaskGraph(savedTasks)
+    return savedTasks
+  }
 
   // ── Handlers ─────────────────────────────────────────
 
@@ -249,9 +458,6 @@ export default function TranscriptInput() {
         raw_text: text.trim(),
       })
       setTranscriptJobId(result.job_id)
-      setName('')
-      setRole('')
-      setText('')
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Failed to submit transcript')
     } finally {
@@ -264,7 +470,6 @@ export default function TranscriptInput() {
     try {
       const result = await pipelineApi.run(projectId)
       setPipelineJobId(result.job_id)
-      navigate(`/projects/${projectId}/dashboard`, { state: { pipelineJobId: result.job_id } })
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Failed to start pipeline')
     }
@@ -280,7 +485,22 @@ export default function TranscriptInput() {
     }
   }
 
-  const canSubmit = name.trim() && role.trim() && text.trim() && !submitting && !transcriptJob.isRunning
+  const handleSaveTeamSize = async () => {
+    if (!projectId) return
+    const parsed = parseInt(teamSizeDraft, 10)
+    if (isNaN(parsed) || parsed <= 0) return
+    setTeamSizeSaving(true)
+    try {
+      const updated = await projectsApi.update(projectId, { team_size: parsed })
+      setProject(updated)
+    } catch {
+      // silent — not critical
+    } finally {
+      setTeamSizeSaving(false)
+    }
+  }
+
+  const canSubmit = name.trim() && role.trim() && text.trim() && !transcriptFormLocked
   const canRunPipeline = transcriptList.length > 0 && !pipelineJob.isRunning
 
   useGsapReveal(rootRef, [projectId, transcriptList.length, taskGraph.length, transcriptJob.isRunning, pipelineJob.isRunning], {
@@ -365,8 +585,9 @@ export default function TranscriptInput() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    disabled={transcriptFormLocked}
                     placeholder="e.g. Jordan Mills"
-                    className="w-full bg-[#F7F4FB] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm placeholder:text-black/28 focus:border-[#B4308B] focus:ring-1 focus:ring-[#B4308B]/20 outline-none transition-colors"
+                    className="w-full bg-[#F7F4FB] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm placeholder:text-black/28 focus:border-[#B4308B] focus:ring-1 focus:ring-[#B4308B]/20 outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -375,30 +596,33 @@ export default function TranscriptInput() {
                     type="text"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
+                    disabled={transcriptFormLocked}
                     placeholder="e.g. Senior SDR"
-                    className="w-full bg-[#0B0F1E] border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder:text-slate-600 focus:border-cerulean focus:ring-1 focus:ring-cerulean/30 outline-none transition-colors"
+                    className="w-full bg-[#F7F4FB] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm placeholder:text-black/28 focus:border-[#B4308B] focus:ring-1 focus:ring-[#B4308B]/20 outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
               </div>
 
               <div className="mb-4">
-                <label className="block text-xs text-slate-400 font-medium mb-1.5">Interview Date</label>
+                <label className="block text-xs text-black/44 font-medium mb-1.5">Interview Date</label>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="bg-[#0B0F1E] border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:border-cerulean focus:ring-1 focus:ring-cerulean/30 outline-none transition-colors"
+                  disabled={transcriptFormLocked}
+                  className="bg-[#F7F4FB] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm focus:border-[#B4308B] focus:ring-1 focus:ring-[#B4308B]/20 outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
 
               <div className="mb-4">
-                <label className="block text-xs text-slate-400 font-medium mb-1.5">Transcript *</label>
+                <label className="block text-xs text-black/44 font-medium mb-1.5">Transcript *</label>
                 <textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
+                  disabled={transcriptFormLocked}
                   placeholder="Paste the full call transcript here..."
                   rows={14}
-                  className="w-full bg-[#0B0F1E] border border-slate-700 rounded-lg px-4 py-3 text-white text-sm font-mono leading-relaxed placeholder:text-slate-600 focus:border-cerulean focus:ring-1 focus:ring-cerulean/30 outline-none transition-colors resize-y"
+                  className="w-full bg-[#F7F4FB] border border-black/10 rounded-2xl px-4 py-3 text-black text-sm font-mono leading-relaxed placeholder:text-black/28 focus:border-[#B4308B] focus:ring-1 focus:ring-[#B4308B]/20 outline-none transition-colors resize-y disabled:opacity-60 disabled:cursor-not-allowed"
                 />
                 <p className="text-xs text-slate-600 mt-1">{text.split(/\s+/).filter(Boolean).length} words</p>
               </div>
@@ -413,7 +637,8 @@ export default function TranscriptInput() {
               <button
                 onClick={handleSubmitTranscript}
                 disabled={!canSubmit}
-                className="flex items-center gap-2 bg-cerulean hover:bg-cerulean-400 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors"
+                className="flex items-center gap-2 disabled:bg-black/10 disabled:text-black/30 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-full font-semibold text-sm transition-colors"
+                style={canSubmit ? { background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)', boxShadow: '0 10px 24px rgba(94,20,159,0.18)' } : undefined}
               >
                 {submitting || transcriptJob.isRunning ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -425,36 +650,36 @@ export default function TranscriptInput() {
 
               {/* Transcript job progress */}
               {transcriptJob.isRunning && transcriptJob.job && (
-                <div className="mt-4 bg-cerulean-500/5 border border-cerulean-500/20 rounded-lg p-4">
+                <div className="mt-4 bg-[#F7F4FB] border border-black/8 rounded-2xl p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Loader2 size={14} className="text-cerulean animate-spin" />
-                    <span className="text-sm text-cerulean-300 font-medium">
-                      {transcriptJob.job.current_step || 'Extracting tasks from transcript...'}
+                    <Loader2 size={14} className="text-[#5E149F] animate-spin" />
+                    <span className="text-sm text-black/72 font-medium">
+                      {getTranscriptStepLabel(transcriptJob.job.current_step)}
                     </span>
                   </div>
-                  <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-black/8 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-cerulean rounded-full transition-all duration-500"
-                      style={{ width: `${transcriptJob.job.progress_pct}%` }}
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${transcriptJob.job.progress_pct}%`, background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}
                     />
                   </div>
                 </div>
               )}
 
               {transcriptJob.isDone && (
-                <div className="mt-4 bg-sea-500/10 border border-sea-500/20 rounded-lg px-4 py-3 text-sea-400 text-sm flex items-center gap-2">
+                <div className="mt-4 bg-[#F0FAF5] border border-[#248F63]/20 rounded-2xl px-4 py-3 text-[#248F63] text-sm flex items-center gap-2">
                   <CheckCircle2 size={14} />
                   Transcript processed successfully
                 </div>
               )}
 
               {transcriptJob.isFailed && (
-                <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm flex items-center gap-2">
+                <div className="mt-4 bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-red-500 text-sm flex items-center gap-2">
                   <AlertCircle size={14} />
                   {transcriptJob.error}
                   <button
                     onClick={() => setTranscriptJobId(null)}
-                    className="ml-auto text-red-300 hover:text-white text-xs underline"
+                    className="ml-auto text-red-400 hover:text-red-600 text-xs underline"
                   >
                     Dismiss
                   </button>
@@ -463,19 +688,19 @@ export default function TranscriptInput() {
             </div>
 
             {/* Transcript history */}
-            <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6">
-              <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <FileText size={16} className="text-cerulean" />
+            <div className="bg-white border border-black/8 rounded-2xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
+              <h2 className="text-black font-semibold mb-4 flex items-center gap-2">
+                <FileText size={16} className="text-[#5E149F]" />
                 Transcript History
                 {transcriptList.length > 0 && (
-                  <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">
+                  <span className="text-xs bg-[#F4E8FB] text-[#5E149F] px-2 py-0.5 rounded-full">
                     {transcriptList.length}
                   </span>
                 )}
               </h2>
 
               {transcriptList.length === 0 ? (
-                <p className="text-slate-500 text-sm text-center py-6">
+                <p className="text-black/40 text-sm text-center py-6">
                   No transcripts submitted yet. Paste your first interview above.
                 </p>
               ) : (
@@ -483,22 +708,22 @@ export default function TranscriptInput() {
                   {transcriptList.map((tx) => {
                     const expanded = expandedTranscript === tx.id
                     return (
-                      <div key={tx.id} className="border border-slate-800 rounded-xl overflow-hidden">
+                      <div key={tx.id} className="border border-black/8 rounded-xl overflow-hidden">
                         <button
                           onClick={() => setExpandedTranscript(expanded ? null : tx.id)}
-                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-800/30 transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#F7F4FB] transition-colors text-left"
                         >
                           <ChevronDown
                             size={14}
-                            className={`text-slate-500 transition-transform flex-shrink-0 ${expanded ? '' : '-rotate-90'}`}
+                            className={`text-black/32 transition-transform flex-shrink-0 ${expanded ? '' : '-rotate-90'}`}
                           />
                           <div className="flex-1 min-w-0">
-                            <span className="text-sm text-white font-medium">{tx.interviewee_name}</span>
-                            <span className="text-xs text-slate-500 ml-2">{tx.interviewee_role}</span>
+                            <span className="text-sm text-black font-medium">{tx.interviewee_name}</span>
+                            <span className="text-xs text-black/42 ml-2">{tx.interviewee_role}</span>
                           </div>
-                          <div className="flex items-center gap-3 text-xs text-slate-500 flex-shrink-0">
+                          <div className="flex items-center gap-3 text-xs text-black/42 flex-shrink-0">
                             {tx.tasks_extracted != null && (
-                              <span className="text-sea-400">+{tx.tasks_extracted} tasks</span>
+                              <span className="text-[#248F63] font-medium">+{tx.tasks_extracted} tasks</span>
                             )}
                             <span className="flex items-center gap-1">
                               <Clock size={10} />
@@ -507,8 +732,8 @@ export default function TranscriptInput() {
                           </div>
                         </button>
                         {expanded && (
-                          <div className="px-4 pb-4 border-t border-slate-800">
-                            <pre className="mt-3 text-xs text-slate-400 font-mono leading-relaxed max-h-60 overflow-auto whitespace-pre-wrap">
+                          <div className="px-4 pb-4 border-t border-black/8">
+                            <pre className="mt-3 text-xs text-black/52 font-mono leading-relaxed max-h-60 overflow-auto whitespace-pre-wrap">
                               {tx.raw_text}
                             </pre>
                           </div>
@@ -524,9 +749,9 @@ export default function TranscriptInput() {
           {/* ── Right: Pipeline actions + task preview (2 cols) ── */}
           <div className="lg:col-span-2 space-y-6">
             {/* Pipeline actions */}
-            <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6">
-              <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
-                <Play size={16} className="text-cerulean" />
+            <div className="bg-white border border-black/8 rounded-2xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
+              <h2 className="text-black font-semibold mb-4 flex items-center gap-2">
+                <Play size={16} className="text-[#5E149F]" />
                 Pipeline Actions
               </h2>
 
@@ -535,45 +760,46 @@ export default function TranscriptInput() {
                 <button
                   onClick={handleRunPipeline}
                   disabled={!canRunPipeline}
-                  className="w-full flex items-center gap-3 bg-cerulean/10 hover:bg-cerulean/20 disabled:bg-slate-800/50 disabled:cursor-not-allowed border border-cerulean-500/20 disabled:border-slate-700 rounded-xl px-4 py-3 transition-colors text-left"
+                  className="w-full flex items-center gap-3 disabled:bg-black/[0.03] disabled:cursor-not-allowed border border-black/8 disabled:border-black/8 rounded-xl px-4 py-3 transition-colors text-left"
+                  style={canRunPipeline ? { background: 'rgba(94,20,159,0.06)', borderColor: 'rgba(94,20,159,0.18)' } : undefined}
                 >
                   {pipelineJob.isRunning ? (
-                    <Loader2 size={18} className="text-cerulean animate-spin flex-shrink-0" />
+                    <Loader2 size={18} className="text-[#5E149F] animate-spin flex-shrink-0" />
                   ) : (
-                    <Play size={18} className={canRunPipeline ? 'text-cerulean' : 'text-slate-600'} />
+                    <Play size={18} className={canRunPipeline ? 'text-[#5E149F]' : 'text-black/28'} />
                   )}
                   <div>
-                    <div className={`text-sm font-medium ${canRunPipeline ? 'text-white' : 'text-slate-500'}`}>
-                      Visualise Workflow
+                    <div className={`text-sm font-medium ${canRunPipeline ? 'text-black' : 'text-black/38'}`}>
+                      Generate Workflow
                     </div>
                   </div>
                 </button>
 
                 {/* Pipeline progress */}
                 {pipelineJob.isRunning && pipelineJob.job && (
-                  <div className="bg-cerulean-500/5 border border-cerulean-500/20 rounded-xl p-4">
+                  <div className="bg-[#F7F4FB] border border-black/8 rounded-xl p-4">
                     <PipelineProgress
                       progressPct={pipelineJob.job.progress_pct}
                       currentStep={pipelineJob.job.current_step}
                     />
-                    <div className="mt-3 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="mt-3 h-1.5 bg-black/8 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-cerulean rounded-full transition-all duration-500"
-                        style={{ width: `${pipelineJob.job.progress_pct}%` }}
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${pipelineJob.job.progress_pct}%`, background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}
                       />
                     </div>
                   </div>
                 )}
 
                 {pipelineJob.isDone && (
-                  <div className="bg-sea-500/10 border border-sea-500/20 rounded-xl px-4 py-3 text-sea-400 text-sm flex items-center gap-2">
+                  <div className="bg-[#F0FAF5] border border-[#248F63]/20 rounded-xl px-4 py-3 text-[#248F63] text-sm flex items-center gap-2">
                     <CheckCircle2 size={14} />
                     Pipeline complete — ready to review
                   </div>
                 )}
 
                 {pipelineJob.isFailed && (
-                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-sm">
+                  <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-500 text-sm">
                     <div className="flex items-center gap-2">
                       <AlertCircle size={14} />
                       Pipeline failed
@@ -585,12 +811,12 @@ export default function TranscriptInput() {
                 {/* Preview tasks */}
                 <button
                   onClick={() => setShowTaskPreview(true)}
-                  className="w-full flex items-center gap-3 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 transition-colors text-left"
+                  className="w-full flex items-center gap-3 bg-[#F7F4FB] hover:bg-[#F0EAF8] border border-black/8 rounded-xl px-4 py-3 transition-colors text-left"
                 >
-                  <Table2 size={18} className="text-slate-400 flex-shrink-0" />
+                  <Table2 size={18} className="text-black/42 flex-shrink-0" />
                   <div>
-                    <div className="text-sm font-medium text-white">Preview Tasks</div>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-sm font-medium text-black">Preview Tasks</div>
+                    <div className="text-xs text-black/42">
                       {taskGraph.length} nodes in task graph
                     </div>
                   </div>
@@ -600,39 +826,56 @@ export default function TranscriptInput() {
                 <button
                   onClick={handleResetTasks}
                   disabled={taskGraph.length === 0}
-                  className="w-full flex items-center gap-3 bg-slate-800/30 hover:bg-red-500/10 disabled:cursor-not-allowed border border-slate-700 hover:border-red-500/30 disabled:hover:border-slate-700 rounded-xl px-4 py-3 transition-colors text-left group"
+                  className="w-full flex items-center gap-3 bg-[#F7F4FB] hover:bg-red-50 disabled:cursor-not-allowed border border-black/8 hover:border-red-200 disabled:hover:border-black/8 rounded-xl px-4 py-3 transition-colors text-left group"
                 >
-                  <Trash2 size={18} className="text-slate-500 group-hover:text-red-400 flex-shrink-0" />
+                  <Trash2 size={18} className="text-black/32 group-hover:text-red-400 flex-shrink-0" />
                   <div>
-                    <div className="text-sm font-medium text-slate-400 group-hover:text-red-300">Reset Tasks</div>
-                    <div className="text-xs text-slate-600">Clear all extracted tasks</div>
+                    <div className="text-sm font-medium text-black/52 group-hover:text-red-500">Reset Tasks</div>
+                    <div className="text-xs text-black/32">Clear all extracted tasks</div>
                   </div>
                 </button>
               </div>
             </div>
 
             {/* Quick stats */}
-            <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6">
-              <h3 className="text-sm font-semibold text-slate-300 mb-4">Project Summary</h3>
+            <div className="bg-white border border-black/8 rounded-2xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
+              <h3 className="text-sm font-semibold text-black mb-4">Project Summary</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-400">Transcripts</span>
-                  <span className="text-sm text-white font-medium">{transcriptList.length}</span>
+                  <span className="text-sm text-black/52">Transcripts</span>
+                  <span className="text-sm text-black font-medium">{transcriptList.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-400">Task Nodes</span>
-                  <span className="text-sm text-white font-medium">{taskGraph.length}</span>
+                  <span className="text-sm text-black/52">Task Nodes</span>
+                  <span className="text-sm text-black font-medium">{taskGraph.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-400">Status</span>
+                  <span className="text-sm text-black/52">Status</span>
                   {project && <StatusBadge status={project.status} />}
+                </div>
+                <div className="pt-2 border-t border-black/8">
+                  <label className="block text-xs text-black/44 font-medium mb-1.5">Team Size</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      min={1}
+                      value={teamSizeDraft}
+                      onChange={(e) => setTeamSizeDraft(e.target.value)}
+                      onBlur={handleSaveTeamSize}
+                      placeholder="e.g. 12"
+                      className="w-full bg-[#F7F4FB] border border-black/10 rounded-xl px-3 py-2 text-black text-sm placeholder:text-black/28 focus:border-[#B4308B] focus:ring-1 focus:ring-[#B4308B]/20 outline-none transition-colors"
+                    />
+                    {teamSizeSaving && <Loader2 size={16} className="text-black/30 animate-spin self-center flex-shrink-0" />}
+                  </div>
+                  <p className="text-[10px] text-black/36 mt-1">Used in pipeline simulations</p>
                 </div>
               </div>
 
               {project?.status === 'ready' && (
                 <button
                   onClick={() => navigate(`/projects/${projectId}/workflow-report`)}
-                  className="w-full mt-4 flex items-center justify-center gap-2 bg-cerulean hover:bg-cerulean-400 text-white px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors"
+                  className="w-full mt-4 flex items-center justify-center gap-2 text-white px-4 py-2.5 rounded-full font-semibold text-sm transition-colors"
+                  style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}
                 >
                   View Report
                   <ChevronRight size={16} />
@@ -644,11 +887,11 @@ export default function TranscriptInput() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-[#0B0F1E] sticky bottom-0">
+      <footer className="border-t border-black/8 bg-white/95 backdrop-blur-sm sticky bottom-0">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')}
-            className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors"
+            className="flex items-center gap-2 text-black/50 hover:text-black text-sm font-medium transition-colors"
           >
             <ArrowLeft size={16} />
             Back to Dashboard
@@ -658,7 +901,7 @@ export default function TranscriptInput() {
 
       {/* Task preview modal */}
       {showTaskPreview && (
-        <TaskPreviewModal tasks={taskGraph} onClose={() => setShowTaskPreview(false)} />
+        <TaskPreviewModal tasks={taskGraph} onClose={() => setShowTaskPreview(false)} onSaveTask={handleSaveTaskPreviewEdit} />
       )}
     </div>
   )

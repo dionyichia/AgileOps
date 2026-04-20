@@ -186,7 +186,6 @@ export default function Consultation() {
   // ── Stage: 'form' | 'booking' | 'success' ─────────────────────────────────
   const [stage, setStage] = useState<Stage>('form')
   const [booked, setBooked] = useState(false) // drives success animation timing
-  const [inviteToken, setInviteToken] = useState('')
   const [calendlyReady, setCalendlyReady] = useState(false)
   const [calendlyError, setCalendlyError] = useState<string | null>(null)
 
@@ -275,7 +274,7 @@ export default function Consultation() {
     setSubmitting(true)
     setSubmitError(null)
     try {
-      const result = await consultationApi.submit({
+      await consultationApi.submit({
         first_name: firstName,
         last_name: lastName,
         email,
@@ -284,7 +283,6 @@ export default function Consultation() {
         tools: tools || undefined,
         description: description || undefined,
       })
-      setInviteToken(result.invite_token)
       setStage('booking')
     } catch (err) {
       console.error('Consultation submit failed:', err)
@@ -447,28 +445,19 @@ export default function Consultation() {
             className="mt-5 max-w-md text-[18px] leading-[1.65] text-white/60"
             style={{ animation: 'fadeSlideUp 0.5s ease 0.38s both' }}
           >
-            A calendar invite is on its way to <strong className="text-white">{email}</strong>. We'll review your workflow submission before the call so we can hit the ground running.
+            A calendar invite is on its way to <strong className="text-white">{email}</strong>. Check your inbox for a workspace invite — we'll review your workflow before the call.
           </p>
 
           <div
             className="mt-10 flex flex-col sm:flex-row items-center gap-3"
             style={{ animation: 'fadeSlideUp 0.5s ease 0.5s both' }}
           >
-            {inviteToken ? (
-              <button
-                onClick={() => navigate(`/signup?token=${inviteToken}`)}
-                className="axis-gradient-button rounded-full px-8 py-3.5 text-[16px] font-bold"
-              >
-                Create your account →
-              </button>
-            ) : (
-              <button
-                onClick={() => navigate('/login')}
-                className="axis-gradient-button rounded-full px-8 py-3.5 text-[16px] font-bold"
-              >
-                Log in to your workspace
-              </button>
-            )}
+            <button
+              onClick={() => navigate('/login')}
+              className="axis-gradient-button rounded-full px-8 py-3.5 text-[16px] font-bold"
+            >
+              Log in to your workspace
+            </button>
             <button
               onClick={() => navigate('/')}
               className="rounded-full border border-white/15 px-8 py-3.5 text-[16px] font-semibold text-white/70 transition-colors hover:bg-white/[0.03]"
