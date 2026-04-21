@@ -285,6 +285,11 @@ export default function Consultation() {
       })
       setStage('booking')
     } catch (err) {
+      const msg = err instanceof Error ? err.message : ''
+      if (msg.includes('409')) {
+        navigate('/login', { state: { notice: 'Looks like you already have an account. Sign in below.' } })
+        return
+      }
       console.error('Consultation submit failed:', err)
       setSubmitError('Something went wrong. Please try again.')
     } finally {

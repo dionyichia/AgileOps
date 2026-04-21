@@ -14,13 +14,19 @@ router = APIRouter(tags=["consultation"])
 async def _send_supabase_invite(email: str, project_id: str) -> None:
     def _do() -> None:
         client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-        client.auth.admin.invite_user_by_email(
-            email,
-            options={
-                "data": {"project_id": project_id},
-                "redirect_to": f"{SITE_URL}/auth/callback",
-            },
-        )
+        try:
+            client.auth.admin.invite_user_by_email(
+                email,
+                options={
+                    "data": {"project_id": project_id},
+                    "redirect_to": f"{SITE_URL}/auth/callback",
+                },
+            )
+        except Exception as e:
+            msg = str(e).lower()
+            if any(phrase in msg for phrase in ("already registered", "already been registered", "user already exists", "email_exists")):
+                raise HTTPException(status_code=409, detail="user_already_exists")
+            raise
     await anyio.to_thread.run_sync(_do)
 
 

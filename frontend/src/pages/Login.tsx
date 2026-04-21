@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase, getUserRole } from '../lib/supabase'
 import { projects } from '../api/client'
 import PublicNavbar from '../components/public/PublicNavbar'
@@ -7,6 +7,8 @@ import PublicFooter from '../components/public/PublicFooter'
 
 export default function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const notice = (location.state as { notice?: string } | null)?.notice
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [mode, setMode] = useState<'login' | 'register'>('login')
@@ -86,6 +88,11 @@ export default function Login() {
               </p>
 
               <div className="mt-8 md:mt-14 max-w-[420px] space-y-4">
+                {notice && (
+                  <div className="rounded-[14px] border border-axispurple-900/40 bg-axispurple-900/10 px-4 py-3 text-[14px] text-white/80">
+                    {notice}
+                  </div>
+                )}
                 <input
                   type="email"
                   placeholder="stanley@gmail.com"
