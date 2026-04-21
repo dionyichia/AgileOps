@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Menu } from 'lucide-react'
+import { Menu, Sun, Moon } from 'lucide-react'
 import gsap from 'gsap'
 import { auth } from '../../api/client'
 import { useGsapReveal } from '../../hooks/useGsapReveal'
+import { useTheme } from '../../hooks/useTheme'
 
 interface ClientWorkspaceShellProps {
   /** Left side of the top bar (titles, back button, logo, etc.) */
@@ -21,6 +22,7 @@ export default function ClientWorkspaceShell({ headerLeft, children, projectId }
   const navigate = useNavigate()
   const dashboardPath = projectId ? `/projects/${projectId}/dashboard` : '/dashboard'
   const [showMenu, setShowMenu] = useState(false)
+  const { theme, toggle: toggleTheme } = useTheme()
   const rootRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLElement>(null)
 
@@ -76,11 +78,19 @@ export default function ClientWorkspaceShell({ headerLeft, children, projectId }
   }, [showMenu])
 
   return (
-    <div ref={rootRef} className="flex min-h-screen flex-col bg-white text-black">
+    <div ref={rootRef} className="flex min-h-screen flex-col page-bg text-black">
       <header data-gsap-shell-header className="sticky top-0 z-40 border-b border-black/5 bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto flex w-full max-w-[1480px] items-start justify-between gap-4 px-6 py-4 md:px-10">
+        <div className="mx-auto flex w-full max-w-[1480px] items-start justify-between gap-4 px-4 py-4 md:px-6 lg:px-10">
           <div className="min-w-0 flex-1">{headerLeft}</div>
           <div className="flex shrink-0 items-center gap-3 pt-1">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white text-black/72 transition-colors hover:bg-black/[0.03]"
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
             <button
               type="button"
               onClick={() => setShowMenu((prev) => !prev)}
@@ -98,7 +108,7 @@ export default function ClientWorkspaceShell({ headerLeft, children, projectId }
       </div>
 
       {showMenu && (
-        <aside ref={menuRef} className="fixed right-0 top-0 z-50 flex h-screen w-full max-w-[320px] flex-col border-l border-black/15 bg-[#F7F7FB] shadow-2xl">
+        <aside ref={menuRef} className="fixed right-0 top-0 z-50 flex h-screen w-full max-w-[320px] flex-col border-l border-black/15 bg-[var(--surface-drawer)] shadow-2xl">
           <div className="px-4 py-4">
             <button
               type="button"
@@ -115,14 +125,14 @@ export default function ClientWorkspaceShell({ headerLeft, children, projectId }
               <button
                 onClick={() => { setShowMenu(false); navigate(dashboardPath) }}
                 data-gsap-menu-item
-                className="block w-full text-right text-[24px] leading-tight tracking-[-0.015em] text-black hover:text-[#5E149F] md:text-[28px]"
+                className="block w-full text-right text-[24px] leading-tight tracking-[-0.015em] text-black hover:text-axispurple-900 md:text-[28px]"
               >
                 Dashboard
               </button>
               <button
                 onClick={() => void handleSignOut()}
                 data-gsap-menu-item
-                className="block w-full text-right text-[24px] leading-tight tracking-[-0.015em] text-black hover:text-[#5E149F] md:text-[28px]"
+                className="block w-full text-right text-[24px] leading-tight tracking-[-0.015em] text-black hover:text-axispurple-900 md:text-[28px]"
               >
                 Sign out
               </button>

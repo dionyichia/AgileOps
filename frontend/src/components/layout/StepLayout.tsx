@@ -58,8 +58,8 @@ export default function StepLayout({
       )
     }
     return (
-      <div ref={rootRef} className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
-        <main data-gsap-shell className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+      <div ref={rootRef} className="min-h-screen page-bg flex flex-col text-black">
+        <main data-gsap-shell className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 md:px-6 md:py-8">
           {children}
         </main>
       </div>
@@ -68,12 +68,12 @@ export default function StepLayout({
 
   if (embedded) {
     return (
-      <div ref={rootRef} className="flex min-h-0 w-full flex-1 flex-col bg-[#F7F4FB] text-black">
-        <main data-gsap-shell className="mx-auto min-h-0 w-full max-w-7xl flex-1 overflow-auto px-6 py-6">
+      <div ref={rootRef} className="flex min-h-0 w-full flex-1 flex-col page-bg text-black">
+        <main data-gsap-shell className="mx-auto min-h-0 w-full max-w-7xl flex-1 overflow-auto px-4 py-4 md:px-6 md:py-6">
           {children}
         </main>
         <footer data-gsap-reveal className="sticky bottom-0 border-t border-black/8 bg-white/95 backdrop-blur-sm">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6 md:py-4">
             {showBack ? (
               <button
                 onClick={handleBack}
@@ -89,8 +89,7 @@ export default function StepLayout({
               <button
                 onClick={onNext}
                 disabled={nextDisabled}
-                className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:bg-black/10 disabled:text-black/30"
-                style={!nextDisabled ? { background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)', boxShadow: '0 12px 24px rgba(94,20,159,0.14)' } : {}}
+                className="btn-primary"
               >
                 {nextLabel}
                 <ArrowRight size={16} />
@@ -103,29 +102,29 @@ export default function StepLayout({
   }
 
   return (
-    <div ref={rootRef} className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
+    <div ref={rootRef} className="min-h-screen page-bg flex flex-col text-black">
       {/* Header — logo only, no step indicator */}
       <header data-gsap-reveal className="border-b border-black/8 bg-white/90 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center">
+        <div className="max-w-7xl mx-auto px-4 py-4 md:px-6 flex items-center">
           <div className="flex items-center gap-3">
             <img
               src="/axis-logo.png"
               alt="Axis logo"
-              className="h-11 w-11 rounded-2xl object-cover"
+              className="h-9 w-9 md:h-11 md:w-11 rounded-2xl object-cover"
             />
-            <span className="font-bold text-[#111111] text-[28px] tracking-[-0.04em]">Axis</span>
+            <span className="font-bold text-[#111111] text-[22px] md:text-[28px] tracking-[-0.04em]">Axis</span>
           </div>
         </div>
       </header>
 
       {/* Content */}
-      <main data-gsap-shell className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+      <main data-gsap-shell className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 md:px-6 md:py-8">
         {children}
       </main>
 
       {/* Footer nav */}
       <footer data-gsap-reveal className="border-t border-black/8 bg-white/95 backdrop-blur-sm sticky bottom-0">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
           {showBack ? (
             <button
               onClick={handleBack}
@@ -142,8 +141,7 @@ export default function StepLayout({
             <button
               onClick={onNext}
               disabled={nextDisabled}
-              className="flex items-center gap-2 disabled:bg-black/10 disabled:text-black/30 disabled:cursor-not-allowed text-white px-6 py-3 rounded-full font-semibold text-sm transition-colors"
-              style={!nextDisabled ? { background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)', boxShadow: '0 12px 24px rgba(94,20,159,0.14)' } : {}}
+              className="btn-primary"
             >
               {nextLabel}
               <ArrowRight size={16} />

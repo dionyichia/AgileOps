@@ -136,18 +136,18 @@ export default function ToolInputForm() {
       hideNextButton={isClientToolInput}
       backPath={projectId ? `/projects/${projectId}/dashboard` : (isClientToolInput ? '/dashboard' : undefined)}
     >
-      <div className="mx-auto max-w-2xl space-y-8">
+      <div className="mx-auto max-w-2xl space-y-6 md:space-y-8">
         {/* Tool name */}
         <div>
           <label className="block text-sm font-semibold text-black/72 mb-2">
-            Tool Name <span className="text-[#F75A8C]">*</span>
+            Tool Name <span className="text-axispurple-300">*</span>
           </label>
           <input
             type="text"
             value={toolName}
             onChange={(e) => setToolName(e.target.value)}
             placeholder="e.g. Apollo.io, Gong, Seismic..."
-            className="w-full bg-white border border-black/8 hover:border-black/14 focus:border-[#B4308B]/40 focus:outline-none text-black placeholder:text-black/28 rounded-xl px-4 py-3 text-sm transition-colors"
+            className="w-full bg-white border border-black/8 hover:border-black/14 text-black placeholder:text-black/28 rounded-xl px-4 py-3 text-sm transition-colors focus-ring-accent"
             style={{ boxShadow: '0 14px 28px rgba(15,23,42,0.04)' }}
           />
         </div>
@@ -164,7 +164,7 @@ export default function ToolInputForm() {
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
             placeholder="https://apollo.io"
-            className="w-full bg-white border border-black/8 hover:border-black/14 focus:border-[#B4308B]/40 focus:outline-none text-black placeholder:text-black/28 rounded-xl px-3 py-2.5 text-sm transition-colors"
+            className="w-full bg-white border border-black/8 hover:border-black/14 text-black placeholder:text-black/28 rounded-xl px-3 py-2.5 text-sm transition-colors focus-ring-accent"
             style={{ boxShadow: '0 14px 28px rgba(15,23,42,0.04)' }}
           />
         </UploadField>
@@ -198,12 +198,7 @@ export default function ToolInputForm() {
               type="button"
               onClick={() => void handleNext()}
               disabled={!canSubmit}
-              className="order-1 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:bg-black/10 disabled:text-black/30 sm:order-2"
-              style={
-                canSubmit
-                  ? { background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)', boxShadow: '0 12px 24px rgba(94,20,159,0.14)' }
-                  : undefined
-              }
+              className="btn-primary order-1 sm:order-2"
             >
               {submitting ? (
                 <>
@@ -247,8 +242,8 @@ export default function ToolInputForm() {
           </div>
         }
       >
-        <main className="flex-1 bg-[#F7F4FB]">
-          <div className="mx-auto max-w-7xl px-6 py-8">{layout}</div>
+        <main className="flex-1 page-bg">
+          <div className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">{layout}</div>
         </main>
       </ClientWorkspaceShell>
     )
@@ -278,7 +273,7 @@ function UploadField({
         <Icon size={14} className="text-black/34" />
         <label className="text-sm font-semibold text-black/72">
           {label}
-          {required && <span className="text-[#F75A8C] ml-1">*</span>}
+          {required && <span className="text-axispurple-300 ml-1">*</span>}
           {!required && <span className="text-black/38 font-normal ml-1">(Optional)</span>}
         </label>
       </div>
@@ -308,13 +303,13 @@ function DualInput({
         value={entry.link}
         onChange={(e) => setter({ ...entry, link: e.target.value })}
         placeholder={placeholder}
-        className="flex-1 bg-white border border-black/8 hover:border-black/14 focus:border-[#B4308B]/40 focus:outline-none text-black placeholder:text-black/28 rounded-xl px-3 py-2.5 text-sm transition-colors"
+        className="flex-1 bg-white border border-black/8 hover:border-black/14 text-black placeholder:text-black/28 rounded-xl px-3 py-2.5 text-sm transition-colors focus-ring-accent"
         style={{ boxShadow: '0 14px 28px rgba(15,23,42,0.04)' }}
       />
       <label className="cursor-pointer">
         <div className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
           entry.file
-            ? 'border-[#B4308B]/25 bg-[#FCEAF4] text-[#B4308B]'
+            ? 'border-axispurple-700/30 bg-[#F4E8FB] text-axispurple-700'
             : 'border-black/8 bg-white text-black/56 hover:border-black/14 hover:text-black/72'
         }`}>
           <Upload size={14} />

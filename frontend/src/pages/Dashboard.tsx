@@ -42,6 +42,7 @@ import CosmoChatWidget from '../components/workspace/CosmoChatWidget'
 import { nodeTypes } from '../components/workflow/CustomNodes'
 import { useJobProgress } from '../hooks/useJobProgress'
 import { useGsapReveal } from '../hooks/useGsapReveal'
+import { useTheme } from '../hooks/useTheme'
 import type { TransitionMatrixJSON } from '../schema.tsx'
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -53,15 +54,15 @@ interface NodeComment {
 }
 
 const BRAND = {
-  shell: '#F7F4FB',
-  panel: '#FFFFFF',
-  border: 'rgba(94, 20, 159, 0.10)',
-  text: '#111111',
-  muted: 'rgba(17, 17, 17, 0.52)',
-  violet: '#5E149F',
-  orchid: '#B4308B',
-  pink: '#E2409B',
-  coral: '#F75A8C',
+  shell:  'var(--surface-page)',
+  panel:  'var(--surface-card)',
+  border: 'var(--border-accent)',
+  text:   'var(--text-primary)',
+  muted:  'var(--text-secondary)',
+  violet: 'var(--axis-violet-900)',
+  orchid: 'var(--axis-violet-700)',
+  pink:   'var(--axis-pink-500)',
+  coral:  'var(--axis-coral-400)',
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -78,6 +79,7 @@ export default function Dashboard() {
   const { existingNodes, existingEdges, loading: markovLoading, isRealData, stats: markovStats } =
     useMarkovData(projectId, markovRefreshKey)
   const isAdmin = useIsAdmin()
+  const { theme } = useTheme()
   const [apiProject, setApiProject] = useState<Project | null>(null)
   const [apiToolEvals, setApiToolEvals] = useState<ToolEvaluation[] | null>(null)
   const [pipelineTaskNodes, setPipelineTaskNodes] = useState<ApiTaskNode[]>([])
@@ -543,7 +545,7 @@ export default function Dashboard() {
         {
           ...connection,
           type: 'smoothstep',
-          style: { stroke: '#5E149F', strokeWidth: 2.5 },
+          style: { stroke: 'var(--axis-violet-900)', strokeWidth: 2.5 },
         },
         eds,
       ),
@@ -635,19 +637,19 @@ export default function Dashboard() {
         </div>
       }
     >
-      <main ref={rootRef} className="mx-auto w-full max-w-[1480px] flex-1 space-y-5 px-6 py-5 md:px-10 md:py-6">
+      <main ref={rootRef} className="mx-auto w-full max-w-[1480px] flex-1 space-y-5 px-4 py-5 md:px-10 md:py-6">
         {/* Two fixed tabs */}
-        <div data-gsap-dashboard-tabs className="-mx-6 border-t-2 md:-mx-10" style={{ borderColor: BRAND.violet }}>
+        <div data-gsap-dashboard-tabs className="-mx-4 border-t-2 md:-mx-10" style={{ borderColor: BRAND.violet }}>
           <div
             className="flex min-h-[44px] border-b-2 bg-white"
-            style={{ borderBottomColor: 'rgba(94, 20, 159, 0.22)' }}
+            style={{ borderBottomColor: 'var(--border-accent)' }}
           >
             <button
               type="button"
               onClick={() => navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')}
-              className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab === 'workspace' ? 'bg-[#F4E8FB] text-[#5E149F]' : 'bg-white text-black/70 hover:bg-black/[0.02]'
+              className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab === 'workspace' ? 'bg-[var(--surface-accent-subtle)] text-axispurple-900' : 'bg-white text-black/70 hover:bg-black/[0.02]'
                 }`}
-              style={activeTab === 'workspace' ? { boxShadow: 'inset 0 -3px 0 0 #5E149F' } : undefined}
+              style={activeTab === 'workspace' ? { boxShadow: 'inset 0 -3px 0 0 var(--axis-violet-900)' } : undefined}
             >
               <LayoutDashboard size={15} className="shrink-0 text-black/50" />
               <span className="whitespace-nowrap">Workspace</span>
@@ -656,9 +658,9 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => navigate(`/projects/${projectId}/dashboard/simulations/${selectedToolEval.id}`)}
-                className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab !== 'workspace' ? 'bg-[#F4E8FB] text-[#5E149F]' : 'bg-white text-black/70 hover:bg-black/[0.02]'
+                className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab !== 'workspace' ? 'bg-[var(--surface-accent-subtle)] text-axispurple-900' : 'bg-white text-black/70 hover:bg-black/[0.02]'
                   }`}
-                style={activeTab !== 'workspace' ? { boxShadow: 'inset 0 -3px 0 0 #5E149F' } : undefined}
+                style={activeTab !== 'workspace' ? { boxShadow: 'inset 0 -3px 0 0 var(--axis-violet-900)' } : undefined}
               >
                 <FileText size={15} className="shrink-0 text-black/50" />
                 <span className="whitespace-nowrap">{selectedSimulationLabel}</span>
@@ -736,8 +738,8 @@ export default function Dashboard() {
                       type="button"
                       onClick={toggleEditMode}
                       className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${editMode
-                          ? 'border-[#B4308B]/30 bg-[#FCEAF4] text-[#B4308B]'
-                          : 'border-black/12 bg-white text-black/55 hover:border-[#B4308B]/30 hover:text-[#B4308B]'
+                          ? 'border-axispurple-700/30 bg-[var(--surface-accent-subtle)] text-axispurple-700'
+                          : 'border-black/12 bg-white text-black/55 hover:border-axispurple-700/30 hover:text-axispurple-700'
                         }`}
                     >
                       <Pencil size={12} />
@@ -752,8 +754,8 @@ export default function Dashboard() {
                     </span>
                   )}
                   {!markovLoading && isRealData && topoSaveState === 'idle' && (
-                    <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: '#248F63' }}>
-                      <span className="w-2 h-2 rounded-full bg-[#248F63]" />
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-sea-600">
+                      <span className="w-2 h-2 rounded-full bg-sea-500" />
                       Ready · {markovStats?.nStates ?? existingNodes.length} nodes
                     </span>
                   )}
@@ -764,7 +766,7 @@ export default function Dashboard() {
                     </span>
                   )}
                   {topoSaveState === 'saved' && (
-                    <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: '#248F63' }}>
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-sea-600">
                       <Check size={11} />
                       Layout saved
                     </span>
@@ -787,7 +789,7 @@ export default function Dashboard() {
                       Pipeline not run
                     </span>
                   )}
-                  <div className="flex items-center gap-3 text-xs text-black/42">
+                  <div className="hidden md:flex items-center gap-3 text-xs text-black/42">
                     <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ background: BRAND.violet }} /> Success</span>
                     <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500 inline-block rounded" /> Fail</span>
                     <span className="flex items-center gap-1"><span className="w-3 h-0.5 inline-block rounded" style={{ background: BRAND.coral }} /> Retry</span>
@@ -795,10 +797,10 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="relative" style={{ height: 520 }}>
+              <div className="relative" style={{ height: 'clamp(360px, 60vw, 520px)' }}>
                 {/* State A: loading */}
                 {markovLoading && projectId && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#F7F4FB]">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[var(--surface-page)]">
                     <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: BRAND.violet, borderTopColor: 'transparent' }} />
                     <span className="text-sm text-black/42">Building workflow graph...</span>
                   </div>
@@ -806,7 +808,7 @@ export default function Dashboard() {
 
                 {/* State B-pipeline: pipeline kicked off from TranscriptInput, job in flight */}
                 {!markovLoading && !isRealData && projectId && inboundPipelineJobId && !pipelineInboundDone && !pipelineInboundFailed && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#F7F4FB]">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[var(--surface-page)]">
                     <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: BRAND.violet, borderTopColor: 'transparent' }} />
                     <div className="text-center">
                       <p className="text-sm font-semibold text-black">
@@ -830,14 +832,14 @@ export default function Dashboard() {
                 {!markovLoading && !isRealData && projectId && !(inboundPipelineJobId && !pipelineInboundDone && !pipelineInboundFailed) && (
                   editMode && rawTasks.length > 0 ? (
                     /* B2: edit mode — show scrollable node list */
-                    <div className="absolute inset-0 overflow-y-auto bg-[#F7F4FB] px-5 py-4">
+                    <div className="absolute inset-0 overflow-y-auto bg-[var(--surface-page)] px-5 py-4">
                       <p className="text-xs text-black/42 mb-3">
                         {rawTasks.length} steps extracted from transcripts. Click <Pencil size={10} className="inline" /> to edit any step.
                       </p>
                       <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
                         {rawTasks.map((task) => {
                           const autoLabel = task.automatable_fraction === 'high' ? 'High automation' : task.automatable_fraction === 'medium' ? 'Med automation' : 'Low automation'
-                          const autoCls = task.automatable_fraction === 'high' ? 'text-[#5E149F] bg-[#F4E8FB]' : task.automatable_fraction === 'medium' ? 'text-[#B4308B] bg-[#FCEAF4]' : 'text-[#F75A8C] bg-[#FFE9EF]'
+                          const autoCls = task.automatable_fraction === 'high' ? 'text-axispurple-900 bg-[var(--surface-accent-subtle)]' : task.automatable_fraction === 'medium' ? 'text-axispurple-700 bg-[#FCEAF4]' : 'text-axispurple-300 bg-[#FFE9EF]'
                           return (
                             <div
                               key={task.node_id}
@@ -848,7 +850,7 @@ export default function Dashboard() {
                                 <div className="text-sm font-semibold text-black truncate">{task.label}</div>
                                 <div className="flex flex-wrap gap-1 mt-1.5 mb-2">
                                   {task.app_cluster.slice(0, 3).map((t) => (
-                                    <span key={t} className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#F4E8FB] text-[#5E149F] font-medium">{t}</span>
+                                    <span key={t} className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--surface-accent-subtle)] text-axispurple-900 font-medium">{t}</span>
                                   ))}
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -858,10 +860,10 @@ export default function Dashboard() {
                               </div>
                               <button
                                 onClick={() => handleOpenEdit(task.node_id)}
-                                className="flex-shrink-0 p-1.5 rounded-full hover:bg-[#F4E8FB] transition-colors group"
+                                className="flex-shrink-0 p-1.5 rounded-full hover:bg-[var(--surface-accent-subtle)] transition-colors group"
                                 title="Edit step"
                               >
-                                <Pencil size={14} className="text-[#5E149F]/40 group-hover:text-[#5E149F]" />
+                                <Pencil size={14} className="text-axispurple-900/40 group-hover:text-axispurple-900" />
                               </button>
                             </div>
                           )
@@ -870,7 +872,7 @@ export default function Dashboard() {
                     </div>
                   ) : (
                     /* B1: no edit mode — original empty state */
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#F7F4FB]">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[var(--surface-page)]">
                       <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(94,20,159,0.08)' }}>
                         <GitBranch size={24} style={{ color: BRAND.violet }} />
                       </div>
@@ -885,8 +887,7 @@ export default function Dashboard() {
                       {isAdmin && (
                         <button
                           onClick={() => navigate(`/projects/${projectId}/transcripts`)}
-                          className="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-full transition-colors"
-                          style={{ background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)` }}
+                          className="btn-primary px-4 py-2.5 text-sm"
                         >
                           <ChevronRight size={15} />
                           Go to Transcripts
@@ -916,12 +917,15 @@ export default function Dashboard() {
                       maxZoom={1.5}
                     >
                       <Controls />
-                      <MiniMap nodeColor={() => '#CFA3E2'} maskColor="rgba(247,244,251,0.7)" />
-                      <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
+                      <MiniMap
+                        nodeColor={() => theme === 'dark' ? '#4A2575' : '#CFA3E2'}
+                        maskColor={theme === 'dark' ? 'rgba(13,17,23,0.7)' : 'rgba(247,244,251,0.7)'}
+                      />
+                      <Background variant={BackgroundVariant.Dots} gap={24} size={1} color={theme === 'dark' ? '#1E2A40' : '#EADBF3'} />
                     </ReactFlow>
                     {/* Faded overlay while Markov data reloads after pipeline completes */}
                     {markovLoading && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#F7F4FB]/80 backdrop-blur-[2px]">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[var(--surface-page)]/80 backdrop-blur-[2px]">
                         <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: BRAND.violet, borderTopColor: 'transparent' }} />
                         <span className="text-sm font-medium text-black/60">Refreshing graph…</span>
                       </div>
@@ -931,7 +935,7 @@ export default function Dashboard() {
 
                 {/* ── Edit panel ────────────────────────────────────────── */}
                 {editingNodeId && editDraft && (
-                  <div ref={editPanelRef} className="absolute top-0 right-0 h-full w-80 bg-white border-l shadow-2xl flex flex-col z-10" style={{ borderColor: BRAND.border }}>
+                  <div ref={editPanelRef} className="absolute top-0 right-0 h-full w-full sm:w-80 bg-white border-l shadow-2xl flex flex-col z-10" style={{ borderColor: BRAND.border }}>
                     <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: BRAND.border }}>
                       <div>
                         <div className="text-xs uppercase tracking-widest font-bold" style={{ color: BRAND.orchid }}>Edit Step</div>
@@ -949,8 +953,8 @@ export default function Dashboard() {
                         <input
                           value={editDraft.label}
                           onChange={(e) => { setEditDraft((d) => d ? { ...d, label: e.target.value } : d); setEditDirty(true) }}
-                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
-                          style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
+                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus-ring-accent"
+                          style={{ borderColor: 'var(--border-accent)' }}
                         />
                       </div>
 
@@ -961,8 +965,8 @@ export default function Dashboard() {
                           value={editDraft.tools}
                           onChange={(e) => { setEditDraft((d) => d ? { ...d, tools: e.target.value } : d); setEditDirty(true) }}
                           placeholder="Salesforce, Slack, ..."
-                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
-                          style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
+                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus-ring-accent"
+                          style={{ borderColor: 'var(--border-accent)' }}
                         />
                         <p className="text-[10px] text-black/38 mt-1">Comma-separated list</p>
                       </div>
@@ -975,8 +979,8 @@ export default function Dashboard() {
                           min={1}
                           value={editDraft.mean_minutes}
                           onChange={(e) => { setEditDraft((d) => d ? { ...d, mean_minutes: Number(e.target.value) } : d); setEditDirty(true) }}
-                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
-                          style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
+                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus-ring-accent"
+                          style={{ borderColor: 'var(--border-accent)' }}
                         />
                       </div>
 
@@ -986,8 +990,8 @@ export default function Dashboard() {
                         <select
                           value={editDraft.automatable_fraction}
                           onChange={(e) => { setEditDraft((d) => d ? { ...d, automatable_fraction: e.target.value } : d); setEditDirty(true) }}
-                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1 bg-white"
-                          style={{ borderColor: BRAND.border }}
+                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus-ring-accent bg-white"
+                          style={{ borderColor: 'var(--border-accent)' }}
                         >
                           <option value="high">High</option>
                           <option value="medium">Medium</option>
@@ -1002,8 +1006,8 @@ export default function Dashboard() {
                           value={editDraft.role_type}
                           onChange={(e) => { setEditDraft((d) => d ? { ...d, role_type: e.target.value } : d); setEditDirty(true) }}
                           placeholder="e.g. SDR, AE, CSM, All"
-                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
-                          style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
+                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus-ring-accent"
+                          style={{ borderColor: 'var(--border-accent)' }}
                         />
                       </div>
 
@@ -1014,8 +1018,8 @@ export default function Dashboard() {
                           value={editDraft.workflow_type}
                           onChange={(e) => { setEditDraft((d) => d ? { ...d, workflow_type: e.target.value } : d); setEditDirty(true) }}
                           placeholder="e.g. outbound, closing, onboarding"
-                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus:outline-none focus:ring-1"
-                          style={{ borderColor: BRAND.border, '--tw-ring-color': BRAND.orchid } as React.CSSProperties}
+                          className="w-full border rounded-xl px-3 py-2 text-sm text-black focus-ring-accent"
+                          style={{ borderColor: 'var(--border-accent)' }}
                         />
                       </div>
 
@@ -1027,7 +1031,7 @@ export default function Dashboard() {
                       )}
 
                       {editSaveSuccess && (
-                        <div className="flex items-start gap-2 rounded-xl border px-3 py-2 text-xs" style={{ borderColor: '#CDECDD', background: '#F1FBF6', color: '#248F63' }}>
+                        <div className="flex items-start gap-2 rounded-xl bg-sea-50 border border-sea-500/30 px-3 py-2 text-xs text-sea-600">
                           <Check size={13} className="mt-0.5 flex-shrink-0" />
                           {editSaveSuccess}
                         </div>
@@ -1045,8 +1049,7 @@ export default function Dashboard() {
                       <button
                         onClick={handleSaveEdit}
                         disabled={editSaving || !editDirty || !!editingNodePendingRequest}
-                        className="w-full flex items-center justify-center gap-2 text-white text-sm font-semibold px-4 py-2.5 rounded-2xl disabled:opacity-50 transition-opacity"
-                        style={{ background: `linear-gradient(90deg, ${BRAND.violet} 0%, ${BRAND.coral} 100%)` }}
+                        className="btn-primary w-full justify-center px-4 py-2.5 text-sm rounded-2xl disabled:opacity-50"
                       >
                         {editSaving ? (
                           <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -1062,7 +1065,7 @@ export default function Dashboard() {
 
                 {/* ── Comment panel ─────────────────────────────────────── */}
                 {commentingNode && (
-                  <div ref={commentPanelRef} className="absolute top-0 right-0 h-full w-80 bg-white border-l shadow-2xl flex flex-col z-10" style={{ borderColor: BRAND.border }}>
+                  <div ref={commentPanelRef} className="absolute top-0 right-0 h-full w-full sm:w-80 bg-white border-l shadow-2xl flex flex-col z-10" style={{ borderColor: BRAND.border }}>
                     <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: BRAND.border }}>
                       <div className="min-w-0">
                         <div className="text-xs uppercase tracking-widest font-bold" style={{ color: BRAND.violet }}>Feedback</div>
@@ -1078,7 +1081,7 @@ export default function Dashboard() {
                         <p className="text-xs text-black/40 text-center py-6">No feedback yet. Something look off? Let us know below.</p>
                       )}
                       {(comments[commentingNode] ?? []).map((c) => (
-                        <div key={c.id} className="bg-[#F7F4FB] border rounded-2xl p-3 group" style={{ borderColor: BRAND.border }}>
+                        <div key={c.id} className="bg-[var(--surface-page)] border rounded-2xl p-3 group" style={{ borderColor: BRAND.border }}>
                           <p className="text-sm text-black/78 leading-relaxed">{c.text}</p>
                           <div className="flex items-center justify-between mt-2">
                             <span className="text-[10px] text-black/38">
@@ -1101,10 +1104,10 @@ export default function Dashboard() {
                           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmitComment() } }}
                           placeholder="What needs to change here?"
                           rows={2}
-                          className="flex-1 bg-[#F7F4FB] border rounded-2xl px-3 py-2 text-sm resize-none transition-colors text-black placeholder:text-black/30 focus:outline-none"
-                          style={{ borderColor: BRAND.border }}
+                          className="flex-1 bg-[var(--surface-page)] border rounded-2xl px-3 py-2 text-sm resize-none transition-colors text-black placeholder:text-black/30 focus-ring-accent"
+                          style={{ borderColor: 'var(--border-accent)' }}
                         />
-                        <button onClick={handleSubmitComment} disabled={!commentText.trim()} className="self-end p-2.5 disabled:bg-black/10 disabled:text-black/30 text-white rounded-2xl transition-colors" style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}>
+                        <button onClick={handleSubmitComment} disabled={!commentText.trim()} className="btn-primary self-end p-2.5 rounded-2xl">
                           <Send size={14} />
                         </button>
                       </div>
@@ -1173,7 +1176,7 @@ export default function Dashboard() {
                         <div className="mt-0.5 flex items-center gap-2 text-xs text-black/42">
                           <span>{e.created_at.slice(0, 10)}</span>
                           {(e.status === 'queued' || e.status === 'running') && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-[#F4E8FB] px-2 py-0.5 font-semibold text-[#5E149F]">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-accent-subtle)] px-2 py-0.5 font-semibold text-axispurple-900">
                               <Loader2 size={10} className="animate-spin" />
                               Simulating…
                             </span>
@@ -1202,7 +1205,7 @@ export default function Dashboard() {
         {activeTab !== 'workspace' && (
           <div data-gsap-dashboard-simulation className="space-y-5">
             {!selectedToolEval && (
-              <div className="flex flex-col items-center justify-center gap-4 rounded-[24px] border bg-[#F7F4FB] py-20 text-center" style={{ borderColor: BRAND.border }}>
+              <div className="flex flex-col items-center justify-center gap-4 rounded-[24px] border bg-[var(--surface-page)] py-20 text-center" style={{ borderColor: BRAND.border }}>
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: 'rgba(94,20,159,0.08)' }}>
                   <FileText size={26} style={{ color: BRAND.violet }} />
                 </div>
@@ -1312,7 +1315,7 @@ export default function Dashboard() {
                         maxZoom={1.5}
                       >
                         <Controls />
-                        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
+                        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color={theme === 'dark' ? '#1E2A40' : '#EADBF3'} />
                       </ReactFlow>
                     </div>
                   </div>
@@ -1336,7 +1339,7 @@ export default function Dashboard() {
                         maxZoom={1.5}
                       >
                         <Controls />
-                        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#EADBF3" />
+                        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color={theme === 'dark' ? '#1E2A40' : '#EADBF3'} />
                       </ReactFlow>
                     </div>
                   </div>
@@ -1347,7 +1350,7 @@ export default function Dashboard() {
                     <h3 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: BRAND.violet }}>Key Use Cases</h3>
                     <div className="space-y-3">
                       {selectedRecommendation.use_cases.map((uc, i) => (
-                        <div key={i} className="rounded-[16px] border bg-[#F7F4FB] px-4 py-3" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
+                        <div key={i} className="rounded-[16px] border bg-[var(--surface-page)] px-4 py-3" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
                           <p className="text-sm font-semibold text-black">{uc.title}</p>
                           <p className="mt-0.5 text-xs text-black/55">{uc.description}</p>
                         </div>

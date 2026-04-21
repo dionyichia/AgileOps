@@ -16,6 +16,7 @@ import Login from './pages/Login'
 import AcceptInvite from './pages/AcceptInvite'
 import AdminRoute from './components/AdminRoute'
 import InternalLogin from './pages/InternalLogin'
+import ForceDark from './components/ForceDark'
 
 export default function App() {
   return (
@@ -23,8 +24,8 @@ export default function App() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<LandingPage />} />
-        <Route path="/get-started" element={<Consultation />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/get-started" element={<ForceDark><Consultation /></ForceDark>} />
+        <Route path="/login" element={<ForceDark><Login /></ForceDark>} />
         <Route path="/signup" element={<AcceptInvite />} />
         <Route path="/auth/callback" element={<AcceptInvite />} />
 
@@ -37,18 +38,18 @@ export default function App() {
         <Route path="/simulation" element={<SimulationResults />} />
         <Route path="/recommendation" element={<FinalRecommendation />} />
 
-        {/* Internal tools hub — admin only */}
-        <Route path="/internal/login" element={<InternalLogin />} />
-        <Route path="/internal" element={<AdminRoute><InternalDashboard /></AdminRoute>} />
-        <Route path="/internal/form" element={<AdminRoute><DataForm /></AdminRoute>} />
-        <Route path="/internal/workflow-report" element={<AdminRoute><WorkflowReport /></AdminRoute>} />
-        <Route path="/internal/tool-input" element={<AdminRoute><ToolInputForm /></AdminRoute>} />
+        {/* Internal tools hub — admin only, always dark */}
+        <Route path="/internal/login" element={<ForceDark><InternalLogin /></ForceDark>} />
+        <Route path="/internal" element={<ForceDark><AdminRoute><InternalDashboard /></AdminRoute></ForceDark>} />
+        <Route path="/internal/form" element={<ForceDark><AdminRoute><DataForm /></AdminRoute></ForceDark>} />
+        <Route path="/internal/workflow-report" element={<ForceDark><AdminRoute><WorkflowReport /></AdminRoute></ForceDark>} />
+        <Route path="/internal/tool-input" element={<ForceDark><AdminRoute><ToolInputForm /></AdminRoute></ForceDark>} />
 
         {/* Project-scoped routes (production) */}
         <Route path="/projects/:projectId/dashboard" element={<Dashboard />} />
         <Route path="/projects/:projectId/dashboard/simulations/:toolEvalId" element={<Dashboard />} />
         {/* Transcript upload — admin only */}
-        <Route path="/projects/:projectId/transcripts" element={<AdminRoute><TranscriptInput /></AdminRoute>} />
+        <Route path="/projects/:projectId/transcripts" element={<ForceDark><AdminRoute><TranscriptInput /></AdminRoute></ForceDark>} />
         <Route path="/projects/:projectId/workflow-report" element={<WorkflowReport />} />
         <Route path="/projects/:projectId/tool-input" element={<ToolInputForm />} />
         <Route path="/projects/:projectId/simulation/:toolEvalId" element={<SimulationResults />} />

@@ -4,8 +4,6 @@ import { ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
 import { CLIENT_REPORTS_SEED } from '../data/clientReports'
 
-const VIOLET = '#5E149F'
-
 export default function ReportsList() {
   const navigate = useNavigate()
 
@@ -38,8 +36,8 @@ export default function ReportsList() {
         </div>
       }
     >
-      <main className="mx-auto max-w-3xl flex-1 px-6 py-8 md:px-10">
-        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: VIOLET }}>
+      <main className="mx-auto max-w-3xl flex-1 px-4 py-6 md:px-6 md:py-8 lg:px-10">
+        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.16em] text-axispurple-900">
           All reports ({sorted.length})
         </p>
 
@@ -51,12 +49,11 @@ export default function ReportsList() {
                 onClick={() =>
                   navigate(`/recommendation?eval=${encodeURIComponent(r.simulationId)}`)
                 }
-                className="flex w-full items-center justify-between gap-4 rounded-2xl border border-black/10 bg-[#FBFAFD] px-4 py-4 text-left transition-colors hover:border-black/15 hover:bg-[#F5F2FA]"
+                className="flex w-full items-center justify-between gap-4 rounded-2xl border border-black/10 bg-[var(--surface-page)] px-4 py-4 text-left transition-colors hover:border-black/15 hover:bg-[var(--surface-accent-subtle)]"
               >
                 <div className="flex min-w-0 items-start gap-3">
                   <div
-                    className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                    style={{ background: 'rgba(94,20,159,0.10)', color: VIOLET }}
+                    className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-accent-subtle)] text-axispurple-900"
                   >
                     <FileText size={18} />
                   </div>

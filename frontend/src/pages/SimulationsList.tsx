@@ -10,8 +10,6 @@ const statusBadge: Record<ClientSimulation['status'], string> = {
   failed: 'bg-red-500/15 text-red-300',
 }
 
-const VIOLET = '#5E149F'
-
 export default function SimulationsList() {
   const navigate = useNavigate()
 
@@ -45,8 +43,8 @@ export default function SimulationsList() {
         </div>
       }
     >
-      <main className="mx-auto max-w-3xl flex-1 px-6 py-8 md:px-10">
-        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: VIOLET }}>
+      <main className="mx-auto max-w-3xl flex-1 px-4 py-6 md:px-6 md:py-8 lg:px-10">
+        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.16em] text-axispurple-900">
           All tool inputs ({sorted.length})
         </p>
 
@@ -56,7 +54,7 @@ export default function SimulationsList() {
               <button
                 type="button"
                 onClick={() => navigate(`/simulation?eval=${encodeURIComponent(sim.id)}`)}
-                className="flex w-full items-center justify-between rounded-2xl border border-black/10 bg-[#FBFAFD] px-4 py-4 text-left transition-colors hover:border-black/15 hover:bg-[#F5F2FA]"
+                className="flex w-full items-center justify-between rounded-2xl border border-black/10 bg-[var(--surface-page)] px-4 py-4 text-left transition-colors hover:border-black/15 hover:bg-[var(--surface-accent-subtle)]"
               >
                 <div>
                   <div className="text-base font-semibold text-black">{sim.toolName}</div>

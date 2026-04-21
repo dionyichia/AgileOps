@@ -204,7 +204,7 @@ export default function SimulationResults() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-black md:text-3xl">Simulation results</h1>
         <p className="mt-1 text-sm text-black/55">
-          Impact of <span className="font-semibold text-[#5E149F]">{toolName}</span> on your{' '}
+          Impact of <span className="font-semibold text-axispurple-900">{toolName}</span> on your{' '}
           {project?.primary_role ?? 'sales'} workflow
           {done ? ` · ${totalSaved}min/day savings per rep` : ''}
         </p>
@@ -229,9 +229,9 @@ export default function SimulationResults() {
         style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #FCF7FF 100%)' }}
       >
         <div
-          className="w-full max-w-2xl rounded-[32px] border bg-white px-10 py-12"
+          className="w-full max-w-2xl rounded-[24px] md:rounded-[32px] border bg-white px-5 py-8 md:px-10 md:py-12"
           style={{
-            borderColor: 'rgba(94,20,159,0.10)',
+            borderColor: 'var(--border-accent)',
             boxShadow: '0 28px 60px rgba(15,23,42,0.08)',
             background: 'linear-gradient(180deg, #FFFFFF 0%, #FCF7FF 100%)',
           }}
@@ -240,7 +240,7 @@ export default function SimulationResults() {
             <div className="mb-8 flex items-center gap-3">
               <div
                 className="flex h-10 w-10 items-center justify-center rounded-xl"
-                style={{ background: 'linear-gradient(180deg, #5E149F 0%, #F75A8C 100%)' }}
+                style={{ background: 'var(--axis-button-gradient)' }}
               >
                 <Zap size={18} className="text-white" fill="white" />
               </div>
@@ -249,7 +249,7 @@ export default function SimulationResults() {
 
             <h2 className="mb-3 text-[2rem] font-bold leading-tight text-black">Running Simulation</h2>
             <p className="mb-10 max-w-xl text-base text-black/56">
-              Analyzing how <span className="font-semibold text-[#5E149F]">{toolName}</span> would affect your{' '}
+              Analyzing how <span className="font-semibold text-axispurple-900">{toolName}</span> would affect your{' '}
               {project?.primary_role ?? 'sales'} workflow.
             </p>
           </div>
@@ -261,13 +261,13 @@ export default function SimulationResults() {
                 aria-hidden="true"
                 style={{
                   width: `${pct}%`,
-                  background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)',
+                  background: 'var(--axis-button-gradient)',
                 }}
               />
             </div>
             <div className="mb-8 flex justify-between text-sm text-black/50">
               <span>{stepLabel}</span>
-              <span className="font-semibold text-[#5E149F]">{pct}%</span>
+              <span className="font-semibold text-axispurple-900">{pct}%</span>
             </div>
 
             <div className="space-y-3 text-left">
@@ -281,17 +281,17 @@ export default function SimulationResults() {
                     key={i}
                     className={`flex items-center gap-3 rounded-[16px] px-3 py-3 text-sm transition-all ${
                       stepDone
-                        ? 'bg-[#EEF8F4] text-[#248F63]'
+                        ? 'bg-sea-50 text-sea-600'
                         : stepActive
-                          ? 'bg-[#F4E8FB] text-[#5E149F]'
+                          ? 'bg-[var(--surface-accent-subtle)] text-axispurple-900'
                           : 'bg-black/[0.02] text-black/34'
                     }`}
                   >
                     <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                       stepDone
-                        ? 'bg-[#248F63] text-white'
+                        ? 'bg-sea-500 text-white'
                         : stepActive
-                          ? 'animate-pulse-slow bg-[#5E149F] text-white'
+                          ? 'animate-pulse-slow bg-axispurple-900 text-white'
                           : 'bg-black/8 text-black/32'
                     }`}>
                       {stepDone ? '✓' : stepActive ? '●' : '○'}
@@ -320,10 +320,10 @@ export default function SimulationResults() {
   // Project-scoped: no simulation data found after loading completed
   if (isProjectScoped && done && !simData) {
     const emptyBody = (
-      <div className="flex flex-1 items-center justify-center bg-[#F7F4FB] px-6 py-24">
+      <div className="flex flex-1 items-center justify-center bg-[var(--surface-page)] px-6 py-24">
         <div className="flex flex-col items-center gap-5 text-center max-w-sm">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: 'rgba(94,20,159,0.08)' }}>
-            <GitBranch size={26} style={{ color: '#5E149F' }} />
+            <GitBranch size={26} className="text-axispurple-900" />
           </div>
           <div>
             <p className="text-base font-semibold text-black">No simulation data yet</p>
@@ -333,8 +333,7 @@ export default function SimulationResults() {
           </div>
           <button
             onClick={() => navigate(`/projects/${projectId}/dashboard`)}
-            className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white"
-            style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}
+            className="btn-primary px-5 py-2.5 text-sm"
           >
             Back to Dashboard
           </button>
@@ -367,15 +366,15 @@ export default function SimulationResults() {
       onNext={() => navigate(recommendationPath)}
       nextLabel="View Final Recommendation"
     >
-      <div className="flex gap-6 h-full">
+      <div className="flex flex-col lg:flex-row gap-6">
 
         {/* ── Left panel ─────────────────────────────────────────────────────── */}
-        <div className="w-72 flex-shrink-0 space-y-4 overflow-y-auto max-h-[calc(100vh-260px)] pr-1">
+        <div className="w-full lg:w-72 lg:flex-shrink-0 space-y-4 lg:overflow-y-auto lg:max-h-[calc(100vh-260px)] pr-1">
 
           {/* Role + tool stack */}
           <div
             className="bg-white border rounded-[24px] p-5"
-            style={{ borderColor: 'rgba(94,20,159,0.10)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
+            style={{ borderColor: 'var(--border-accent)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
           >
             <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3">Role Stats</h3>
             <div className="space-y-2 text-xs">
@@ -403,9 +402,9 @@ export default function SimulationResults() {
                 {/* New tool being evaluated */}
                 {toolName && (
                   <div className="mt-2 pt-2 border-t border-black/6">
-                    <div className="text-xs text-[#5E149F] flex items-center gap-1 font-semibold">
+                    <div className="text-xs text-axispurple-900 flex items-center gap-1 font-semibold">
                       <Zap size={10} className="text-[#F75A8C]" />
-                      {toolName} <span className="text-[10px] font-normal text-[#B4308B]">NEW</span>
+                      {toolName} <span className="text-[10px] font-normal text-axispurple-700">NEW</span>
                     </div>
                   </div>
                 )}
@@ -416,7 +415,7 @@ export default function SimulationResults() {
           {/* Estimated time per tool */}
           <div
             className="bg-white border rounded-[24px] p-5"
-            style={{ borderColor: 'rgba(94,20,159,0.10)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
+            style={{ borderColor: 'var(--border-accent)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
           >
             <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3">Estimated Time Impact</h3>
             {timeMetrics.length === 0 && (
@@ -444,13 +443,13 @@ export default function SimulationResults() {
 
                   <div className="flex items-center gap-2 mt-1">
                     {m.change === 'new' ? (
-                      <span className="text-xs text-[#B4308B] font-semibold bg-[#FCEAF4] px-2 py-0.5 rounded">NEW · {m.after}</span>
+                      <span className="badge-base badge-accent text-xs font-semibold">NEW · {m.after}</span>
                     ) : (
                       <>
                         <span className="text-xs text-black/34 line-through">{m.before}</span>
                         <span className="text-black text-xs font-semibold">{m.after}</span>
                         {m.change === 'decrease' && (
-                          <span className="flex items-center gap-0.5 text-[#248F63] text-xs font-bold">
+                          <span className="flex items-center gap-0.5 text-sea-600 text-xs font-bold">
                             <TrendingDown size={11} /> {(m as any).saved}m
                           </span>
                         )}
@@ -472,11 +471,11 @@ export default function SimulationResults() {
             <div className="mt-4 pt-3 border-t border-black/8">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-black/46 font-medium">Net time saved/day</span>
-                <span className="text-[#248F63] font-bold text-sm">{totalSaved}min</span>
+                <span className="text-sea-600 font-bold text-sm">{totalSaved}min</span>
               </div>
               <div className="flex items-center justify-between mt-1">
                 <span className="text-xs text-black/46 font-medium">Per rep per week</span>
-                <span className="text-[#248F63] font-bold text-sm">{(totalSaved * 5 / 60).toFixed(1)}h</span>
+                <span className="text-sea-600 font-bold text-sm">{(totalSaved * 5 / 60).toFixed(1)}h</span>
               </div>
             </div>
           </div>
@@ -484,7 +483,7 @@ export default function SimulationResults() {
           {/* Cost estimation */}
           <div
             className="bg-white border rounded-[24px] p-5"
-            style={{ borderColor: 'rgba(94,20,159,0.10)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
+            style={{ borderColor: 'var(--border-accent)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
           >
             <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-3 flex items-center gap-1.5">
               <DollarSign size={11} /> Cost Estimation
@@ -501,11 +500,11 @@ export default function SimulationResults() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-black/46">Est. revenue impact</span>
-                    <span className="text-[#248F63] font-semibold">{formatDollar(revenueP70)}/yr</span>
+                    <span className="text-sea-600 font-semibold">{formatDollar(revenueP70)}/yr</span>
                   </div>
                   <div className="flex justify-between border-t border-black/8 pt-2 mt-2">
                     <span className="text-black/78 font-semibold">Net ROI</span>
-                    <span className="text-[#248F63] font-bold text-sm">{roi}</span>
+                    <span className="text-sea-600 font-bold text-sm">{roi}</span>
                   </div>
                   <div className="mt-3 text-[10px] text-black/34">
                     Based on {project?.team_size ?? '—'} {project?.primary_role ?? 'reps'} · {totalSaved}min/day savings
@@ -523,8 +522,8 @@ export default function SimulationResults() {
           <div
             className="bg-white border rounded-[24px] overflow-hidden"
             style={{
-              height: 'calc(100vh - 260px)',
-              borderColor: 'rgba(94,20,159,0.10)',
+              height: 'clamp(400px, 60vw, calc(100vh - 260px))',
+              borderColor: 'var(--border-accent)',
               boxShadow: '0 18px 40px rgba(15,23,42,0.05)',
               background: 'linear-gradient(180deg, #FFFFFF 0%, #FCF7FF 100%)',
             }}
@@ -535,9 +534,9 @@ export default function SimulationResults() {
                 <span className="ml-2 text-xs text-black/42">New paths highlighted in violet</span>
               </div>
               <div className="flex items-center gap-3 text-xs text-black/42">
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#248F63] inline-block rounded" /> Success</span>
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#F75A8C] inline-block rounded" /> Fail</span>
-                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#5E149F] inline-block rounded" /> New path</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-sea-500 inline-block rounded" /> Success</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-axispurple-300 inline-block rounded" /> Fail</span>
+                <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-axispurple-900 inline-block rounded" /> New path</span>
               </div>
             </div>
 

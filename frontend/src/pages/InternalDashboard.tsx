@@ -138,57 +138,69 @@ export default function InternalDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
+    <div className="min-h-screen page-bg flex flex-col text-black">
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header className="border-b border-black/8 bg-white/90 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 md:gap-3 min-w-0">
             <img
               src="/axis-logo.png"
               alt="Axis logo"
-              className="h-11 w-11 rounded-2xl object-cover"
+              className="h-9 w-9 md:h-11 md:w-11 rounded-2xl object-cover flex-shrink-0"
             />
-            <span className="font-bold text-[#111111] text-[28px] tracking-[-0.04em]">Axis</span>
-            <span className="text-xs font-medium text-[#5E149F] bg-[#F4E8FB] px-2.5 py-1 rounded-full">INTERNAL</span>
+            <span className="font-bold text-[22px] md:text-[28px] tracking-[-0.04em]" style={{ color: 'var(--text-primary)' }}>Axis</span>
+            <span className="badge-base badge-accent hidden sm:inline-flex">INTERNAL</span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="relative hidden sm:block">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-black/34" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search projects, contacts..."
-                className="bg-[#F7F4FB] border border-black/10 focus:border-[#B4308B] focus:outline-none text-black placeholder:text-black/30 rounded-2xl pl-9 pr-4 py-2.5 text-sm w-72 transition-colors"
+                placeholder="Search projects..."
+                className="bg-[var(--surface-page)] border border-black/10 focus-ring-accent text-black placeholder:text-white/30 rounded-2xl pl-9 pr-4 py-2.5 text-sm w-48 md:w-72 transition-colors"
               />
             </div>
-            <button className="flex items-center gap-2 text-white px-4 py-2.5 rounded-full font-semibold text-sm transition-colors" style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}>
+            <button className="btn-primary">
               <Plus size={14} />
-              New Project
+              <span className="hidden sm:inline">New Project</span>
             </button>
+          </div>
+        </div>
+        {/* Mobile search row */}
+        <div className="sm:hidden px-4 pb-3">
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-black/34" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search projects, contacts..."
+              className="bg-[var(--surface-page)] border border-black/10 focus-ring-accent text-black placeholder:text-white/30 rounded-2xl pl-9 pr-4 py-2.5 text-sm w-full transition-colors"
+            />
           </div>
         </div>
       </header>
 
       {/* ── Content ────────────────────────────────────────────────────────── */}
-      <main className="max-w-6xl mx-auto w-full px-6 py-8">
+      <main className="max-w-6xl mx-auto w-full px-4 md:px-6 py-6 md:py-8">
 
         {/* Overview stats */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
           <div className="bg-white border border-black/8 rounded-[24px] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
             <div className="text-xs text-black/42 mb-1">Total Projects</div>
             <div className="text-2xl font-bold text-black">{loading ? '—' : projectsList.length}</div>
           </div>
           <div className="bg-white border border-black/8 rounded-[24px] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
             <div className="text-xs text-black/42 mb-1">Active</div>
-            <div className="text-2xl font-bold text-[#B4308B]">
+            <div className="text-2xl font-bold text-axispurple-700">
               {loading ? '—' : projectsList.filter((p) => p.status !== 'delivered').length}
             </div>
           </div>
           <div className="bg-white border border-black/8 rounded-[24px] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
             <div className="text-xs text-black/42 mb-1">Delivered</div>
-            <div className="text-2xl font-bold text-[#5E149F]">
+            <div className="text-2xl font-bold text-axispurple-900">
               {loading ? '—' : projectsList.filter((p) => p.status === 'delivered').length}
             </div>
           </div>
@@ -201,13 +213,13 @@ export default function InternalDashboard() {
         {/* Project list */}
         <div className="space-y-3">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Projects</h2>
-            <span className="text-xs text-slate-600">{filtered.length} project{filtered.length !== 1 ? 's' : ''}</span>
+            <h2 className="text-sm font-bold text-black/40 uppercase tracking-widest">Projects</h2>
+            <span className="text-xs text-black/52">{filtered.length} project{filtered.length !== 1 ? 's' : ''}</span>
           </div>
 
           {/* Loading / error / empty states */}
           {loading && (
-            <div className="flex items-center justify-center py-16 text-slate-500">
+            <div className="flex items-center justify-center py-16 text-black/50">
               <Loader2 size={20} className="animate-spin mr-2" />
               Loading projects…
             </div>
@@ -219,7 +231,7 @@ export default function InternalDashboard() {
             </div>
           )}
           {!loading && !error && filtered.length === 0 && (
-            <div className="text-center py-16 text-slate-500 text-sm">
+            <div className="text-center py-16 text-black/50 text-sm">
               {search ? 'No projects match your search.' : 'No projects yet — create one to get started.'}
             </div>
           )}
@@ -275,7 +287,7 @@ export default function InternalDashboard() {
                 {/* ── Expanded detail ─────────────────────────────────────────── */}
                 {isExpanded && (
                   <div className="border-t border-slate-800 bg-[#0B0F1E] animate-fade-in">
-                    <div className="grid grid-cols-2 gap-px bg-slate-800">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-slate-800">
 
                       {/* ── Left column: Project details ─────────────────────── */}
                       <div className="bg-[#0B0F1E] p-5 space-y-5">
@@ -437,7 +449,7 @@ export default function InternalDashboard() {
                     {/* ── Bottom bar: navigation + actions ────────────────────── */}
                     <div className="border-t border-slate-800 px-5 py-4">
                       <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Jump to</div>
-                      <div className="grid grid-cols-5 gap-2 mb-4">
+                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
                         {PROJECT_STEPS.map((step) => {
                           const StepIcon = step.icon
                           return (

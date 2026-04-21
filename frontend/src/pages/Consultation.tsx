@@ -293,7 +293,7 @@ export default function Consultation() {
   }
 
   const inputClass =
-    'w-full rounded-[18px] border border-black/10 bg-[#F6F6F6] px-5 py-4 text-[15px] text-black outline-none transition-colors placeholder:text-black/35 focus:border-[#B4308B]'
+    'w-full rounded-[18px] border border-white/10 bg-white/6 px-5 py-4 text-[15px] text-white outline-none transition-colors placeholder:text-white/35 focus:border-[#B4308B]'
 
   // ══════════════════════════════════════════════════════════════════════════
   // STAGE: BOOKING — full-width Calendly widget
@@ -353,24 +353,24 @@ export default function Consultation() {
 
             {/* Right — Calendly widget */}
             <div
-              className="relative rounded-[24px] border border-black/6 overflow-hidden"
+              className="relative rounded-[24px] border border-white/8 overflow-hidden"
               style={{ minWidth: '320px', height: '700px', boxShadow: '0 18px 50px rgba(15,23,42,0.08), 0 4px 14px rgba(15,23,42,0.04)' }}
             >
               {/* Loading overlay — fades out once Calendly iframe paints */}
               {!calendlyReady && !calendlyError && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white">
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3" style={{ background: 'var(--surface-card)' }}>
                   <div
-                    className="h-7 w-7 animate-spin rounded-full border-2 border-black/10"
+                    className="h-7 w-7 animate-spin rounded-full border-2 border-white/10"
                     style={{ borderTopColor: '#B4308B' }}
                   />
-                  <span className="text-[14px] text-black/35">Loading calendar…</span>
+                  <span className="text-[14px] text-white/40">Loading calendar…</span>
                 </div>
               )}
               {calendlyError && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-white p-8 text-center">
+                <div className="absolute inset-0 z-10 flex items-center justify-center p-8 text-center" style={{ background: 'var(--surface-card)' }}>
                   <div className="max-w-md">
-                    <p className="text-[20px] font-semibold text-black">Calendar unavailable</p>
-                    <p className="mt-3 text-[15px] leading-7 text-black/60">{calendlyError}</p>
+                    <p className="text-[20px] font-semibold text-white">Calendar unavailable</p>
+                    <p className="mt-3 text-[15px] leading-7 text-white/55">{calendlyError}</p>
                   </div>
                 </div>
               )}
@@ -468,8 +468,8 @@ export default function Consultation() {
 
           {/* What happens next */}
           <div
-            className="mt-14 max-w-lg rounded-[22px] border border-black/6 bg-[#FAFAFA] px-7 py-6 text-left"
-            style={{ animation: 'fadeSlideUp 0.5s ease 0.6s both' }}
+            className="mt-14 max-w-lg rounded-[22px] border border-white/8 px-7 py-6 text-left"
+            style={{ background: 'var(--surface-card)', animation: 'fadeSlideUp 0.5s ease 0.6s both' }}
           >
             <p className="text-[13px] font-semibold uppercase tracking-[0.16em]" style={{ color: COLORS.violet }}>
               What happens next
@@ -481,7 +481,7 @@ export default function Consultation() {
                 'On the call, we walk through your setup and goals.',
                 'Within 48h, your recommendation report is ready.',
               ].map((step, i) => (
-                <li key={i} className="flex items-start gap-3 text-[15px] text-black/70">
+                <li key={i} className="flex items-start gap-3 text-[15px] text-white/65">
                   <span
                     className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
                     style={{ background: 'linear-gradient(135deg, #5E149F, #B4308B)' }}
@@ -546,8 +546,8 @@ export default function Consultation() {
             </ul>
           </section>
 
-          <section className="flex min-h-[40rem] flex-col bg-white rounded-[28px] p-7 md:p-9 axis-soft-shadow border border-black/5">
-            <h1 className="text-center text-[36px] leading-tight font-bold">Book a Consultation</h1>
+          <section className="flex min-h-[40rem] flex-col rounded-[28px] p-7 md:p-9 border border-white/8" style={{ background: 'var(--surface-card)', boxShadow: '0 24px 60px rgba(0,0,0,0.4)' }}>
+            <h1 className="text-center text-[36px] leading-tight font-bold text-white">Book a Consultation</h1>
 
             {formStep === 1 && (
               <>
@@ -586,21 +586,21 @@ export default function Consultation() {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-black/45 pointer-events-none" />
+                  <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-white/45 pointer-events-none" />
                 </div>
 
-                <div className="mt-5 rounded-[22px] border border-black/6 bg-[#FAFAFA] p-5">
+                <div className="mt-5 rounded-[22px] border border-white/8 p-5" style={{ background: 'var(--surface-page)' }}>
                   <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                    <p className="text-[14px] font-semibold uppercase tracking-[0.16em]" style={{ color: '#5E149F' }}>
+                    <p className="text-[14px] font-semibold uppercase tracking-[0.16em]" style={{ color: '#E2409B' }}>
                       Team Responsibilities
                     </p>
-                    <span className="text-[13px] font-medium text-black/45">
+                    <span className="text-[13px] font-medium text-white/45">
                       Select as many as apply
                     </span>
                   </div>
 
                   <div
-                    className="mt-4 min-h-[min(42dvh,22rem)] max-h-[min(42dvh,22rem)] overflow-y-auto overflow-x-hidden overscroll-y-contain rounded-xl border border-black/[0.06] bg-white/80 p-3 pr-2 [-webkit-overflow-scrolling:touch] [scrollbar-gutter:stable]"
+                    className="mt-4 min-h-[min(42dvh,22rem)] max-h-[min(42dvh,22rem)] overflow-y-auto overflow-x-hidden overscroll-y-contain rounded-xl border border-white/[0.06] p-3 pr-2 [-webkit-overflow-scrolling:touch] [scrollbar-gutter:stable]" style={{ background: 'var(--surface-card)' }}
                     role="region"
                     aria-label="Team responsibility options"
                   >
@@ -614,9 +614,9 @@ export default function Consultation() {
                             onClick={() => toggleResponsibility(item)}
                             className="rounded-full border px-4 py-2 text-[14px] font-medium transition-colors text-left"
                             style={{
-                              borderColor: selected ? '#B4308B' : 'rgba(0,0,0,0.08)',
-                              background: selected ? 'rgba(180, 48, 139, 0.10)' : '#FFFFFF',
-                              color: selected ? '#5E149F' : 'rgba(0,0,0,0.72)',
+                              borderColor: selected ? '#B4308B' : 'rgba(255,255,255,0.10)',
+                              background: selected ? 'rgba(180, 48, 139, 0.18)' : 'rgba(255,255,255,0.05)',
+                              color: selected ? '#F75A8C' : 'rgba(255,255,255,0.65)',
                             }}
                           >
                             {item}
@@ -643,18 +643,18 @@ export default function Consultation() {
             {formStep === 2 && (
               <>
                 <div className="mt-8 flex min-h-[min(42dvh,22rem)] w-full flex-col gap-4 *:min-h-0">
-                  <div className="flex min-h-0 flex-1 flex-col rounded-[22px] border border-black/6 bg-[#FAFAFA] p-5">
+                  <div className="flex min-h-0 flex-1 flex-col rounded-[22px] border border-white/8 p-5" style={{ background: 'var(--surface-page)' }}>
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                       <p
                         className="text-[14px] font-semibold uppercase tracking-[0.16em]"
-                        style={{ color: '#5E149F' }}
+                        style={{ color: '#E2409B' }}
                         id="consultation-workflow-label"
                       >
                         Your workflow
                       </p>
                       <span
                         id="consultation-workflow-prompt"
-                        className="text-[13px] font-medium leading-snug text-black/45 sm:max-w-[55%] sm:text-right"
+                        className="text-[13px] font-medium leading-snug text-white/45 sm:max-w-[55%] sm:text-right"
                       >
                         Tell us about your workflow, bottlenecks, and what you&apos;re seeking to improve?
                       </span>
@@ -666,20 +666,20 @@ export default function Consultation() {
                       placeholder="Type your response..."
                       aria-labelledby="consultation-workflow-label"
                       aria-describedby="consultation-workflow-prompt"
-                      className={`${inputClass} mt-4 min-h-0 flex-1 resize-none bg-white`}
+                      className={`${inputClass} mt-4 min-h-0 flex-1 resize-none`}
                     />
                   </div>
 
-                  <div className="flex min-h-0 flex-1 flex-col rounded-[22px] border border-black/6 bg-[#FAFAFA] p-5">
+                  <div className="flex min-h-0 flex-1 flex-col rounded-[22px] border border-white/8 p-5" style={{ background: 'var(--surface-page)' }}>
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                       <p
                         className="text-[14px] font-semibold uppercase tracking-[0.16em]"
-                        style={{ color: '#5E149F' }}
+                        style={{ color: '#E2409B' }}
                         id="consultation-tools-label"
                       >
                         Current tools
                       </p>
-                      <span id="consultation-tools-prompt" className="text-[13px] font-medium text-black/45 sm:text-right">
+                      <span id="consultation-tools-prompt" className="text-[13px] font-medium text-white/45 sm:text-right">
                         Current tools you&apos;re using
                       </span>
                     </div>
@@ -690,7 +690,7 @@ export default function Consultation() {
                       placeholder="e.g. Salesforce, Outreach, Gong..."
                       aria-labelledby="consultation-tools-label"
                       aria-describedby="consultation-tools-prompt"
-                      className={`${inputClass} mt-4 min-h-0 flex-1 resize-none bg-white`}
+                      className={`${inputClass} mt-4 min-h-0 flex-1 resize-none`}
                     />
                   </div>
                 </div>
@@ -703,7 +703,7 @@ export default function Consultation() {
                   <button
                     type="button"
                     onClick={() => setFormStep(1)}
-                    className="rounded-full border border-black/15 px-8 py-3.5 text-[16px] font-semibold text-black/80 transition-colors hover:bg-black/[0.03]"
+                    className="rounded-full border border-white/15 px-8 py-3.5 text-[16px] font-semibold text-white/70 transition-colors hover:bg-white/[0.05]"
                   >
                     Back
                   </button>
@@ -742,13 +742,13 @@ export default function Consultation() {
                 key={item.title}
                 className="rounded-[24px] border p-7"
                 style={{
-                  borderColor: 'rgba(0,0,0,0.08)',
-                  background: COLORS.white,
-                  boxShadow: '0 18px 40px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04)',
+                  borderColor: 'rgba(255,255,255,0.08)',
+                  background: 'var(--surface-card)',
+                  boxShadow: '0 18px 40px rgba(0,0,0,0.25)',
                 }}
               >
-                <h2 className="text-[22px] leading-tight font-bold">{item.title}</h2>
-                <p className="mt-4 text-[16px] leading-7 text-black/72">{item.body}</p>
+                <h2 className="text-[22px] leading-tight font-bold text-white">{item.title}</h2>
+                <p className="mt-4 text-[16px] leading-7 text-white/60">{item.body}</p>
               </div>
             ))}
           </div>
@@ -859,17 +859,17 @@ export default function Consultation() {
               ].map(({ icon: Icon, title, body }) => (
                 <div
                   key={title}
-                  className="rounded-[22px] bg-white px-6 py-5 text-black min-h-[170px]"
-                  style={{ boxShadow: '0 16px 40px rgba(0,0,0,0.12)' }}
+                  className="rounded-[22px] px-6 py-5 min-h-[170px]"
+                  style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 16px 40px rgba(0,0,0,0.12)' }}
                 >
                   <div
                     className="flex h-12 w-12 items-center justify-center rounded-2xl"
-                    style={{ background: 'rgba(180, 48, 139, 0.10)', color: COLORS.violet }}
+                    style={{ background: 'rgba(255,255,255,0.15)', color: '#ffffff' }}
                   >
                     <Icon size={22} />
                   </div>
-                  <h3 className="mt-4 text-[18px] leading-tight font-bold">{title}</h3>
-                  <p className="mt-3 text-[14px] leading-6 text-black/68">{body}</p>
+                  <h3 className="mt-4 text-[18px] leading-tight font-bold text-white">{title}</h3>
+                  <p className="mt-3 text-[14px] leading-6 text-white/72">{body}</p>
                 </div>
               ))}
             </div>
@@ -901,13 +901,14 @@ export default function Consultation() {
               ].map((point) => (
                 <div
                   key={point}
-                  className="rounded-[22px] border bg-white px-6 py-5"
+                  className="rounded-[22px] border px-6 py-5"
                   style={{
-                    borderColor: 'rgba(0,0,0,0.08)',
-                    boxShadow: '0 18px 40px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04)',
+                    borderColor: 'rgba(255,255,255,0.08)',
+                    background: 'var(--surface-card)',
+                    boxShadow: '0 18px 40px rgba(0,0,0,0.25)',
                   }}
                 >
-                  <p className="text-[16px] leading-7 text-black/76">{point}</p>
+                  <p className="text-[16px] leading-7 text-white/65">{point}</p>
                 </div>
               ))}
             </div>

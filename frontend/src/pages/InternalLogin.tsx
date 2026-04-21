@@ -43,23 +43,23 @@ export default function InternalLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F4FB] text-black flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen page-bg flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex items-center justify-center gap-3">
           <img src="/axis-logo.png" alt="Axis logo" className="h-11 w-11 rounded-2xl object-cover" />
-          <span className="font-bold text-[#111111] text-[28px] tracking-[-0.04em]">Axis</span>
-          <span className="text-xs font-medium text-[#5E149F] bg-[#F4E8FB] px-2.5 py-1 rounded-full">INTERNAL</span>
+          <span className="font-bold text-[28px] tracking-[-0.04em]" style={{ color: 'var(--text-primary)' }}>Axis</span>
+          <span className="badge-base badge-accent">INTERNAL</span>
         </div>
-        <h2 className="mt-6 text-center text-[28px] font-bold tracking-[-0.02em] text-gray-900">
+        <h2 className="mt-6 text-center text-[28px] font-bold tracking-[-0.02em]" style={{ color: 'var(--text-primary)' }}>
           Staff Portal
         </h2>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)] rounded-[24px] border border-black/8 sm:px-10">
+        <div className="card-base py-8 px-4 shadow-[0_18px_40px_rgba(0,0,0,0.25)] sm:px-10">
           <div className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                 Work Email
               </label>
               <div className="mt-2">
@@ -72,13 +72,13 @@ export default function InternalLogin() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-12 rounded-[14px] border border-black/10 px-5 text-[15px] outline-none focus:border-[#B4308B] transition-colors"
+                  className="input-base h-12 rounded-[14px] px-5 text-[15px] focus-ring-accent"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                 Password
               </label>
               <div className="mt-2">
@@ -92,7 +92,7 @@ export default function InternalLogin() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-                  className="w-full h-12 rounded-[14px] border border-black/10 px-5 text-[15px] outline-none focus:border-[#B4308B] transition-colors"
+                  className="input-base h-12 rounded-[14px] px-5 text-[15px] focus-ring-accent"
                 />
               </div>
             </div>
@@ -107,8 +107,7 @@ export default function InternalLogin() {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="w-full flex justify-center py-3.5 px-4 rounded-[14px] shadow-sm text-[16px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-                style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}
+                className="btn-primary w-full justify-center py-3.5 px-4 rounded-[14px] text-[16px] font-bold disabled:opacity-60"
               >
                 {loading ? 'Authenticating...' : 'Sign In to Portal'}
               </button>

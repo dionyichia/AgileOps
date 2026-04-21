@@ -109,13 +109,13 @@ function PipelineProgress({ progressPct, currentStep }: { progressPct: number; c
         return (
           <div key={i} className="flex items-center gap-3">
             {done ? (
-              <CheckCircle2 size={16} className="text-[#248F63] flex-shrink-0" />
+              <CheckCircle2 size={16} className="text-sea-500 flex-shrink-0" />
             ) : active ? (
-              <Loader2 size={16} className="text-[#5E149F] animate-spin flex-shrink-0" />
+              <Loader2 size={16} className="text-axispurple-900 animate-spin flex-shrink-0" />
             ) : (
               <Circle size={16} className="text-black/28 flex-shrink-0" />
             )}
-            <span className={`text-sm ${done ? 'text-black/52' : active ? 'text-[#5E149F]' : 'text-black/36'}`}>
+            <span className={`text-sm ${done ? 'text-black/52' : active ? 'text-axispurple-900' : 'text-black/36'}`}>
               Stage {i + 1}/3: {stage.label}
             </span>
           </div>
@@ -247,7 +247,7 @@ function TaskPreviewModal({
                           <input
                             value={draft.label}
                             onChange={(e) => handleDraftChange(task.node_id, { label: e.target.value })}
-                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#B4308B]"
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus-ring-accent"
                           />
                         </div>
                         <div>
@@ -255,7 +255,7 @@ function TaskPreviewModal({
                           <input
                             value={draft.tools}
                             onChange={(e) => handleDraftChange(task.node_id, { tools: e.target.value })}
-                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#B4308B]"
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus-ring-accent"
                           />
                         </div>
                       </div>
@@ -268,7 +268,7 @@ function TaskPreviewModal({
                             min={1}
                             value={draft.mean_minutes}
                             onChange={(e) => handleDraftChange(task.node_id, { mean_minutes: Number(e.target.value) })}
-                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#B4308B]"
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus-ring-accent"
                           />
                         </div>
                         <div>
@@ -276,7 +276,7 @@ function TaskPreviewModal({
                           <select
                             value={draft.automatable_fraction}
                             onChange={(e) => handleDraftChange(task.node_id, { automatable_fraction: e.target.value as TaskNode['automatable_fraction'] })}
-                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#B4308B]"
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus-ring-accent"
                           >
                             <option value="high">High</option>
                             <option value="medium">Medium</option>
@@ -292,7 +292,7 @@ function TaskPreviewModal({
                             value={draft.role_type}
                             onChange={(e) => handleDraftChange(task.node_id, { role_type: e.target.value })}
                             placeholder="e.g. SDR, AE, CSM"
-                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#B4308B]"
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus-ring-accent"
                           />
                         </div>
                         <div>
@@ -301,7 +301,7 @@ function TaskPreviewModal({
                             value={draft.workflow_type}
                             onChange={(e) => handleDraftChange(task.node_id, { workflow_type: e.target.value })}
                             placeholder="e.g. outbound, closing"
-                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:outline-none focus:border-[#B4308B]"
+                            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus-ring-accent"
                           />
                         </div>
                       </div>
@@ -314,8 +314,7 @@ function TaskPreviewModal({
                         <button
                           onClick={() => handleSaveTask(task.node_id)}
                           disabled={isSaving}
-                          className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-                          style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}
+                          className="btn-primary py-2 px-4 text-sm disabled:opacity-60"
                         >
                           {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                           {isSaving ? 'Saving...' : 'Save Task'}
@@ -515,11 +514,11 @@ export default function TranscriptInput() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-[#F7F4FB] flex items-center justify-center">
+      <div className="min-h-screen page-bg flex items-center justify-center">
         <div className="text-center">
           <AlertCircle size={40} className="text-red-400 mx-auto mb-4" />
           <p className="text-red-400 mb-4">{loadError}</p>
-          <button onClick={() => navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')} className="text-[#5E149F] hover:opacity-70 text-sm">
+          <button onClick={() => navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')} className="text-axispurple-900 hover:opacity-70 text-sm">
             Back to Dashboard
           </button>
         </div>
@@ -528,23 +527,23 @@ export default function TranscriptInput() {
   }
 
   return (
-    <div ref={rootRef} className="min-h-screen bg-[#F7F4FB] flex flex-col text-black">
+    <div ref={rootRef} className="min-h-screen page-bg flex flex-col text-black">
       {/* Header */}
       <header data-gsap-transcript className="border-b border-black/8 bg-white/90 backdrop-blur-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <img
                 src="/axis-logo.png"
                 alt="Axis logo"
-                className="h-11 w-11 rounded-2xl object-cover"
+                className="h-9 w-9 md:h-11 md:w-11 rounded-2xl object-cover"
               />
-              <span className="font-bold text-[#111111] text-[28px] tracking-[-0.04em]">Axis</span>
+              <span className="font-bold text-[#111111] text-[22px] md:text-[28px] tracking-[-0.04em]">Axis</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-black/44">
-              <button onClick={() => navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')} className="hover:text-black transition-colors">Dashboard</button>
-              <ChevronRight size={14} />
-              <span className="text-black">{project?.company_name ?? 'Loading...'}</span>
+            <div className="hidden sm:flex items-center gap-2 text-sm text-black/44 min-w-0">
+              <button onClick={() => navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')} className="hover:text-black transition-colors flex-shrink-0">Dashboard</button>
+              <ChevronRight size={14} className="flex-shrink-0" />
+              <span className="text-black truncate">{project?.company_name ?? 'Loading...'}</span>
             </div>
           </div>
           {project && <StatusBadge status={project.status} />}
@@ -553,8 +552,8 @@ export default function TranscriptInput() {
 
       {/* Project summary */}
       <div data-gsap-transcript className="border-b border-black/6 bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-5">
-          <h1 className="text-[36px] leading-tight font-bold tracking-[-0.04em] text-black">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-5">
+          <h1 className="text-[24px] md:text-[36px] leading-tight font-bold tracking-[-0.04em] text-black">
             {project?.company_name ?? 'Loading...'} — Transcript Input
           </h1>
           {project && (
@@ -567,18 +566,18 @@ export default function TranscriptInput() {
       </div>
 
       {/* Main content */}
-      <main data-gsap-transcript className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
-        <div className="grid lg:grid-cols-5 gap-8">
+      <main data-gsap-transcript className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 md:px-6 md:py-8">
+        <div className="grid lg:grid-cols-5 gap-6 md:gap-8">
           {/* ── Left: Transcript form (3 cols) ── */}
           <div className="lg:col-span-3 space-y-6">
             {/* Form card */}
             <div className="bg-white border border-black/8 rounded-[24px] p-6 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
               <h2 className="text-black font-semibold mb-4 flex items-center gap-2">
-                <Plus size={16} className="text-[#5E149F]" />
+                <Plus size={16} className="text-axispurple-900" />
                 New Transcript
               </h2>
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-xs text-black/44 font-medium mb-1.5">Interviewee Name *</label>
                   <input
@@ -587,7 +586,7 @@ export default function TranscriptInput() {
                     onChange={(e) => setName(e.target.value)}
                     disabled={transcriptFormLocked}
                     placeholder="e.g. Jordan Mills"
-                    className="w-full bg-[#F7F4FB] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm placeholder:text-black/28 focus:border-[#B4308B] focus:ring-1 focus:ring-[#B4308B]/20 outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full bg-[var(--surface-page)] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm placeholder:text-black/28 focus-ring-accent transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -598,7 +597,7 @@ export default function TranscriptInput() {
                     onChange={(e) => setRole(e.target.value)}
                     disabled={transcriptFormLocked}
                     placeholder="e.g. Senior SDR"
-                    className="w-full bg-[#F7F4FB] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm placeholder:text-black/28 focus:border-[#B4308B] focus:ring-1 focus:ring-[#B4308B]/20 outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full bg-[var(--surface-page)] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm placeholder:text-black/28 focus-ring-accent transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -610,7 +609,7 @@ export default function TranscriptInput() {
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   disabled={transcriptFormLocked}
-                  className="bg-[#F7F4FB] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm focus:border-[#B4308B] focus:ring-1 focus:ring-[#B4308B]/20 outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="bg-[var(--surface-page)] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm focus-ring-accent transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -621,10 +620,10 @@ export default function TranscriptInput() {
                   onChange={(e) => setText(e.target.value)}
                   disabled={transcriptFormLocked}
                   placeholder="Paste the full call transcript here..."
-                  rows={14}
-                  className="w-full bg-[#F7F4FB] border border-black/10 rounded-2xl px-4 py-3 text-black text-sm font-mono leading-relaxed placeholder:text-black/28 focus:border-[#B4308B] focus:ring-1 focus:ring-[#B4308B]/20 outline-none transition-colors resize-y disabled:opacity-60 disabled:cursor-not-allowed"
+                  rows={8}
+                  className="w-full bg-[var(--surface-page)] border border-black/10 rounded-2xl px-4 py-3 text-black text-sm font-mono leading-relaxed placeholder:text-black/28 focus-ring-accent transition-colors resize-y disabled:opacity-60 disabled:cursor-not-allowed"
                 />
-                <p className="text-xs text-slate-600 mt-1">{text.split(/\s+/).filter(Boolean).length} words</p>
+                <p className="text-xs text-black/52 mt-1">{text.split(/\s+/).filter(Boolean).length} words</p>
               </div>
 
               {submitError && (
@@ -637,8 +636,7 @@ export default function TranscriptInput() {
               <button
                 onClick={handleSubmitTranscript}
                 disabled={!canSubmit}
-                className="flex items-center gap-2 disabled:bg-black/10 disabled:text-black/30 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-full font-semibold text-sm transition-colors"
-                style={canSubmit ? { background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)', boxShadow: '0 10px 24px rgba(94,20,159,0.18)' } : undefined}
+                className="btn-primary px-5 py-2.5"
               >
                 {submitting || transcriptJob.isRunning ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -650,9 +648,9 @@ export default function TranscriptInput() {
 
               {/* Transcript job progress */}
               {transcriptJob.isRunning && transcriptJob.job && (
-                <div className="mt-4 bg-[#F7F4FB] border border-black/8 rounded-2xl p-4">
+                <div className="mt-4 bg-[var(--surface-page)] border border-black/8 rounded-2xl p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Loader2 size={14} className="text-[#5E149F] animate-spin" />
+                    <Loader2 size={14} className="text-axispurple-900 animate-spin" />
                     <span className="text-sm text-black/72 font-medium">
                       {getTranscriptStepLabel(transcriptJob.job.current_step)}
                     </span>
@@ -667,7 +665,7 @@ export default function TranscriptInput() {
               )}
 
               {transcriptJob.isDone && (
-                <div className="mt-4 bg-[#F0FAF5] border border-[#248F63]/20 rounded-2xl px-4 py-3 text-[#248F63] text-sm flex items-center gap-2">
+                <div className="mt-4 bg-sea-50 border border-sea-500/20 rounded-2xl px-4 py-3 text-sea-600 text-sm flex items-center gap-2">
                   <CheckCircle2 size={14} />
                   Transcript processed successfully
                 </div>
@@ -690,10 +688,10 @@ export default function TranscriptInput() {
             {/* Transcript history */}
             <div className="bg-white border border-black/8 rounded-2xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
               <h2 className="text-black font-semibold mb-4 flex items-center gap-2">
-                <FileText size={16} className="text-[#5E149F]" />
+                <FileText size={16} className="text-axispurple-900" />
                 Transcript History
                 {transcriptList.length > 0 && (
-                  <span className="text-xs bg-[#F4E8FB] text-[#5E149F] px-2 py-0.5 rounded-full">
+                  <span className="badge-base badge-accent">
                     {transcriptList.length}
                   </span>
                 )}
@@ -711,7 +709,7 @@ export default function TranscriptInput() {
                       <div key={tx.id} className="border border-black/8 rounded-xl overflow-hidden">
                         <button
                           onClick={() => setExpandedTranscript(expanded ? null : tx.id)}
-                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#F7F4FB] transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-page)] transition-colors text-left"
                         >
                           <ChevronDown
                             size={14}
@@ -723,7 +721,7 @@ export default function TranscriptInput() {
                           </div>
                           <div className="flex items-center gap-3 text-xs text-black/42 flex-shrink-0">
                             {tx.tasks_extracted != null && (
-                              <span className="text-[#248F63] font-medium">+{tx.tasks_extracted} tasks</span>
+                              <span className="text-sea-500 font-medium">+{tx.tasks_extracted} tasks</span>
                             )}
                             <span className="flex items-center gap-1">
                               <Clock size={10} />
@@ -751,7 +749,7 @@ export default function TranscriptInput() {
             {/* Pipeline actions */}
             <div className="bg-white border border-black/8 rounded-2xl p-6 shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
               <h2 className="text-black font-semibold mb-4 flex items-center gap-2">
-                <Play size={16} className="text-[#5E149F]" />
+                <Play size={16} className="text-axispurple-900" />
                 Pipeline Actions
               </h2>
 
@@ -764,9 +762,9 @@ export default function TranscriptInput() {
                   style={canRunPipeline ? { background: 'rgba(94,20,159,0.06)', borderColor: 'rgba(94,20,159,0.18)' } : undefined}
                 >
                   {pipelineJob.isRunning ? (
-                    <Loader2 size={18} className="text-[#5E149F] animate-spin flex-shrink-0" />
+                    <Loader2 size={18} className="text-axispurple-900 animate-spin flex-shrink-0" />
                   ) : (
-                    <Play size={18} className={canRunPipeline ? 'text-[#5E149F]' : 'text-black/28'} />
+                    <Play size={18} className={canRunPipeline ? 'text-axispurple-900' : 'text-black/28'} />
                   )}
                   <div>
                     <div className={`text-sm font-medium ${canRunPipeline ? 'text-black' : 'text-black/38'}`}>
@@ -777,7 +775,7 @@ export default function TranscriptInput() {
 
                 {/* Pipeline progress */}
                 {pipelineJob.isRunning && pipelineJob.job && (
-                  <div className="bg-[#F7F4FB] border border-black/8 rounded-xl p-4">
+                  <div className="bg-[var(--surface-page)] border border-black/8 rounded-xl p-4">
                     <PipelineProgress
                       progressPct={pipelineJob.job.progress_pct}
                       currentStep={pipelineJob.job.current_step}
@@ -792,7 +790,7 @@ export default function TranscriptInput() {
                 )}
 
                 {pipelineJob.isDone && (
-                  <div className="bg-[#F0FAF5] border border-[#248F63]/20 rounded-xl px-4 py-3 text-[#248F63] text-sm flex items-center gap-2">
+                  <div className="bg-sea-50 border border-sea-500/20 rounded-xl px-4 py-3 text-sea-600 text-sm flex items-center gap-2">
                     <CheckCircle2 size={14} />
                     Pipeline complete — ready to review
                   </div>
@@ -811,7 +809,7 @@ export default function TranscriptInput() {
                 {/* Preview tasks */}
                 <button
                   onClick={() => setShowTaskPreview(true)}
-                  className="w-full flex items-center gap-3 bg-[#F7F4FB] hover:bg-[#F0EAF8] border border-black/8 rounded-xl px-4 py-3 transition-colors text-left"
+                  className="w-full flex items-center gap-3 bg-[var(--surface-page)] hover:bg-[#F0EAF8] border border-black/8 rounded-xl px-4 py-3 transition-colors text-left"
                 >
                   <Table2 size={18} className="text-black/42 flex-shrink-0" />
                   <div>
@@ -826,7 +824,7 @@ export default function TranscriptInput() {
                 <button
                   onClick={handleResetTasks}
                   disabled={taskGraph.length === 0}
-                  className="w-full flex items-center gap-3 bg-[#F7F4FB] hover:bg-red-50 disabled:cursor-not-allowed border border-black/8 hover:border-red-200 disabled:hover:border-black/8 rounded-xl px-4 py-3 transition-colors text-left group"
+                  className="w-full flex items-center gap-3 bg-[var(--surface-page)] hover:bg-red-50 disabled:cursor-not-allowed border border-black/8 hover:border-red-200 disabled:hover:border-black/8 rounded-xl px-4 py-3 transition-colors text-left group"
                 >
                   <Trash2 size={18} className="text-black/32 group-hover:text-red-400 flex-shrink-0" />
                   <div>
@@ -863,7 +861,7 @@ export default function TranscriptInput() {
                       onChange={(e) => setTeamSizeDraft(e.target.value)}
                       onBlur={handleSaveTeamSize}
                       placeholder="e.g. 12"
-                      className="w-full bg-[#F7F4FB] border border-black/10 rounded-xl px-3 py-2 text-black text-sm placeholder:text-black/28 focus:border-[#B4308B] focus:ring-1 focus:ring-[#B4308B]/20 outline-none transition-colors"
+                      className="w-full bg-[var(--surface-page)] border border-black/10 rounded-xl px-3 py-2 text-black text-sm placeholder:text-black/28 focus-ring-accent transition-colors"
                     />
                     {teamSizeSaving && <Loader2 size={16} className="text-black/30 animate-spin self-center flex-shrink-0" />}
                   </div>
@@ -874,8 +872,7 @@ export default function TranscriptInput() {
               {project?.status === 'ready' && (
                 <button
                   onClick={() => navigate(`/projects/${projectId}/workflow-report`)}
-                  className="w-full mt-4 flex items-center justify-center gap-2 text-white px-4 py-2.5 rounded-full font-semibold text-sm transition-colors"
-                  style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}
+                  className="btn-primary w-full mt-4 justify-center px-4 py-2.5"
                 >
                   View Report
                   <ChevronRight size={16} />

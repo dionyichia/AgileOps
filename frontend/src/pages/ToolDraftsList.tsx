@@ -4,8 +4,6 @@ import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
 import ClientWorkspaceShell from '../components/workspace/ClientWorkspaceShell'
 import { deleteToolDraft, loadToolDrafts, type ToolDraft } from '../lib/toolDraftStorage'
 
-const VIOLET = '#5E149F'
-
 export default function ToolDraftsList() {
   const navigate = useNavigate()
   const [drafts, setDrafts] = useState<ToolDraft[]>(() => loadToolDrafts())
@@ -44,13 +42,13 @@ export default function ToolDraftsList() {
         </div>
       }
     >
-      <main className="mx-auto max-w-3xl flex-1 px-6 py-8 md:px-10">
-        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: VIOLET }}>
+      <main className="mx-auto max-w-3xl flex-1 px-4 py-6 md:px-6 md:py-8 lg:px-10">
+        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.16em] text-axispurple-900">
           All drafts ({sorted.length})
         </p>
 
         {sorted.length === 0 ? (
-          <div className="rounded-2xl border border-black/10 bg-[#FBFAFD] px-6 py-12 text-center text-sm text-black/50">
+          <div className="rounded-2xl border border-black/10 bg-[var(--surface-page)] px-6 py-12 text-center text-sm text-black/50">
             No drafts yet. Use <span className="font-semibold text-black/70">Save Draft</span> on the tool input page.
           </div>
         ) : (
@@ -60,7 +58,7 @@ export default function ToolDraftsList() {
                 <button
                   type="button"
                   onClick={() => navigate(`/toolinput?draft=${encodeURIComponent(d.id)}`)}
-                  className="flex min-w-0 flex-1 items-center justify-between rounded-2xl border border-black/10 bg-[#FBFAFD] px-4 py-4 text-left transition-colors hover:border-black/15 hover:bg-[#F5F2FA]"
+                  className="flex min-w-0 flex-1 items-center justify-between rounded-2xl border border-black/10 bg-[var(--surface-page)] px-4 py-4 text-left transition-colors hover:border-black/15 hover:bg-[var(--surface-accent-subtle)]"
                 >
                   <div className="min-w-0">
                     <div className="truncate text-base font-semibold text-black">{displayName(d)}</div>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Loader2, MessageCircle, Send, Sparkles, X } from 'lucide-react'
 
 import { cosmo } from '../../api/client'
@@ -101,7 +102,7 @@ export default function CosmoChatWidget({
     }
   }
 
-  return (
+  return createPortal(
     <div className="fixed bottom-5 right-5 z-[70] flex items-end justify-end sm:bottom-6 sm:right-6">
       {isOpen ? (
         <div className="flex h-[min(70vh,620px)] w-[min(calc(100vw-24px),390px)] flex-col overflow-hidden rounded-[28px] border border-white/40 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.22)]">
@@ -200,6 +201,7 @@ export default function CosmoChatWidget({
           {!launcherCompact && <span className="ml-2 text-sm font-semibold">Ask Cosmo</span>}
         </button>
       )}
-    </div>
+    </div>,
+    document.body,
   )
 }

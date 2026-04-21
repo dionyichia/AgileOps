@@ -129,7 +129,7 @@ export default function FinalRecommendation() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-black md:text-3xl">Final recommendation</h1>
         <p className="mt-1 text-sm text-black/55">
-          Axis recommendation for <span className="font-semibold text-[#5E149F]">{toolName}</span> · based on your{' '}
+          Axis recommendation for <span className="font-semibold text-axispurple-900">{toolName}</span> · based on your{' '}
           {project?.primary_role ?? 'sales'} workflow simulation
         </p>
       </div>
@@ -140,7 +140,7 @@ export default function FinalRecommendation() {
     if (isFlatClient) {
       return (
         <ClientWorkspaceShell headerLeft={flatShellHeader} projectId={projectId}>
-          <div className="flex flex-1 items-center justify-center bg-[#F7F4FB] py-24">
+          <div className="flex flex-1 items-center justify-center bg-[var(--surface-page)] py-24">
             <PageLoader message="Loading recommendation..." />
           </div>
         </ClientWorkspaceShell>
@@ -169,16 +169,16 @@ export default function FinalRecommendation() {
         <div
           className="bg-white border rounded-[28px] p-6"
           style={{
-            borderColor: 'rgba(94,20,159,0.10)',
+            borderColor: 'var(--border-accent)',
             boxShadow: '0 22px 48px rgba(15,23,42,0.06)',
             background: 'linear-gradient(180deg, #FFFFFF 0%, #FCF8FF 100%)',
           }}
         >
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
-              <div className="text-xs font-bold tracking-widest uppercase mb-1 text-[#5E149F]">Recommendation</div>
+              <div className="text-xs font-bold tracking-widest uppercase mb-1 text-axispurple-900">Recommendation</div>
               <h2 className="text-xl font-bold text-black">
-                Adopt <span className="text-[#B4308B]">{toolName}</span> for your {project?.primary_role ?? 'sales'} team
+                Adopt <span className="text-axispurple-700">{toolName}</span> for your {project?.primary_role ?? 'sales'} team
               </h2>
             </div>
             <ConfidenceBadge score={conf} />
@@ -193,7 +193,7 @@ export default function FinalRecommendation() {
         <div
           className="bg-white border rounded-[28px] p-6"
           style={{
-            borderColor: 'rgba(94,20,159,0.10)',
+            borderColor: 'var(--border-accent)',
             boxShadow: '0 22px 48px rgba(15,23,42,0.06)',
             background: 'linear-gradient(180deg, #FFFFFF 0%, #FFF8FC 100%)',
           }}
@@ -207,7 +207,7 @@ export default function FinalRecommendation() {
           <div className="mt-4 mb-6">
             <div className="flex justify-between text-xs text-black/48 mb-2">
               <span>Estimated Adoption Rate</span>
-              <span className="font-bold text-[#5E149F]">{adoption}%</span>
+              <span className="font-bold text-axispurple-900">{adoption}%</span>
             </div>
             <input
               type="range"
@@ -218,13 +218,13 @@ export default function FinalRecommendation() {
               onChange={(e) => setAdoption(Number(e.target.value))}
               className="w-full"
               style={{
-                background: `linear-gradient(to right, #5E149F 0%, #F75A8C ${((adoption - 10) / 60) * 100}%, rgba(17,17,17,0.10) ${((adoption - 10) / 60) * 100}%, rgba(17,17,17,0.10) 100%)`,
+                background: `linear-gradient(to right, var(--axis-violet-900) 0%, var(--axis-coral-400) ${((adoption - 10) / 60) * 100}%, rgba(17,17,17,0.10) ${((adoption - 10) / 60) * 100}%, rgba(17,17,17,0.10) 100%)`,
               }}
             />
             <div className="flex justify-between text-xs text-black/34 mt-1">
-              <span>10% (cautious)</span>
-              <span>40% (moderate)</span>
-              <span>70% (full)</span>
+              <span>10%</span>
+              <span className="hidden sm:inline">40% (moderate)</span>
+              <span>70%</span>
             </div>
           </div>
 
@@ -233,13 +233,13 @@ export default function FinalRecommendation() {
             <div
               className="border rounded-[24px] p-5"
               style={{
-                borderColor: 'rgba(94,20,159,0.08)',
+                borderColor: 'var(--border-accent)',
                 background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF6FF 100%)',
                 boxShadow: '0 14px 30px rgba(15,23,42,0.04)',
               }}
             >
               <div className="flex items-center gap-2 mb-4">
-                <Users size={15} className="text-[#5E149F]" />
+                <Users size={15} className="text-axispurple-900" />
                 <span className="text-xs font-bold text-black/46 uppercase tracking-widest">Employee Level</span>
               </div>
               <div className="space-y-4">
@@ -268,13 +268,13 @@ export default function FinalRecommendation() {
             <div
               className="border rounded-[24px] p-5"
               style={{
-                borderColor: 'rgba(94,20,159,0.08)',
+                borderColor: 'var(--border-accent)',
                 background: 'linear-gradient(180deg, #FFFFFF 0%, #FFF7FB 100%)',
                 boxShadow: '0 14px 30px rgba(15,23,42,0.04)',
               }}
             >
               <div className="flex items-center gap-2 mb-4">
-                <Building2 size={15} className="text-[#B4308B]" />
+                <Building2 size={15} className="text-axispurple-700" />
                 <span className="text-xs font-bold text-black/46 uppercase tracking-widest">Company Level</span>
               </div>
               <div className="space-y-4">
@@ -307,7 +307,7 @@ export default function FinalRecommendation() {
         <div
           className="bg-white border rounded-[28px] p-6"
           style={{
-            borderColor: 'rgba(94,20,159,0.10)',
+            borderColor: 'var(--border-accent)',
             boxShadow: '0 22px 48px rgba(15,23,42,0.06)',
             background: 'linear-gradient(180deg, #FFFFFF 0%, #FCF8FF 100%)',
           }}
@@ -319,12 +319,12 @@ export default function FinalRecommendation() {
                 key={uc.title}
                 className="flex gap-3 border rounded-[22px] p-4"
                 style={{
-                  borderColor: 'rgba(94,20,159,0.08)',
+                  borderColor: 'var(--border-accent)',
                   background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF6FF 100%)',
                   boxShadow: '0 12px 26px rgba(15,23,42,0.04)',
                 }}
               >
-                <CheckCircle2 size={16} className="text-[#5E149F] flex-shrink-0 mt-0.5" />
+                <CheckCircle2 size={16} className="text-axispurple-900 flex-shrink-0 mt-0.5" />
                 <div>
                   <div className="text-sm font-semibold text-black mb-1">{uc.title}</div>
                   <div className="text-xs text-black/56 leading-relaxed">{uc.description}</div>
@@ -338,29 +338,28 @@ export default function FinalRecommendation() {
         <div
           className="bg-white border rounded-[28px] p-6"
           style={{
-            borderColor: 'rgba(94,20,159,0.10)',
+            borderColor: 'var(--border-accent)',
             boxShadow: '0 22px 48px rgba(15,23,42,0.06)',
             background: 'linear-gradient(180deg, #FFFFFF 0%, #FFF8FC 100%)',
           }}
         >
           <h3 className="text-sm font-bold text-black mb-3">Summary & Integration Plan</h3>
           <div className="text-sm text-black/60 leading-relaxed mb-5">
-            At <strong className="text-[#5E149F]">{adoption}% adoption</strong>, integrating {toolName} into your{' '}
+            At <strong className="text-axispurple-900">{adoption}% adoption</strong>, integrating {toolName} into your{' '}
             {project?.primary_role ?? 'sales'} workflow is projected to save{' '}
-            <strong className="text-[#B4308B]">{timeSaved} hours/rep/week</strong> and increase qualified
-            pipeline by <strong className="text-[#F75A8C]">{throughput}%</strong> — generating an estimated{' '}
-            <strong className="text-[#5E149F]">{formatDollar(netRevenue)}</strong> in net annual value against a{' '}
+            <strong className="text-axispurple-700">{timeSaved} hours/rep/week</strong> and increase qualified
+            pipeline by <strong className="text-axispurple-300">{throughput}%</strong> — generating an estimated{' '}
+            <strong className="text-axispurple-900">{formatDollar(netRevenue)}</strong> in net annual value against a{' '}
             {formatDollar(ci.toolCost)} license cost.
             <br /><br />
             Recommended rollout: Start with a pilot cohort for 4 weeks, measure reply rate and prospects-per-rep,
             then expand to the full team with a structured onboarding session.
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <button
               onClick={() => {}}
-              className="flex items-center gap-2 text-white font-semibold px-5 py-3 rounded-full text-sm transition-colors"
-              style={{ background: 'linear-gradient(90deg, #5E149F 0%, #F75A8C 100%)' }}
+              className="btn-primary px-5 py-3 text-sm"
             >
               <Download size={15} />
               Download Report
@@ -401,10 +400,10 @@ export default function FinalRecommendation() {
 
 function Metric({ label, value, sub, color }: { label: string; value: string; sub: string; color: string }) {
   const colorMap: Record<string, string> = {
-    emerald: 'text-[#5E149F]',
-    indigo:  'text-[#B4308B]',
-    violet:  'text-[#F75A8C]',
-    amber:   'text-[#B4308B]',
+    emerald: 'text-axispurple-900',
+    indigo:  'text-axispurple-700',
+    violet:  'text-axispurple-300',
+    amber:   'text-axispurple-700',
     slate:   'text-black/72',
   }
   return (
@@ -417,9 +416,9 @@ function Metric({ label, value, sub, color }: { label: string; value: string; su
 }
 
 function ConfidenceBadge({ score }: { score: number }) {
-  const color = score >= 80 ? 'text-[#5E149F] bg-[#F4E8FB] border-[#5E149F]/20'
-              : score >= 60 ? 'text-[#B4308B] bg-[#FCEAF4] border-[#B4308B]/20'
-              :               'text-[#F75A8C] bg-[#FFE9EF] border-[#F75A8C]/20'
+  const color = score >= 80 ? 'text-axispurple-900 bg-[var(--surface-accent-subtle)] border-axispurple-900/20'
+              : score >= 60 ? 'text-axispurple-700 bg-[#FCEAF4] border-axispurple-700/20'
+              :               'text-axispurple-300 bg-[#FFE9EF] border-axispurple-300/20'
   return (
     <div className={`flex flex-col items-center border rounded-[20px] px-4 py-3 shadow-[0_14px_30px_rgba(15,23,42,0.06)] ${color}`}>
       <div className="flex items-center gap-1 mb-1">

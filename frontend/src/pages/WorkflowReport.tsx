@@ -19,11 +19,13 @@ import { nodeTypes } from '../components/workflow/CustomNodes'
 import { projects as projectsApi, tasks as tasksApi, type Project, type TaskNode } from '../api/client'
 import { useMarkovData } from '../hooks/pullMarkovData'
 import { useGsapReveal } from '../hooks/useGsapReveal'
+import { useTheme } from '../hooks/useTheme'
 
 
 export default function WorkflowReport() {
   const { projectId } = useParams<{ projectId: string }>()
   const { existingNodes, existingEdges, loading, error } = useMarkovData(projectId)
+  const { theme } = useTheme()
 
   const navigate = useNavigate()
   const [nodes, setNodes, onNodesChange] = useNodesState(existingNodes)
@@ -73,8 +75,8 @@ export default function WorkflowReport() {
         subtitle="Loading workflow data..."
         hideNextButton
       >
-        <div className="flex gap-6 h-full">
-          <div className="w-72 flex-shrink-0 space-y-5">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="w-full lg:w-72 lg:flex-shrink-0 space-y-5">
             <SkeletonCard lines={5} />
             <SkeletonCard lines={6} />
           </div>
@@ -96,11 +98,11 @@ export default function WorkflowReport() {
         nextLabel="Analyze New Tool"
       >
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <AlertCircle size={40} className="text-[#F75A8C]" />
-          <p className="text-[#F75A8C] text-sm">{error}</p>
+          <AlertCircle size={40} className="text-axispurple-300" />
+          <p className="text-axispurple-300 text-sm">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="text-sm text-[#5E149F] hover:text-[#B4308B] underline"
+            className="text-sm text-axispurple-900 hover:text-axispurple-700 underline"
           >
             Try again
           </button>
@@ -116,9 +118,9 @@ export default function WorkflowReport() {
               {
                 ...params,
                 type: 'smoothstep',
-                style: { stroke: '#5E149F', strokeWidth: 2 },
+                style: { stroke: 'var(--axis-violet-900)', strokeWidth: 2 },
                 label: '?%',
-                labelStyle: { fill: '#5E149F', fontWeight: 700, fontSize: 11 },
+                labelStyle: { fill: 'var(--axis-violet-900)', fontWeight: 700, fontSize: 11 },
                 labelBgStyle: { fill: '#FFFFFF', fillOpacity: 0.95 },
                 labelBgPadding: [4, 8] as [number, number],
               },
@@ -195,15 +197,15 @@ export default function WorkflowReport() {
       onNext={() => navigate(projectId ? `/projects/${projectId}/tool-input` : '/internal/tool-input')}
       nextLabel="Analyze New Tool"
     >
-      <div ref={rootRef} className="flex gap-6 h-full">
+      <div ref={rootRef} className="flex flex-col lg:flex-row gap-6">
 
         {/* ── Left panel ─────────────────────────────────────────────────────── */}
-        <div data-gsap-reveal-panel className="w-72 flex-shrink-0 space-y-5 overflow-y-auto max-h-[calc(100vh-260px)] pr-1">
+        <div data-gsap-reveal-panel className="w-full lg:w-72 lg:flex-shrink-0 space-y-5 lg:overflow-y-auto lg:max-h-[calc(100vh-260px)] pr-1">
 
           {/* Role Stats */}
           <div
             className="bg-white border rounded-[24px] p-5"
-            style={{ borderColor: 'rgba(94,20,159,0.10)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
+            style={{ borderColor: 'var(--border-accent)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
           >
             <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-4">Role Stats</h3>
             <div className="space-y-3">
@@ -223,7 +225,7 @@ export default function WorkflowReport() {
           {/* Tool Stack */}
           <div
             className="bg-white border rounded-[24px] p-5"
-            style={{ borderColor: 'rgba(94,20,159,0.10)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
+            style={{ borderColor: 'var(--border-accent)', boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}
           >
             <h3 className="text-xs font-bold text-black/42 uppercase tracking-widest mb-4">Tool Stack</h3>
             {derivedToolList.length > 0 ? (
@@ -251,10 +253,10 @@ export default function WorkflowReport() {
           <div
             className="bg-white border rounded-[24px] overflow-hidden"
             style={{
-              height: 'calc(100vh - 260px)',
-              borderColor: 'rgba(94,20,159,0.10)',
+              height: 'clamp(400px, 60vw, calc(100vh - 260px))',
+              borderColor: 'var(--border-accent)',
               boxShadow: '0 18px 40px rgba(15,23,42,0.05)',
-              background: 'linear-gradient(180deg, #FFFFFF 0%, #FCF7FF 100%)',
+              background: 'var(--surface-card)',
             }}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-black/8">
@@ -265,13 +267,13 @@ export default function WorkflowReport() {
               <div className="flex items-center gap-3">
                 {/* Legend */}
                 <div className="hidden lg:flex items-center gap-3 text-xs text-black/42">
-                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#248F63] inline-block rounded" /> Success</span>
-                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#F75A8C] inline-block rounded" /> Fail</span>
+                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-sea-500 inline-block rounded" /> Success</span>
+                  <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-axispurple-300 inline-block rounded" /> Fail</span>
                   <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-[#C98400] inline-block rounded" /> Retry</span>
                 </div>
                 <button
                   onClick={addTask}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-[#5E149F] bg-[#F4E8FB] hover:bg-[#EEDFF8] border border-[#5E149F]/16 px-3 py-1.5 rounded-full transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-axispurple-900 bg-[var(--surface-accent-subtle)] hover:bg-axispurple-900/10 border border-axispurple-900/16 px-3 py-1.5 rounded-full transition-colors"
                 >
                   <Plus size={12} /> Add Task
                 </button>
@@ -292,10 +294,10 @@ export default function WorkflowReport() {
             >
               <Controls />
               <MiniMap
-                nodeColor={() => '#EEDFF8'}
-                maskColor="rgba(255,255,255,0.75)"
+                nodeColor={() => theme === 'dark' ? '#4A2575' : '#EEDFF8'}
+                maskColor={theme === 'dark' ? 'rgba(13,17,23,0.7)' : 'rgba(255,255,255,0.75)'}
               />
-              <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#E8D8F4" />
+              <Background variant={BackgroundVariant.Dots} gap={24} size={1} color={theme === 'dark' ? '#1E2A40' : '#E8D8F4'} />
             </ReactFlow>
           </div>
         </div>

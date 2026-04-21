@@ -658,7 +658,7 @@ export default function LandingPage() {
                 <motion.button
                   data-gsap-hero-cta
                   onClick={goToConsultation}
-                  className="bg-white text-black inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-[17px] font-bold"
+                  className="axis-gradient-button inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-[17px] font-bold text-white"
                   whileHover={{
                     scale: 1.018,
                     boxShadow: '0 0 28px rgba(247,90,140,0.4)',
