@@ -645,9 +645,7 @@ export default function LandingPage() {
                 data-gsap-hero-subheadline
                 className="mt-8 max-w-3xl mx-auto text-[22px] leading-[1.35] font-medium text-white/75 text-balance"
               >
-                We analyze your team&apos;s workflow and recommend the tools that
-                will <em className="italic font-medium">actually</em> improve
-                productivity.
+                We model your actual sales pipeline and run the numbers — so you know exactly how a tool will move your throughput, deal velocity, and revenue before you sign anything.
               </motion.p>
 
               {/* CTA buttons */}
