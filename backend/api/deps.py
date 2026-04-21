@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from backend.api.config import DATABASE_URL, SUPABASE_ANON_KEY, SUPABASE_URL
+from backend.api.config import DATABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY, SUPABASE_URL
 
 _pg_kwargs = (
     {"pool_size": 5, "max_overflow": 10, "pool_pre_ping": True}
@@ -23,6 +23,7 @@ bearer = HTTPBearer(auto_error=False)
 class AuthUser:
     id: str
     email: str
+    is_admin: bool = False
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -52,4 +53,22 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="Invalid or expired session")
 
     data = resp.json()
-    return AuthUser(id=data["id"], email=data.get("email", ""))
+    user_id = data["id"]
+    email = data.get("email", "")
+
+    is_admin = False
+    if SUPABASE_SERVICE_KEY:
+        async with httpx.AsyncClient() as client:
+            profile_resp = await client.get(
+                f"{SUPABASE_URL}/rest/v1/user_profiles",
+                params={"id": f"eq.{user_id}", "select": "role", "limit": "1"},
+                headers={
+                    "apikey": SUPABASE_SERVICE_KEY,
+                    "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+                },
+            )
+        if profile_resp.status_code == 200:
+            rows = profile_resp.json()
+            is_admin = bool(rows) and rows[0].get("role") == "admin"
+
+    return AuthUser(id=user_id, email=email, is_admin=is_admin)

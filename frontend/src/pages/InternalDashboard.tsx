@@ -29,6 +29,7 @@ import {
   type TaskEditRequest,
   type Transcript,
 } from '../api/client'
+import { clearMarkovCache } from '../hooks/dataLoader'
 
 // Meow
 
@@ -124,6 +125,8 @@ export default function InternalDashboard() {
       const updated = action === 'approve'
         ? await taskEditRequestsApi.approve(projectId, requestId)
         : await taskEditRequestsApi.reject(projectId, requestId)
+
+      if (action === 'approve') clearMarkovCache(projectId)
 
       setProjectTaskEdits((prev) => {
         const current = Array.isArray(prev[projectId]) ? prev[projectId] : []

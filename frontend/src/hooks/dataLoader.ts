@@ -15,6 +15,12 @@
 
 import type { Node, Edge } from 'reactflow'
 import type { TransitionMatrixJSON } from '../schema'
+import { getAccessToken } from '../lib/supabase'
+
+async function authFetch(url: string): Promise<Response> {
+  const token = await getAccessToken()
+  return fetch(url, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined)
+}
 
 // Minimal shape of an all_tasks.json node we care about for display
 interface AllTasksNode {
@@ -399,9 +405,9 @@ export async function loadMarkovData(projectId?: string): Promise<LoadedMarkovDa
   if (_cache[url]) return _cache[url]
 
   // Fetch transition matrix (required) and all_tasks metadata (optional, project-only)
-  const markovFetch = fetch(url)
+  const markovFetch = authFetch(url)
   const tasksFetch = projectId
-    ? fetch(`/api/projects/${projectId}/tasks`).then((r) => r.ok ? r.json() as Promise<AllTasksNode[]> : []).catch(() => [])
+    ? authFetch(`/api/projects/${projectId}/tasks`).then((r) => r.ok ? r.json() as Promise<AllTasksNode[]> : []).catch(() => [])
     : Promise.resolve([])
 
   const [res, tasksRaw] = await Promise.all([markovFetch, tasksFetch])

@@ -14,7 +14,7 @@ async def require_owned_project(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    if project.owner_id != current_user.id:
+    if not current_user.is_admin and project.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="You do not have access to this project")
 
     return project

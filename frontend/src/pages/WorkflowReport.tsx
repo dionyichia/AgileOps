@@ -18,6 +18,7 @@ import { SkeletonCard, PageLoader } from '../components/ui/Skeleton'
 import { nodeTypes } from '../components/workflow/CustomNodes'
 import { projects as projectsApi, tasks as tasksApi, type Project, type TaskNode } from '../api/client'
 import { useMarkovData } from '../hooks/pullMarkovData'
+import { clearMarkovCache } from '../hooks/dataLoader'
 import { useGsapReveal } from '../hooks/useGsapReveal'
 import { useTheme } from '../hooks/useTheme'
 
@@ -47,6 +48,7 @@ export default function WorkflowReport() {
 
   useEffect(() => {
     if (!projectId) return
+    clearMarkovCache(projectId)
     projectsApi.get(projectId).then(setProject).catch(() => {})
     tasksApi.get(projectId).then(setTaskNodes).catch(() => {})
   }, [projectId])

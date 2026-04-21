@@ -1,13 +1,13 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.deps import AuthUser, get_current_user, get_db
-from backend.api.models.db import Project, TaskEditRequest
+from backend.api.models.db import JobType, Project, TaskEditRequest
 from backend.api.schemas.api import TaskEditRequestCreate, TaskEditRequestOut, TaskEditReview
-from backend.api.services import data_io
+from backend.api.services import data_io, job_runner
 
 router = APIRouter(tags=["task-edit-requests"])
 
@@ -105,6 +105,7 @@ async def create_task_edit_request(
 async def approve_task_edit_request(
     project_id: str,
     request_id: str,
+    background_tasks: BackgroundTasks,
     body: TaskEditReview | None = None,
     db: AsyncSession = Depends(get_db),
     current_user: AuthUser = Depends(get_current_user),
@@ -121,6 +122,10 @@ async def approve_task_edit_request(
     updated_tasks = _apply_proposed_task(tasks, task_edit_request.node_id, task_edit_request.proposed_task)
     await data_io.write_tasks_json(project_id, updated_tasks)
     await data_io.clear_telemetry_json(project_id)
+
+    # Re-run the full pipeline so transition_matrix.json and the graph reflect the change
+    job = await job_runner.create_job(db, project_id, JobType.pipeline_run)
+    background_tasks.add_task(job_runner.run_pipeline_job, job.id, project_id)
 
     task_edit_request.status = "approved"
     task_edit_request.reviewer_user_id = current_user.id
