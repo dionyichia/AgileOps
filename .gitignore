@@ -28,5 +28,5 @@ frontend/.env
 frontend/.env.local
 
 # Data (dev database)
-backend/data/agileops.db
+# backend/data/agileops.db
 node_modules/
