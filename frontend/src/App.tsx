@@ -30,13 +30,13 @@ export default function App() {
         <Route path="/auth/callback" element={<AcceptInvite />} />
 
         {/* Client workspace — legacy flat routes (no project scope) */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        {/* <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/toolinput" element={<ToolInputForm />} />
         <Route path="/simulations" element={<SimulationsList />} />
         <Route path="/tool-drafts" element={<ToolDraftsList />} />
         <Route path="/reports" element={<ReportsList />} />
         <Route path="/simulation" element={<SimulationResults />} />
-        <Route path="/recommendation" element={<FinalRecommendation />} />
+        <Route path="/recommendation" element={<FinalRecommendation />} /> */}
 
         {/* Internal tools hub — admin only, always dark */}
         <Route path="/internal/login" element={<ForceDark><InternalLogin /></ForceDark>} />
