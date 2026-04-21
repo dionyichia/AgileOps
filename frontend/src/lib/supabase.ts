@@ -34,3 +34,9 @@ export async function getUserRole(): Promise<string> {
     .single()
   return (data?.role as string) ?? 'client'
 }
+
+/** Clear cached role/project for a user id (call on sign-out). */
+export function clearAuthCache(userId: string) {
+  localStorage.removeItem(`axis_role_${userId}`)
+  localStorage.removeItem(`axis_project_${userId}`)
+}

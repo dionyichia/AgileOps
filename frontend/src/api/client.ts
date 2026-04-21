@@ -5,7 +5,7 @@
  * The Vite dev proxy forwards /api/* to the FastAPI server on :8000.
  */
 
-import { getAccessToken, supabase } from '../lib/supabase'
+import { getAccessToken, supabase, clearAuthCache } from '../lib/supabase'
 
 const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api'
 
@@ -14,7 +14,11 @@ const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api'
 export const token = {
   get: (): string | null => null,           // use getAccessToken() for async access
   set: (_t: string) => {},                  // no-op; Supabase manages the session
-  clear: () => supabase.auth.signOut(),
+  clear: async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.user.id) clearAuthCache(session.user.id)
+    return supabase.auth.signOut()
+  },
 }
 
 async function authHeaders(): Promise<Record<string, string>> {
@@ -161,7 +165,11 @@ export const auth = {
     supabase.auth.signUp({ email, password }),
   resetPassword: (email: string) =>
     supabase.auth.resetPasswordForEmail(email),
-  logout: () => supabase.auth.signOut(),
+  logout: async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.user.id) clearAuthCache(session.user.id)
+    return supabase.auth.signOut()
+  },
 }
 
 // ── Consultation (public — no auth needed) ─────────────

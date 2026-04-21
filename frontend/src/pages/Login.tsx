@@ -23,23 +23,38 @@ export default function Login() {
     setLoading(true)
     try {
       if (mode === 'login') {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+        const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
         if (authError) throw new Error(authError.message)
+
+        // Fast path: use cached role + project from last session
+        const userId = data.session?.user.id
+        if (userId) {
+          const cachedRole = localStorage.getItem(`axis_role_${userId}`)
+          const cachedProject = localStorage.getItem(`axis_project_${userId}`)
+          if (cachedRole === 'admin') { navigate('/internal'); return }
+          if (cachedRole === 'client' && cachedProject) {
+            navigate(`/projects/${cachedProject}/dashboard`)
+            return
+          }
+        }
+
+        // Slow path: fetch role and projects in parallel (first login or cache miss)
+        const [role, userProjects] = await Promise.all([getUserRole(), projects.list()])
+
+        if (userId) {
+          localStorage.setItem(`axis_role_${userId}`, role)
+          if (userProjects.length > 0) localStorage.setItem(`axis_project_${userId}`, userProjects[0].id)
+        }
+
+        if (role === 'admin') { navigate('/internal'); return }
+        if (userProjects.length > 0) {
+          navigate(`/projects/${userProjects[0].id}/dashboard`)
+        } else {
+          navigate('/get-started')
+        }
       } else {
         const { error: authError } = await supabase.auth.signUp({ email, password })
         if (authError) throw new Error(authError.message)
-      }
-
-      const role = await getUserRole()
-      if (role === 'admin') {
-        navigate('/internal')
-        return
-      }
-
-      const userProjects = await projects.list()
-      if (userProjects.length > 0) {
-        navigate(`/projects/${userProjects[0].id}/dashboard`)
-      } else {
         navigate('/get-started')
       }
     } catch (err: unknown) {
