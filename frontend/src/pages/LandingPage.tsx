@@ -659,6 +659,7 @@ export default function LandingPage() {
                   data-gsap-hero-cta
                   onClick={goToConsultation}
                   className="axis-gradient-button inline-flex items-center justify-center gap-2 rounded-full border-2 border-white px-8 py-4 text-[17px] font-bold text-white"
+                  style={{ border: '2px solid white' }}
                   whileHover={{
                     scale: 1.018,
                     boxShadow: '0 0 28px rgba(247,90,140,0.4)',
