@@ -658,7 +658,7 @@ export default function LandingPage() {
                 <motion.button
                   data-gsap-hero-cta
                   onClick={goToConsultation}
-                  className="axis-gradient-button inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-[17px] font-bold text-white"
+                  className="axis-gradient-button inline-flex items-center justify-center gap-2 rounded-full border-2 border-white px-8 py-4 text-[17px] font-bold text-white"
                   whileHover={{
                     scale: 1.018,
                     boxShadow: '0 0 28px rgba(247,90,140,0.4)',
@@ -830,7 +830,7 @@ export default function LandingPage() {
               <button
                 data-gsap-reveal-item
                 onClick={goToConsultation}
-                className="bg-white text-black inline-flex items-center gap-2 rounded-full px-8 py-4 text-[17px] font-bold transition-transform hover:-translate-y-0.5"
+                className="bg-white text-black inline-flex items-center gap-2 rounded-full border-2 border-white px-8 py-4 text-[17px] font-bold transition-transform hover:-translate-y-0.5"
               >
                 Get Started
                 <ChevronRight size={18} />

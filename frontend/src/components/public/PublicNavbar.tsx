@@ -107,7 +107,7 @@ export default function PublicNavbar({
             </MotionHighlight>
             <button
               onClick={() => navigate('/get-started')}
-              className="rounded-full bg-white px-4 py-2 text-[13px] font-bold text-black transition-transform hover:-translate-y-0.5 sm:px-5 md:px-6 md:py-2.5 md:text-[16px]"
+              className="rounded-full border-2 border-white bg-white px-4 py-2 text-[13px] font-bold text-black transition-transform hover:-translate-y-0.5 sm:px-5 md:px-6 md:py-2.5 md:text-[16px]"
             >
               Get Started
             </button>
