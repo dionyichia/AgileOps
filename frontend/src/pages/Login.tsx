@@ -40,7 +40,7 @@ export default function Login() {
       if (userProjects.length > 0) {
         navigate(`/projects/${userProjects[0].id}/dashboard`)
       } else {
-        navigate('/dashboard')
+        navigate('/get-started')
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
