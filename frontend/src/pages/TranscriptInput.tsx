@@ -583,7 +583,7 @@ export default function TranscriptInput() {
                   <input
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => { setName(e.target.value); if (transcriptJob.isDone) setTranscriptJobId(null) }}
                     disabled={transcriptFormLocked}
                     placeholder="e.g. Jordan Mills"
                     className="w-full bg-[var(--surface-page)] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm placeholder:text-black/28 focus-ring-accent transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
@@ -594,7 +594,7 @@ export default function TranscriptInput() {
                   <input
                     type="text"
                     value={role}
-                    onChange={(e) => setRole(e.target.value)}
+                    onChange={(e) => { setRole(e.target.value); if (transcriptJob.isDone) setTranscriptJobId(null) }}
                     disabled={transcriptFormLocked}
                     placeholder="e.g. Senior SDR"
                     className="w-full bg-[var(--surface-page)] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm placeholder:text-black/28 focus-ring-accent transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
@@ -607,7 +607,7 @@ export default function TranscriptInput() {
                 <input
                   type="date"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={(e) => { setDate(e.target.value); if (transcriptJob.isDone) setTranscriptJobId(null) }}
                   disabled={transcriptFormLocked}
                   className="bg-[var(--surface-page)] border border-black/10 rounded-2xl px-3 py-2.5 text-black text-sm focus-ring-accent transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
@@ -617,7 +617,7 @@ export default function TranscriptInput() {
                 <label className="block text-xs text-black/44 font-medium mb-1.5">Transcript *</label>
                 <textarea
                   value={text}
-                  onChange={(e) => setText(e.target.value)}
+                  onChange={(e) => { setText(e.target.value); if (transcriptJob.isDone) setTranscriptJobId(null) }}
                   disabled={transcriptFormLocked}
                   placeholder="Paste the full call transcript here..."
                   rows={8}
@@ -633,18 +633,16 @@ export default function TranscriptInput() {
                 </div>
               )}
 
-              <button
-                onClick={handleSubmitTranscript}
-                disabled={!canSubmit}
-                className="btn-primary px-5 py-2.5"
-              >
-                {submitting || transcriptJob.isRunning ? (
-                  <Loader2 size={16} className="animate-spin" />
-                ) : (
-                  <Send size={16} />
-                )}
-                {submitting ? 'Submitting...' : transcriptJob.isRunning ? 'Processing...' : 'Process Transcript'}
-              </button>
+              {!transcriptJob.isRunning && !transcriptJob.isDone && (
+                <button
+                  onClick={handleSubmitTranscript}
+                  disabled={!canSubmit}
+                  className="btn-primary px-5 py-2.5"
+                >
+                  {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                  {submitting ? 'Submitting...' : 'Process Transcript'}
+                </button>
+              )}
 
               {/* Transcript job progress */}
               {transcriptJob.isRunning && transcriptJob.job && (
