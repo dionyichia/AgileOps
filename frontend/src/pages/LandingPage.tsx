@@ -44,7 +44,7 @@ const trustedBySequence = Array.from({ length: 8 }, (_, index) => ({
 }))
 const trustedByTrack = [...trustedBySequence, ...trustedBySequence]
 
-const HEADLINE_TEXT = 'Your sales tools make big promises. We tell you if they\'re true for your team.'
+const HEADLINE_TEXT = 'Your sales tools make big promises. We tell you if they\'re true for you.'
 const HEADLINE_STAGGER = 0.2
 const HEADLINE_DURATION = 0.5
 const HEADLINE_INITIAL_DELAY = 0.3
