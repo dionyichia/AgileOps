@@ -175,6 +175,7 @@ export default function Consultation() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
+  const [company, setCompany] = useState('')
   const [role, setRole] = useState('')
   const [formStep, setFormStep] = useState<1 | 2>(1)
   const [selectedResponsibilities, setSelectedResponsibilities] = useState<string[]>([])
@@ -278,6 +279,7 @@ export default function Consultation() {
         first_name: firstName,
         last_name: lastName,
         email,
+        company: company || undefined,
         role,
         selected_responsibilities: selectedResponsibilities,
         tools: tools || undefined,
@@ -575,6 +577,12 @@ export default function Consultation() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <input
+                    className={inputClass}
+                    placeholder="Company Name"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
                   />
                 </div>
 

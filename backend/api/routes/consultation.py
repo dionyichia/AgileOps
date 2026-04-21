@@ -40,8 +40,9 @@ async def submit_consultation(
     Creates a project + profile, then sends a Supabase invite email.
     No Supabase user is created until they accept the invite.
     """
+    domain = body.email.split('@')[-1].split('.')[0].capitalize()
     project = Project(
-        company_name=body.email.split('@')[-1],
+        company_name=body.company or domain,
         team_name=f"{body.first_name} {body.last_name}",
         primary_role=body.role,
         notes=body.description or None,

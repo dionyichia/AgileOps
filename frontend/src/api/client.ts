@@ -170,6 +170,7 @@ export interface ConsultationPayload {
   first_name: string
   last_name: string
   email: string
+  company?: string
   role: string
   selected_responsibilities: string[]
   tools?: string

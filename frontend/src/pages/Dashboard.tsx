@@ -641,28 +641,30 @@ export default function Dashboard() {
         {/* Two fixed tabs */}
         <div data-gsap-dashboard-tabs className="-mx-4 border-t-2 md:-mx-10" style={{ borderColor: BRAND.violet }}>
           <div
-            className="flex min-h-[44px] border-b-2 bg-white"
-            style={{ borderBottomColor: 'var(--border-accent)' }}
+            className="flex min-h-[44px] border-b-2"
+            style={{ background: 'var(--surface-card)', borderBottomColor: 'var(--border-accent)' }}
           >
             <button
               type="button"
               onClick={() => navigate(projectId ? `/projects/${projectId}/dashboard` : '/dashboard')}
-              className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab === 'workspace' ? 'bg-[var(--surface-accent-subtle)] text-axispurple-900' : 'bg-white text-black/70 hover:bg-black/[0.02]'
-                }`}
-              style={activeTab === 'workspace' ? { boxShadow: 'inset 0 -3px 0 0 var(--axis-violet-900)' } : undefined}
+              className={`flex shrink-0 items-center gap-2 border-r px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab === 'workspace' ? 'bg-[var(--surface-accent-subtle)] text-axispurple-900' : 'hover:bg-[var(--surface-page)]'}`}
+              style={activeTab === 'workspace'
+                ? { boxShadow: 'inset 0 -3px 0 0 var(--axis-violet-900)', borderColor: 'var(--border-subtle)' }
+                : { color: 'var(--text-secondary)', borderColor: 'var(--border-subtle)' }}
             >
-              <LayoutDashboard size={15} className="shrink-0 text-black/50" />
+              <LayoutDashboard size={15} className="shrink-0 opacity-50" />
               <span className="whitespace-nowrap">Workspace</span>
             </button>
             {selectedToolEval && (
               <button
                 type="button"
                 onClick={() => navigate(`/projects/${projectId}/dashboard/simulations/${selectedToolEval.id}`)}
-                className={`flex shrink-0 items-center gap-2 border-r border-black/10 px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab !== 'workspace' ? 'bg-[var(--surface-accent-subtle)] text-axispurple-900' : 'bg-white text-black/70 hover:bg-black/[0.02]'
-                  }`}
-                style={activeTab !== 'workspace' ? { boxShadow: 'inset 0 -3px 0 0 var(--axis-violet-900)' } : undefined}
+                className={`flex shrink-0 items-center gap-2 border-r px-5 py-2.5 text-[13px] font-semibold transition-colors ${activeTab !== 'workspace' ? 'bg-[var(--surface-accent-subtle)] text-axispurple-900' : 'hover:bg-[var(--surface-page)]'}`}
+                style={activeTab !== 'workspace'
+                  ? { boxShadow: 'inset 0 -3px 0 0 var(--axis-violet-900)', borderColor: 'var(--border-subtle)' }
+                  : { color: 'var(--text-secondary)', borderColor: 'var(--border-subtle)' }}
               >
-                <FileText size={15} className="shrink-0 text-black/50" />
+                <FileText size={15} className="shrink-0 opacity-50" />
                 <span className="whitespace-nowrap">{selectedSimulationLabel}</span>
               </button>
             )}
@@ -670,28 +672,28 @@ export default function Dashboard() {
         </div>
 
         <div data-gsap-dashboard-stats className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(94,20,159,0.12)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+          <div className="rounded-[18px] border px-4 py-3" style={{ background: 'var(--surface-card)', borderColor: 'rgba(94,20,159,0.18)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
             <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Workflow Steps</div>
-            <div className="text-2xl font-bold leading-tight text-black">{taskNodes.length || '—'}</div>
-            <div className="text-[11px] text-black/42 mt-0.5">{totalMinutes ? `${totalMinutes} min total cycle` : 'Run pipeline to populate'}</div>
+            <div className="text-2xl font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>{taskNodes.length || '—'}</div>
+            <div className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{totalMinutes ? `${totalMinutes} min total cycle` : 'Run pipeline to populate'}</div>
           </div>
-          <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(247,90,140,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+          <div className="rounded-[18px] border px-4 py-3" style={{ background: 'var(--surface-card)', borderColor: 'rgba(247,90,140,0.20)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
             <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.coral }}>Team Size</div>
-            <div className="text-2xl font-bold leading-tight text-black">{apiProject?.team_size ?? '—'}</div>
-            <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-black/42">
+            <div className="text-2xl font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>{apiProject?.team_size ?? '—'}</div>
+            <div className="mt-0.5 inline-flex items-center gap-1 text-[11px]" style={{ color: 'var(--text-secondary)' }}>
               <Users size={11} style={{ color: BRAND.coral }} />
               <span className="line-clamp-2 leading-snug">{apiProject?.primary_role ?? 'reps'} · Active seats</span>
             </div>
           </div>
-          <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(180,48,139,0.12)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+          <div className="rounded-[18px] border px-4 py-3" style={{ background: 'var(--surface-card)', borderColor: 'rgba(180,48,139,0.18)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
             <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.orchid }}>Tools in Stack</div>
-            <div className="text-2xl font-bold leading-tight text-black">{derivedToolList.length || '—'}</div>
-            <div className="text-[11px] text-black/42 mt-0.5">{derivedToolList.length > 0 ? 'Extracted from workflow tasks' : 'Run pipeline to populate'}</div>
+            <div className="text-2xl font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>{derivedToolList.length || '—'}</div>
+            <div className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{derivedToolList.length > 0 ? 'Extracted from workflow tasks' : 'Run pipeline to populate'}</div>
           </div>
-          <div className="rounded-[18px] border bg-white px-4 py-3" style={{ borderColor: 'rgba(226,64,155,0.14)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
+          <div className="rounded-[18px] border px-4 py-3" style={{ background: 'var(--surface-card)', borderColor: 'rgba(226,64,155,0.20)', boxShadow: '0 10px 28px rgba(15,23,42,0.04)' }}>
             <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: BRAND.pink }}>Simulations Run</div>
-            <div className="text-2xl font-bold leading-tight text-black">{apiToolEvals?.length ?? '—'}</div>
-            <div className="text-[11px] text-black/42 mt-0.5">Tool evaluations</div>
+            <div className="text-2xl font-bold leading-tight" style={{ color: 'var(--text-primary)' }}>{apiToolEvals?.length ?? '—'}</div>
+            <div className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>Tool evaluations</div>
           </div>
         </div>
 
@@ -708,8 +710,8 @@ export default function Dashboard() {
                 Add new tool
               </button>
             </div>
-            <div className="bg-white border rounded-[24px] overflow-hidden" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
-              <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: 'rgba(94,20,159,0.08)' }}>
+            <div className="border rounded-[24px] overflow-hidden" style={{ background: 'var(--surface-card)', borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+              <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
                 <div className="flex items-center gap-3">
                   <BarChart3 size={16} style={{ color: BRAND.violet }} />
                   <div>
@@ -1121,42 +1123,42 @@ export default function Dashboard() {
 
           {/* ── Bottom grid: Tool stack + simulations ───────────────────── */}
           <div className="grid gap-5 xl:grid-cols-[7fr_3fr]">
-            <div className="bg-white border rounded-[24px] p-5 max-h-[520px] overflow-y-auto" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+            <div className="border rounded-[24px] p-5 max-h-[520px] overflow-y-auto" style={{ background: 'var(--surface-card)', borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Tool Stack</h3>
-                <span className="text-xs text-black/38">{derivedToolList.length} tools</span>
+                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{derivedToolList.length} tools</span>
               </div>
 
               {derivedToolList.length > 0 ? (
                 <div className="space-y-1">
-                  <div className="grid grid-cols-2 gap-1 text-[10px] text-black/34 font-semibold uppercase tracking-wide pb-1 border-b border-black/8">
+                  <div className="grid grid-cols-2 gap-1 text-[10px] font-semibold uppercase tracking-wide pb-1 border-b" style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-subtle)' }}>
                     <span>Tool</span>
                     <span className="text-right">Est. hrs/wk</span>
                   </div>
                   {derivedToolList.map((tool) => (
-                    <div key={tool.name} className="grid grid-cols-2 gap-1 text-xs py-1.5 border-b border-black/6">
-                      <span className="text-black/78 font-medium truncate">{tool.name}</span>
-                      <span className="text-right text-black/42">{tool.weeklyHrs}h</span>
+                    <div key={tool.name} className="grid grid-cols-2 gap-1 text-xs py-1.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+                      <span className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>{tool.name}</span>
+                      <span className="text-right" style={{ color: 'var(--text-secondary)' }}>{tool.weeklyHrs}h</span>
                     </div>
                   ))}
-                  <p className="text-[10px] text-black/34 mt-2">Derived from extracted workflow tasks</p>
+                  <p className="text-[10px] mt-2" style={{ color: 'var(--text-secondary)' }}>Derived from extracted workflow tasks</p>
                 </div>
               ) : (
-                <p className="rounded-2xl border border-black/8 bg-[#FBFAFD] px-4 py-6 text-center text-xs text-black/45">
+                <p className="rounded-2xl border px-4 py-6 text-center text-xs" style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-page)', color: 'var(--text-secondary)' }}>
                   Run the pipeline to generate your tool stack.
                 </p>
               )}
             </div>
 
             {/* ── Recent Simulations card ──────────────────────────────── */}
-            <div className="bg-white border rounded-[24px] p-5" style={{ borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
+            <div className="border rounded-[24px] p-5" style={{ background: 'var(--surface-card)', borderColor: BRAND.border, boxShadow: '0 18px 40px rgba(15,23,42,0.05)' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND.violet }}>Simulations</h3>
-                <span className="text-xs text-black/38">{apiToolEvals?.length ?? 0} runs</span>
+                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{apiToolEvals?.length ?? 0} runs</span>
               </div>
               <div className="space-y-2">
                 {!apiToolEvals?.length ? (
-                  <p className="rounded-2xl border border-black/8 bg-[#FBFAFD] px-4 py-6 text-center text-xs text-black/45">
+                  <p className="rounded-2xl border px-4 py-6 text-center text-xs" style={{ borderColor: 'var(--border-subtle)', background: 'var(--surface-page)', color: 'var(--text-secondary)' }}>
                     No simulations yet. Add a tool to get started.
                   </p>
                 ) : (
@@ -1168,12 +1170,12 @@ export default function Dashboard() {
                         ? navigate(`/projects/${projectId}/dashboard/simulations/${e.id}`)
                         : navigate(`/simulation?eval=${encodeURIComponent(e.id)}`)
                       }
-                      className="group flex w-full items-center justify-between rounded-2xl border bg-[#FBFAFD] px-4 py-3 transition-colors hover:border-black/12"
-                      style={{ borderColor: BRAND.border }}
+                      className="group flex w-full items-center justify-between rounded-2xl border px-4 py-3 transition-colors"
+                      style={{ borderColor: BRAND.border, background: 'var(--surface-page)' }}
                     >
                       <div className="text-left">
-                        <div className="text-sm font-medium text-black">{e.tool_name}</div>
-                        <div className="mt-0.5 flex items-center gap-2 text-xs text-black/42">
+                        <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{e.tool_name}</div>
+                        <div className="mt-0.5 flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
                           <span>{e.created_at.slice(0, 10)}</span>
                           {(e.status === 'queued' || e.status === 'running') && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-accent-subtle)] px-2 py-0.5 font-semibold text-axispurple-900">
@@ -1182,18 +1184,18 @@ export default function Dashboard() {
                             </span>
                           )}
                           {e.status === 'failed' && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 font-semibold text-red-500">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 font-semibold text-red-400">
                               Failed
                             </span>
                           )}
                         </div>
                         {(e.status === 'queued' || e.status === 'running') && (
-                          <div className="mt-1 text-[11px] text-black/45">
+                          <div className="mt-1 text-[11px]" style={{ color: 'var(--text-secondary)' }}>
                             {e.latest_job_step ?? 'Queued'}{typeof e.latest_job_progress_pct === 'number' ? ` · ${e.latest_job_progress_pct}%` : ''}
                           </div>
                         )}
                       </div>
-                      <ChevronRight size={14} className="text-black/32" />
+                      <ChevronRight size={14} style={{ color: 'var(--text-secondary)' }} />
                     </button>
                   ))
                 )}

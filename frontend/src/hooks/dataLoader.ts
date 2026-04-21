@@ -402,7 +402,9 @@ export function buildLoadedMarkovData(
 
 export async function loadMarkovData(projectId?: string): Promise<LoadedMarkovData> {
   const url = getDataUrl(projectId)
-  if (_cache[url]) return _cache[url]
+
+  // Only cache static fallback data — project API data changes after every pipeline run
+  if (!projectId && _cache[url]) return _cache[url]
 
   // Fetch transition matrix (required) and all_tasks metadata (optional, project-only)
   const markovFetch = authFetch(url)
@@ -416,7 +418,7 @@ export async function loadMarkovData(projectId?: string): Promise<LoadedMarkovDa
   const data: TransitionMatrixJSON = await res.json()
   const result = buildLoadedMarkovData(data, tasksRaw as AllTasksNode[])
 
-  _cache[url] = result
+  if (!projectId) _cache[url] = result
   return result
 }
 

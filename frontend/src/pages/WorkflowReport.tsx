@@ -18,7 +18,6 @@ import { SkeletonCard, PageLoader } from '../components/ui/Skeleton'
 import { nodeTypes } from '../components/workflow/CustomNodes'
 import { projects as projectsApi, tasks as tasksApi, type Project, type TaskNode } from '../api/client'
 import { useMarkovData } from '../hooks/pullMarkovData'
-import { clearMarkovCache } from '../hooks/dataLoader'
 import { useGsapReveal } from '../hooks/useGsapReveal'
 import { useTheme } from '../hooks/useTheme'
 
@@ -48,7 +47,6 @@ export default function WorkflowReport() {
 
   useEffect(() => {
     if (!projectId) return
-    clearMarkovCache(projectId)
     projectsApi.get(projectId).then(setProject).catch(() => {})
     tasksApi.get(projectId).then(setTaskNodes).catch(() => {})
   }, [projectId])
@@ -163,20 +161,16 @@ export default function WorkflowReport() {
 
     if (!nodeEls.length && !edgeEls.length) return
 
+    // Animate opacity only — never touch transform/y/scale on React Flow nodes
+    // because React Flow uses CSS transform for positioning and GSAP would clobber it.
     const tl = gsap.timeline()
     tl.fromTo(nodeEls, {
       autoAlpha: 0,
-      y: 16,
-      scale: 0.96,
-      transformOrigin: '50% 50%',
     }, {
       autoAlpha: 1,
-      y: 0,
-      scale: 1,
       duration: 0.42,
       stagger: 0.03,
       ease: 'power3.out',
-      clearProps: 'transform',
     }).fromTo(edgeEls, {
       autoAlpha: 0,
     }, {

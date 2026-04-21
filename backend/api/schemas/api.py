@@ -21,6 +21,7 @@ class ConsultationCreate(BaseModel):
     first_name: str
     last_name: str
     email: str
+    company: Optional[str] = None
     role: str
     selected_responsibilities: List[str] = Field(default_factory=list)
     tools: Optional[str] = None

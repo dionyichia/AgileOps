@@ -121,14 +121,15 @@ export default function FinalRecommendation() {
       <button
         type="button"
         onClick={() => navigate(dashboardBackPath)}
-        className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/10 text-black/70 transition-colors hover:bg-black/[0.03]"
+        className="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-colors hover:bg-[var(--surface-page)]"
+        style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
         aria-label="Back to dashboard"
       >
         <ChevronLeft size={20} />
       </button>
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-black md:text-3xl">Final recommendation</h1>
-        <p className="mt-1 text-sm text-black/55">
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl" style={{ color: 'var(--text-primary)' }}>Final recommendation</h1>
+        <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
           Axis recommendation for <span className="font-semibold text-axispurple-900">{toolName}</span> · based on your{' '}
           {project?.primary_role ?? 'sales'} workflow simulation
         </p>
@@ -167,45 +168,36 @@ export default function FinalRecommendation() {
 
         {/* Recommendation card */}
         <div
-          className="bg-white border rounded-[28px] p-6"
-          style={{
-            borderColor: 'var(--border-accent)',
-            boxShadow: '0 22px 48px rgba(15,23,42,0.06)',
-            background: 'linear-gradient(180deg, #FFFFFF 0%, #FCF8FF 100%)',
-          }}
+          className="border rounded-[28px] p-6"
+          style={{ background: 'var(--surface-card)', borderColor: 'var(--border-accent)', boxShadow: '0 22px 48px rgba(15,23,42,0.06)' }}
         >
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
               <div className="text-xs font-bold tracking-widest uppercase mb-1 text-axispurple-900">Recommendation</div>
-              <h2 className="text-xl font-bold text-black">
+              <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 Adopt <span className="text-axispurple-700">{toolName}</span> for your {project?.primary_role ?? 'sales'} team
               </h2>
             </div>
             <ConfidenceBadge score={conf} />
           </div>
-
-          <div className="text-black/68 text-sm leading-relaxed whitespace-pre-line">
+          <div className="text-sm leading-relaxed whitespace-pre-line" style={{ color: 'var(--text-secondary)' }}>
             {summary}
           </div>
         </div>
 
         {/* Adoption slider + impact */}
         <div
-          className="bg-white border rounded-[28px] p-6"
-          style={{
-            borderColor: 'var(--border-accent)',
-            boxShadow: '0 22px 48px rgba(15,23,42,0.06)',
-            background: 'linear-gradient(180deg, #FFFFFF 0%, #FFF8FC 100%)',
-          }}
+          className="border rounded-[28px] p-6"
+          style={{ background: 'var(--surface-card)', borderColor: 'var(--border-accent)', boxShadow: '0 22px 48px rgba(15,23,42,0.06)' }}
         >
           <div className="flex items-center justify-between mb-1">
-            <h3 className="text-sm font-bold text-black">Impact Analysis</h3>
-            <span className="text-xs text-black/42">Simulations estimate 10% – 70% ↑ in throughput</span>
+            <h3 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Impact Analysis</h3>
+            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Simulations estimate 10% – 70% ↑ in throughput</span>
           </div>
 
           {/* Slider */}
           <div className="mt-4 mb-6">
-            <div className="flex justify-between text-xs text-black/48 mb-2">
+            <div className="flex justify-between text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>
               <span>Estimated Adoption Rate</span>
               <span className="font-bold text-axispurple-900">{adoption}%</span>
             </div>
@@ -218,10 +210,10 @@ export default function FinalRecommendation() {
               onChange={(e) => setAdoption(Number(e.target.value))}
               className="w-full"
               style={{
-                background: `linear-gradient(to right, var(--axis-violet-900) 0%, var(--axis-coral-400) ${((adoption - 10) / 60) * 100}%, rgba(17,17,17,0.10) ${((adoption - 10) / 60) * 100}%, rgba(17,17,17,0.10) 100%)`,
+                background: `linear-gradient(to right, var(--axis-violet-900) 0%, var(--axis-coral-400) ${((adoption - 10) / 60) * 100}%, rgba(255,255,255,0.12) ${((adoption - 10) / 60) * 100}%, rgba(255,255,255,0.12) 100%)`,
               }}
             />
-            <div className="flex justify-between text-xs text-black/34 mt-1">
+            <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
               <span>10%</span>
               <span className="hidden sm:inline">40% (moderate)</span>
               <span>70%</span>
@@ -232,15 +224,11 @@ export default function FinalRecommendation() {
             {/* Employee level */}
             <div
               className="border rounded-[24px] p-5"
-              style={{
-                borderColor: 'var(--border-accent)',
-                background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF6FF 100%)',
-                boxShadow: '0 14px 30px rgba(15,23,42,0.04)',
-              }}
+              style={{ borderColor: 'var(--border-accent)', background: 'var(--surface-page)', boxShadow: '0 14px 30px rgba(15,23,42,0.04)' }}
             >
               <div className="flex items-center gap-2 mb-4">
                 <Users size={15} className="text-axispurple-900" />
-                <span className="text-xs font-bold text-black/46 uppercase tracking-widest">Employee Level</span>
+                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Employee Level</span>
               </div>
               <div className="space-y-4">
                 <Metric
@@ -267,15 +255,11 @@ export default function FinalRecommendation() {
             {/* Company level */}
             <div
               className="border rounded-[24px] p-5"
-              style={{
-                borderColor: 'var(--border-accent)',
-                background: 'linear-gradient(180deg, #FFFFFF 0%, #FFF7FB 100%)',
-                boxShadow: '0 14px 30px rgba(15,23,42,0.04)',
-              }}
+              style={{ borderColor: 'var(--border-accent)', background: 'var(--surface-page)', boxShadow: '0 14px 30px rgba(15,23,42,0.04)' }}
             >
               <div className="flex items-center gap-2 mb-4">
                 <Building2 size={15} className="text-axispurple-700" />
-                <span className="text-xs font-bold text-black/46 uppercase tracking-widest">Company Level</span>
+                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Company Level</span>
               </div>
               <div className="space-y-4">
                 <Metric
@@ -305,29 +289,21 @@ export default function FinalRecommendation() {
 
         {/* Use cases */}
         <div
-          className="bg-white border rounded-[28px] p-6"
-          style={{
-            borderColor: 'var(--border-accent)',
-            boxShadow: '0 22px 48px rgba(15,23,42,0.06)',
-            background: 'linear-gradient(180deg, #FFFFFF 0%, #FCF8FF 100%)',
-          }}
+          className="border rounded-[28px] p-6"
+          style={{ background: 'var(--surface-card)', borderColor: 'var(--border-accent)', boxShadow: '0 22px 48px rgba(15,23,42,0.06)' }}
         >
-          <h3 className="text-sm font-bold text-black mb-4">Use Cases</h3>
+          <h3 className="text-sm font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Use Cases</h3>
           <div className="grid sm:grid-cols-2 gap-3">
             {useCases.map((uc) => (
               <div
                 key={uc.title}
                 className="flex gap-3 border rounded-[22px] p-4"
-                style={{
-                  borderColor: 'var(--border-accent)',
-                  background: 'linear-gradient(180deg, #FFFFFF 0%, #FBF6FF 100%)',
-                  boxShadow: '0 12px 26px rgba(15,23,42,0.04)',
-                }}
+                style={{ borderColor: 'var(--border-accent)', background: 'var(--surface-page)', boxShadow: '0 12px 26px rgba(15,23,42,0.04)' }}
               >
                 <CheckCircle2 size={16} className="text-axispurple-900 flex-shrink-0 mt-0.5" />
                 <div>
-                  <div className="text-sm font-semibold text-black mb-1">{uc.title}</div>
-                  <div className="text-xs text-black/56 leading-relaxed">{uc.description}</div>
+                  <div className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{uc.title}</div>
+                  <div className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{uc.description}</div>
                 </div>
               </div>
             ))}
@@ -336,15 +312,11 @@ export default function FinalRecommendation() {
 
         {/* Summary + actions */}
         <div
-          className="bg-white border rounded-[28px] p-6"
-          style={{
-            borderColor: 'var(--border-accent)',
-            boxShadow: '0 22px 48px rgba(15,23,42,0.06)',
-            background: 'linear-gradient(180deg, #FFFFFF 0%, #FFF8FC 100%)',
-          }}
+          className="border rounded-[28px] p-6"
+          style={{ background: 'var(--surface-card)', borderColor: 'var(--border-accent)', boxShadow: '0 22px 48px rgba(15,23,42,0.06)' }}
         >
-          <h3 className="text-sm font-bold text-black mb-3">Summary & Integration Plan</h3>
-          <div className="text-sm text-black/60 leading-relaxed mb-5">
+          <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--text-primary)' }}>Summary & Integration Plan</h3>
+          <div className="text-sm leading-relaxed mb-5" style={{ color: 'var(--text-secondary)' }}>
             At <strong className="text-axispurple-900">{adoption}% adoption</strong>, integrating {toolName} into your{' '}
             {project?.primary_role ?? 'sales'} workflow is projected to save{' '}
             <strong className="text-axispurple-700">{timeSaved} hours/rep/week</strong> and increase qualified
@@ -368,7 +340,8 @@ export default function FinalRecommendation() {
               onClick={() =>
                 navigate(isProjectScoped ? `/projects/${projectId}/dashboard` : dashboardBackPath)
               }
-              className="flex items-center gap-2 border border-black/10 hover:border-black/18 text-black/62 hover:text-black font-medium px-5 py-3 rounded-full text-sm transition-colors"
+              className="flex items-center gap-2 border font-medium px-5 py-3 rounded-full text-sm transition-colors hover:bg-[var(--surface-page)]"
+              style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}
             >
               Back to Dashboard
             </button>
@@ -404,21 +377,21 @@ function Metric({ label, value, sub, color }: { label: string; value: string; su
     indigo:  'text-axispurple-700',
     violet:  'text-axispurple-300',
     amber:   'text-axispurple-700',
-    slate:   'text-black/72',
+    slate:   'text-white/72',
   }
   return (
     <div>
-      <div className="text-xs text-black/42 mb-0.5">{label}</div>
-      <div className={`text-[1.75rem] leading-none font-bold ${colorMap[color] ?? 'text-black'}`}>{value}</div>
-      <div className="text-xs text-black/42 leading-snug">{sub}</div>
+      <div className="text-xs mb-0.5" style={{ color: 'var(--text-secondary)' }}>{label}</div>
+      <div className={`text-[1.75rem] leading-none font-bold ${colorMap[color] ?? 'text-[var(--text-primary)]'}`}>{value}</div>
+      <div className="text-xs leading-snug" style={{ color: 'var(--text-secondary)' }}>{sub}</div>
     </div>
   )
 }
 
 function ConfidenceBadge({ score }: { score: number }) {
   const color = score >= 80 ? 'text-axispurple-900 bg-[var(--surface-accent-subtle)] border-axispurple-900/20'
-              : score >= 60 ? 'text-axispurple-700 bg-[#FCEAF4] border-axispurple-700/20'
-              :               'text-axispurple-300 bg-[#FFE9EF] border-axispurple-300/20'
+              : score >= 60 ? 'text-axispurple-700 bg-axispurple-700/10 border-axispurple-700/20'
+              :               'text-axispurple-300 bg-axispurple-300/10 border-axispurple-300/20'
   return (
     <div className={`flex flex-col items-center border rounded-[20px] px-4 py-3 shadow-[0_14px_30px_rgba(15,23,42,0.06)] ${color}`}>
       <div className="flex items-center gap-1 mb-1">
@@ -426,7 +399,7 @@ function ConfidenceBadge({ score }: { score: number }) {
         <span className="text-xs font-semibold">Confidence</span>
       </div>
       <span className="text-2xl font-bold">{score}%</span>
-      <div className="w-full bg-black/8 rounded-full h-1 mt-1">
+      <div className="w-full rounded-full h-1 mt-1" style={{ background: 'rgba(255,255,255,0.12)' }}>
         <div className="rounded-full h-1 transition-all" style={{ width: `${score}%`, background: 'currentColor' }} />
       </div>
     </div>
