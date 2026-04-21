@@ -540,9 +540,9 @@ export default function Consultation() {
                 'Recommendations based on your stack and process',
                 'A practical starting point for your workflow audit',
               ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
+                <li key={item} className="flex items-center gap-3">
                   <span
-                    className="mt-1 flex h-6 w-6 items-center justify-center rounded-full text-white"
+                    className="flex-shrink-0 flex h-6 w-6 items-center justify-center rounded-full text-white"
                     style={{ background: 'linear-gradient(180deg, #B4308B 0%, #F75A8C 100%)' }}
                   >
                     <CheckCircle2 size={14} />
