@@ -300,7 +300,7 @@ export default function Consultation() {
   }
 
   const inputClass =
-    'w-full rounded-[18px] border border-white/10 bg-white/6 px-5 py-4 text-[15px] text-white outline-none transition-colors placeholder:text-white/35 focus:border-[#B4308B]'
+    'w-full rounded-[18px] border border-white/25 bg-transparent px-5 py-4 text-[15px] text-white outline-none transition-colors placeholder:text-white/35 focus:border-[#F75A8C]'
 
   // ══════════════════════════════════════════════════════════════════════════
   // STAGE: BOOKING — full-width Calendly widget
